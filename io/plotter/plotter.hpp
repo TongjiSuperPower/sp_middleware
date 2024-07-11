@@ -12,12 +12,13 @@ class Plotter
 public:
   Plotter(UART_HandleTypeDef * huart);
 
-  void plot(float value1);
-  void plot(float value1, float value2);
-  void plot(float value1, float value2, float value3);
-  void plot(float value1, float value2, float value3, float value4);
-  void plot(float value1, float value2, float value3, float value4, float value5);
-  void plot(float value1, float value2, float value3, float value4, float value5, float value6);
+  template <typename... Floats>
+  void plot(Floats... floats)
+  {
+    static_assert(1 <= sizeof...(floats) && sizeof...(floats) <= MAX_FLOATS);
+    fill<0>(floats...);
+    send();
+  }
 
 private:
 #pragma pack(1)
@@ -31,6 +32,19 @@ private:
 
   UART_HandleTypeDef * huart_;
   PlotFrame plot_frame_;
+
+  template <size_t i, typename Float, typename... Floats>
+  void fill(Float first, Floats... floats)
+  {
+    plot_frame_.data[i] = static_cast<float>(first);
+    fill<i + 1>(floats...);
+  }
+
+  template <size_t i>
+  void fill()
+  {
+    plot_frame_.size = 4 * i;
+  }
 
   void send();
 };
