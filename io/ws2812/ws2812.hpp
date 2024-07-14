@@ -1,6 +1,8 @@
 #ifndef IO__WS2812_HPP
 #define IO__WS2812_HPP
 
+#include <cstdint>
+
 #include "spi.h"
 
 namespace io

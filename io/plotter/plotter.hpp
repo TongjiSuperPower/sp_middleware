@@ -1,6 +1,8 @@
 #ifndef IO__PLOTTER_HPP
 #define IO__PLOTTER_HPP
 
+#include <cstdint>
+
 #include "usart.h"
 
 namespace io
