@@ -1,8 +1,6 @@
 #ifndef IO__BUZZER_HPP
 #define IO__BUZZER_HPP
 
-#include <cstdint>
-
 #include "tim.h"
 
 namespace io
