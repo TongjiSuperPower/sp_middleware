@@ -15,6 +15,8 @@ private:
   struct motor_measure_t
   {
     uint16_t ecd;           // 电机编码器位置
+    uint16_t last_ecd;      // 上一次电机编码器位置
+    int16_t revolutions;    //电机转的圈数
     int16_t speed_rpm;      // 电机转速（转/分钟）
     int16_t given_current;  // 电机实际电流
     uint8_t temperate;      // 电机温度
