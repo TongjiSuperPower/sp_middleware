@@ -1,7 +1,7 @@
 #ifndef MOTOR__GM6020_HPP
 #define MOTOR__GM6020_HPP
 
-#include "main.h"
+#include <cstdint>
 
 namespace motor
 {
@@ -30,7 +30,7 @@ public:
 private:
   uint8_t motor_id_;
   bool voltage_ctrl_;
-  float cmd_speed_or_torque_;
+  int16_t cmd_raw_;
 
   uint16_t angle_ecd_;
   int16_t speed_rpm_;
