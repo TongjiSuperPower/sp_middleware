@@ -24,6 +24,7 @@ public:
     uint16_t last_ecd;      // 上一次电机编码器位置
     float angle;            // 电机转子角度（rad）
     int16_t revolutions;    // 电机转子转的圈数
+    double rev_angle;       // 多圈编码的转子角度（rad）
     int16_t speed_rpm;      // 电机转速（转/分钟）
     float speed;            // 电机转速（rad/s）
     int16_t given_current;  // 电机实际电流
