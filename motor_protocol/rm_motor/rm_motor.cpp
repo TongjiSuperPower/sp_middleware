@@ -2,10 +2,11 @@
 
 namespace motor_protocol
 {
+RM_Motor::RM_Motor(CAN_HandleTypeDef * hcan, uint32_t stdid) : hcan_(hcan), stdid_(stdid) {}
+
 // 发送电机控制指令
 HAL_StatusTypeDef RM_Motor::motor_cmd(
-  CAN_HandleTypeDef * hcan, uint32_t stdid, int16_t motor1, int16_t motor2, int16_t motor3,
-  int16_t motor4)
+  int16_t motor1, int16_t motor2, int16_t motor3, int16_t motor4)
 {
   uint32_t send_mail_box;
   motor_tx_message_.StdId = stdid;
@@ -34,6 +35,16 @@ void RM_Motor::decode_motor_measure(uint8_t motor_id, uint8_t data[8])
   motor_measure_[motor_id].given_current = (int16_t)((data)[4] << 8 | (data)[5]);
   motor_measure_[motor_id].temperate = (uint8_t)(data)[6];
   // ToDo::多圈编码
+
+  if (
+    (motor_measure_[motor_id].ecd - motor_measure_[motor_id].last_ecd) *
+      motor_measure_[motor_id].speed_rpm <
+    0) {
+    if (motor_measure_[motor_id].speed_rpm > 0)
+      motor_measure_[motor_id].revolutions++;
+    else
+      motor_measure_[motor_id].revolutions--;
+  }
   return;
 }
 
