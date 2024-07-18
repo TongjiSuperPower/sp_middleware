@@ -1,13 +1,11 @@
-#include "can_init.hpp"
+#include "can_init.h"
 
-#include "main.h"
+#include "can.h"
 
 extern CAN_HandleTypeDef hcan1;
 extern CAN_HandleTypeDef hcan2;
 
-namespace io
-{
-void Can_Init::can_filter_init(void)
+void can_filter_init(void)
 {
   CAN_FilterTypeDef can_filter_st;
   can_filter_st.FilterActivation = ENABLE;
@@ -29,4 +27,3 @@ void Can_Init::can_filter_init(void)
   HAL_CAN_Start(&hcan2);
   HAL_CAN_ActivateNotification(&hcan2, CAN_IT_RX_FIFO0_MSG_PENDING);
 }
-}  // namespace io
