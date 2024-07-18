@@ -30,23 +30,22 @@ HAL_StatusTypeDef RM_Motor::motor_cmd(
 void RM_Motor::decode_motor_measure(uint8_t motor_id, uint8_t data[8])
 {
   motor_measure_[motor_id].last_ecd = motor_measure_[motor_id].ecd;
-  motor_measure_[motor_id].ecd = (uint16_t)((data)[0] << 8 | (data)[1]);
-  motor_measure_[motor_id].angle = (motor_measure_[motor_id].ecd - 4096) * M_PI / 8192;
-  motor_measure_[motor_id].speed_rpm = (int16_t)((data)[2] << 8 | (data)[3]);
-  motor_measure_[motor_id].speed = motor_measure_[motor_id].speed_rpm * 2 * M_PI / 60;
-  motor_measure_[motor_id].given_current = (int16_t)((data)[4] << 8 | (data)[5]);
-  motor_measure_[motor_id].temperate = (uint8_t)(data)[6];
-  // ToDo::¶àÈ¦±àÂë
 
-  if (
-    (motor_measure_[motor_id].ecd - motor_measure_[motor_id].last_ecd) *
-      motor_measure_[motor_id].speed_rpm <
-    0) {
-    if (motor_measure_[motor_id].speed_rpm > 0)
-      motor_measure_[motor_id].revolutions++;
-    else
-      motor_measure_[motor_id].revolutions--;
+  motor_measure_[motor_id].ecd = (uint16_t)(data[0] << 8 | data[1]);
+  motor_measure_[motor_id].speed_rpm = (int16_t)(data[2] << 8 | data[3]);
+  motor_measure_[motor_id].given_current = (int16_t)(data[4] << 8 | data[5]);
+  motor_measure_[motor_id].temperate = (uint8_t)data[6];
+
+  motor_measure_[motor_id].angle = (motor_measure_[motor_id].ecd - 4096) * 2 * M_PI / 8192;
+  motor_measure_[motor_id].speed = motor_measure_[motor_id].speed_rpm * M_PI * 2 / 60;
+
+  if (fabs(motor_measure_[motor_id].ecd - motor_measure_[motor_id].last_ecd) > 4096) {
+    if (motor_measure_[motor_id].speed_rpm > 0) motor_measure_[motor_id].revolutions++;
+    if (motor_measure_[motor_id].speed_rpm < 0) motor_measure_[motor_id].revolutions--;
   }
+
+  motor_measure_[motor_id].rev_angle =
+    motor_measure_[motor_id].revolutions * M_PI * 2 + motor_measure_[motor_id].angle;
   return;
 }
 
