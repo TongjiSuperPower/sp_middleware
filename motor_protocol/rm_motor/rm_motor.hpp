@@ -1,9 +1,9 @@
 #ifndef _RM_MOTOR_HPP_
 #define _RM_MOTOR_HPP_
 
-#include "cstdint"
-#include "main.h"
-#include "para_init.hpp"
+#include <cmath>
+
+#include "can.h"
 
 namespace motor_protocol
 {
