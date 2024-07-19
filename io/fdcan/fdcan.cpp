@@ -4,17 +4,21 @@ namespace io
 {
 FDCAN::FDCAN(FDCAN_HandleTypeDef * hfdcan) : hfdcan_(hfdcan)
 {
-  for (size_t i = 0; i < TX_DATAS; i++) {
-    tx_headers_[i].IdType = FDCAN_STANDARD_ID;
-    tx_headers_[i].TxFrameType = FDCAN_DATA_FRAME;
-    tx_headers_[i].DataLength = FDCAN_DLC_BYTES_8;  // TODO
-    tx_headers_[i].ErrorStateIndicator = FDCAN_ESI_ACTIVE;
-    tx_headers_[i].BitRateSwitch = FDCAN_BRS_OFF;
-    tx_headers_[i].FDFormat = FDCAN_CLASSIC_CAN;
-    tx_headers_[i].TxEventFifoControl = FDCAN_NO_TX_EVENTS;
-    tx_headers_[i].MessageMarker = 0x00;
-  }
+  tx_header_.IdType = FDCAN_STANDARD_ID;
+  tx_header_.TxFrameType = FDCAN_DATA_FRAME;
+  tx_header_.DataLength = FDCAN_DLC_BYTES_8;
+  tx_header_.ErrorStateIndicator = FDCAN_ESI_ACTIVE;
+  tx_header_.BitRateSwitch = FDCAN_BRS_OFF;
+  tx_header_.FDFormat = FDCAN_CLASSIC_CAN;
+  tx_header_.TxEventFifoControl = FDCAN_NO_TX_EVENTS;
+  tx_header_.MessageMarker = 0x00;
 }
+
+uint32_t FDCAN::rx_id() const { return rx_header_.Identifier; }
+
+uint8_t * FDCAN::rx_data() { return rx_data_; }
+
+uint8_t * FDCAN::tx_data() { return tx_data_; }
 
 void FDCAN::start()
 {
@@ -27,19 +31,10 @@ void FDCAN::recv()
   HAL_FDCAN_GetRxMessage(hfdcan_, FDCAN_RX_FIFO0, &rx_header_, rx_data_);  // dismiss return
 }
 
-uint32_t FDCAN::rx_id() { return rx_header_.Identifier; }
-
-uint8_t * FDCAN::rx_data() { return rx_data_; }
-
-uint8_t * FDCAN::tx_data() { return tx_datas_[i_]; }
-
 void FDCAN::send(uint32_t tx_id)
 {
-  tx_headers_[i_].Identifier = tx_id;
-  HAL_FDCAN_AddMessageToTxFifoQ(hfdcan_, &tx_headers_[i_], tx_datas_[i_]);  // dismiss return
-
-  i_ += 1;
-  if (i_ == TX_DATAS) i_ = 0;
+  tx_header_.Identifier = tx_id;
+  HAL_FDCAN_AddMessageToTxFifoQ(hfdcan_, &tx_header_, tx_data_);  // dismiss return
 }
 
 }  // namespace io
