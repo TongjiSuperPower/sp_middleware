@@ -14,7 +14,10 @@ constexpr float GM6020_RAW_TO_TORQUE = 0.741 * 3 / GM6020_MAX_CURRENT_RAW;
 class GM6020 : public RM_Motor
 {
 public:
-  GM6020(uint8_t motor_id, bool voltage_ctrl) : RM_Motor(motor_id), voltage_ctrl_(voltage_ctrl) {}
+  GM6020(uint8_t motor_id, bool voltage_ctrl = true)
+  : RM_Motor(motor_id), voltage_ctrl_(voltage_ctrl)
+  {
+  }
 
   uint16_t rx_id() const { return 0x204 + motor_id_; }
   uint16_t tx_id() const
