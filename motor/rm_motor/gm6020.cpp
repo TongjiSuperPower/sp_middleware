@@ -4,53 +4,53 @@
 
 namespace motor
 {
-constexpr float RAW_TO_SPEED = (13.33 / 60 * 2 * tools::PI) * 24 / 25000;
-constexpr float RAW_TO_TORQUE = 0.741 * 3 / 16384;
+constexpr int16_t GM6020_MAX_VOTAGE_RAW = 25000;
+constexpr int16_t GM6020_MAX_CURRENT_RAW = 16384;
+constexpr float GM6020_RAW_TO_SPEED = (13.33 / 60 * 2 * tools::PI) * 24 / GM6020_MAX_VOTAGE_RAW;
+constexpr float GM6020_RAW_TO_TORQUE = 0.741 * 3 / GM6020_MAX_CURRENT_RAW;
 
 GM6020::GM6020(uint8_t motor_id, bool voltage_ctrl)
-: motor_id_(motor_id), voltage_ctrl_(voltage_ctrl), cmd_raw_(0)
+: RM_Motor(motor_id), voltage_ctrl_(voltage_ctrl)
 {
 }
 
 uint16_t GM6020::rx_id() const { return 0x204 + motor_id_; }
 
-void GM6020::read(uint8_t * data)
-{
-  // TODO timestamp
-  angle_ecd_ = static_cast<uint16_t>((data[0] << 8) | data[1]);
-  speed_rpm_ = static_cast<int16_t>((data[2] << 8) | data[3]);
-  current_raw_ = static_cast<int16_t>((data[4] << 8) | data[5]);
-  temperature_ = data[6];
-}
-
 uint16_t GM6020::tx_id() const
 {
-  if (motor_id_ < 5) return (voltage_ctrl_) ? 0x1FF : 0x1FE;
-  return (voltage_ctrl_) ? 0x2FF : 0x2FE;
-}
-
-void GM6020::write(uint8_t * data) const
-{
-  data[(motor_id_ - 1) % 4 * 2 + 0] = static_cast<uint8_t>(cmd_raw_ >> 8);
-  data[(motor_id_ - 1) % 4 * 2 + 1] = static_cast<uint8_t>(cmd_raw_);
+  if (motor_id_ < 5)
+    return (voltage_ctrl_) ? 0x1FF : 0x1FE;
+  else
+    return (voltage_ctrl_) ? 0x2FF : 0x2FE;
 }
 
 float GM6020::angle() const
 {
   // TODO multicicrle
-  return (static_cast<float>(angle_ecd_) / 8192 - 0.5) * 2 * tools::PI;
+  return static_cast<float>(angle_ecd_ - 4095) / 8192 * 2 * tools::PI;
 }
 
 float GM6020::speed() const { return static_cast<float>(speed_rpm_) / 60 * 2 * tools::PI; }
 
-float GM6020::torque() const { return static_cast<float>(current_raw_ * RAW_TO_TORQUE); }
+float GM6020::torque() const { return static_cast<float>(current_raw_ * GM6020_RAW_TO_TORQUE); }
 
 void GM6020::cmd(float speed_or_torque)
 {
-  cmd_raw_ =
-    static_cast<int16_t>(speed_or_torque / ((voltage_ctrl_) ? RAW_TO_SPEED : RAW_TO_TORQUE));
+  int16_t raw;
 
-  // TODO limit max
+  if (voltage_ctrl_) {
+    raw = static_cast<int16_t>(speed_or_torque / GM6020_RAW_TO_SPEED);
+    if (raw > GM6020_MAX_VOTAGE_RAW) raw = GM6020_MAX_VOTAGE_RAW;
+    if (raw < -GM6020_MAX_VOTAGE_RAW) raw = -GM6020_MAX_VOTAGE_RAW;
+  }
+
+  else {
+    raw = static_cast<int16_t>(speed_or_torque / GM6020_RAW_TO_TORQUE);
+    if (raw > GM6020_MAX_CURRENT_RAW) raw = GM6020_MAX_CURRENT_RAW;
+    if (raw < -GM6020_MAX_CURRENT_RAW) raw = -GM6020_MAX_CURRENT_RAW;
+  }
+
+  cmd_raw(raw);
 }
 
 }  // namespace motor
