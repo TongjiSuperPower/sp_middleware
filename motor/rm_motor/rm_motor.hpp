@@ -10,7 +10,10 @@ class RM_Motor
 public:
   RM_Motor(uint8_t motor_id);
 
-  void read(uint8_t * data);
+  bool is_open() const;
+  bool is_alive(uint32_t now_ms) const;
+
+  void read(uint8_t * data, uint32_t stamp_ms);
   void write(uint8_t * data) const;
 
   float angle() const;
@@ -23,6 +26,10 @@ protected:
   uint8_t motor_id_;
 
 private:
+  bool has_read_;
+  uint32_t last_read_ms_;
+
+  int32_t circle_;
   uint16_t angle_ecd_;
   int16_t speed_rpm_;
   int16_t current_raw_;
