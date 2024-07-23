@@ -65,9 +65,9 @@ void Plotter::plot(
 void Plotter::send()
 {
   // dismiss return
-  HAL_UART_Transmit(
+  HAL_UART_Transmit_DMA(
     huart_, (uint8_t *)&plot_frame_,
-    sizeof(plot_frame_.start) + sizeof(plot_frame_.size) + plot_frame_.size, 0xFFFF);
+    sizeof(plot_frame_.start) + sizeof(plot_frame_.size) + plot_frame_.size);
 }
 
 }  // namespace io
