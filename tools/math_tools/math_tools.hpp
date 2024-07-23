@@ -10,6 +10,8 @@ constexpr float PI = M_PI;
 // (-PI, PI]
 float limit_angle(float angle);
 
+int deadband_limit(int input, int deadline);
+
 }  // namespace tools
 
 #endif  // TOOLS__MATH_TOOLS_HPP

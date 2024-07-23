@@ -9,4 +9,6 @@ float limit_angle(float angle)
   return angle;
 }
 
+int deadband_limit(int input, int deadline) { return fabs(input) < deadline ? 0 : input; }
+
 }  // namespace tools
