@@ -1,11 +1,16 @@
-#include "can_init.h"
+#include "can.hpp"
 
-#include "can.h"
+namespace io
+{
+CAN::CAN(CAN_HandleTypeDef * hcan) : hcan_(hcan) {}
 
-extern CAN_HandleTypeDef hcan1;
-extern CAN_HandleTypeDef hcan2;
+void CAN::recv() { HAL_CAN_GetRxMessage(hcan_, CAN_RX_FIFO0, &rx_header_, rx_data_); }
 
-void can_filter_init(void)
+void CAN::send(uint32_t id) { HAL_CAN_AddTxMessage(hcan_, &tx_header_, tx_data_, &send_mail_box_); }
+
+}  // namespace io
+
+extern "C" void can_filter_init(void)
 {
   CAN_FilterTypeDef can_filter_st;
   can_filter_st.FilterActivation = ENABLE;
