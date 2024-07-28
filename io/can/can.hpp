@@ -16,12 +16,14 @@ public:
   void send(uint32_t tx_id);
 
   uint8_t rx_data_[DATA_LEN];
-  uint8_t tx_data_[DATA_LEN];
   CAN_RxHeaderTypeDef rx_header_;
+
+  uint8_t tx_data_[DATA_LEN];
 
 private:
   uint32_t send_mail_box_;
   CAN_HandleTypeDef * hcan_;
+
   CAN_TxHeaderTypeDef tx_header_;
 };
 }  // namespace io

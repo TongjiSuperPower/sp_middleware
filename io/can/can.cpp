@@ -2,11 +2,20 @@
 
 namespace io
 {
-CAN::CAN(CAN_HandleTypeDef * hcan) : hcan_(hcan) {}
+CAN::CAN(CAN_HandleTypeDef * hcan) : hcan_(hcan)
+{
+  tx_header_.IDE = CAN_ID_STD;
+  tx_header_.RTR = CAN_RTR_DATA;
+  tx_header_.DLC = 0x08;
+}
 
 void CAN::recv() { HAL_CAN_GetRxMessage(hcan_, CAN_RX_FIFO0, &rx_header_, rx_data_); }
 
-void CAN::send(uint32_t id) { HAL_CAN_AddTxMessage(hcan_, &tx_header_, tx_data_, &send_mail_box_); }
+void CAN::send(uint32_t id)
+{
+  tx_header_.StdId = id;
+  HAL_CAN_AddTxMessage(hcan_, &tx_header_, tx_data_, &send_mail_box_);
+}
 
 }  // namespace io
 
