@@ -35,6 +35,7 @@ private:
   uint16_t angle_ecd_;
   int16_t speed_rpm_;
   int16_t current_raw_;
+  int16_t temperate_;
 
   int16_t cmd_raw_;
 };

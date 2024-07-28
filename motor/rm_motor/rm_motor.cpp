@@ -22,6 +22,7 @@ void RM_Motor::read(uint8_t * data, uint32_t stamp_ms)
   angle_ecd_ = static_cast<uint16_t>((data[0] << 8) | data[1]);
   speed_rpm_ = static_cast<int16_t>((data[2] << 8) | data[3]);
   current_raw_ = static_cast<int16_t>((data[4] << 8) | data[5]);
+  temperate_ = static_cast<uint8_t>(data[6]);
 
   if (!has_read_) {
     has_read_ = true;
