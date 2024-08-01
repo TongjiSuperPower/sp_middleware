@@ -10,7 +10,7 @@ constexpr size_t MAX_FLOATS = 6;
 class Plotter
 {
 public:
-  Plotter(UART_HandleTypeDef * huart);
+  Plotter(UART_HandleTypeDef * huart, bool use_dma = true);
 
   void plot(float value1);
   void plot(float value1, float value2);
@@ -30,6 +30,8 @@ private:
 #pragma pack()
 
   UART_HandleTypeDef * huart_;
+  bool use_dma_;
+  HAL_StatusTypeDef hal_status_;
   PlotFrame plot_frame_;
 
   void send();

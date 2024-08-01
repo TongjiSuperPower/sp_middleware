@@ -2,7 +2,10 @@
 
 namespace io
 {
-Plotter::Plotter(UART_HandleTypeDef * huart) : huart_(huart) {}
+Plotter::Plotter(UART_HandleTypeDef * huart, bool use_dma)
+: huart_(huart), use_dma_(use_dma), hal_status_(HAL_OK)
+{
+}
 
 void Plotter::plot(float value1)
 {
@@ -64,10 +67,16 @@ void Plotter::plot(
 
 void Plotter::send()
 {
-  // dismiss return
-  HAL_UART_Transmit_DMA(
-    huart_, (uint8_t *)&plot_frame_,
-    sizeof(plot_frame_.start) + sizeof(plot_frame_.size) + plot_frame_.size);
+  if (use_dma_) {
+    hal_status_ = HAL_UART_Transmit_DMA(
+      huart_, (uint8_t *)&plot_frame_,
+      sizeof(plot_frame_.start) + sizeof(plot_frame_.size) + plot_frame_.size);
+  }
+  else {
+    hal_status_ = HAL_UART_Transmit(
+      huart_, (uint8_t *)&plot_frame_,
+      sizeof(plot_frame_.start) + sizeof(plot_frame_.size) + plot_frame_.size, 0xff);
+  }
 }
 
 }  // namespace io
