@@ -7,6 +7,13 @@ namespace io
 {
 constexpr size_t DBUS_BUFF_SIZE = 18;
 
+enum class DBusSwitchMode
+{
+  DOWN,
+  MID,
+  UP
+};
+
 class DBus
 {
 public:
@@ -17,8 +24,8 @@ public:
   float stick_lh;  // [-1, 1] left horizontal
   float stick_lv;  // [-1, 1] left vertical
 
-  int8_t switch_r;  // -1: down, 0: mid, 1: up
-  int8_t switch_l;  // -1: down, 0: mid, 1: up
+  DBusSwitchMode switch_r;
+  DBusSwitchMode switch_l;
 
   void start();
   void update(uint32_t stamp_ms);

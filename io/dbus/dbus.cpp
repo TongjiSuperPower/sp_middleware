@@ -4,14 +4,14 @@ namespace io
 {
 float get_stick(uint16_t raw) { return (static_cast<int16_t>(raw) - 1024) / 660.0f; }
 
-int8_t get_switch(uint8_t raw)
+DBusSwitchMode get_switch(uint8_t raw)
 {
   if (raw == 1)
-    return 1;  // up
+    return DBusSwitchMode::UP;
   else if (raw == 3)
-    return 0;  // mid
+    return DBusSwitchMode::MID;
   else
-    return -1;  // down
+    return DBusSwitchMode::DOWN;
 }
 
 DBus::DBus(UART_HandleTypeDef * huart, bool use_dma)
@@ -27,8 +27,8 @@ void DBus::start()
   stick_rv = 0.0f;
   stick_lh = 0.0f;
   stick_lv = 0.0f;
-  switch_r = -1;
-  switch_l = -1;
+  switch_r = DBusSwitchMode::DOWN;
+  switch_l = DBusSwitchMode::DOWN;
 
   request();
 }
