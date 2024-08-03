@@ -12,8 +12,10 @@ extern "C" void uart_task()
 {
   remote.start();
 
+  while (!remote.is_open());
+
   while (true) {
-    plotter.plot(remote.switch_lv, remote.switch_rh, remote.switch_l);
+    plotter.plot(remote.switch_lv, remote.switch_lh, remote.switch_rh, remote.switch_rr);
     osDelay(10);
   }
 }
