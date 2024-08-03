@@ -5,7 +5,7 @@
 
 namespace io
 {
-constexpr size_t DATA_LEN = 8;
+constexpr size_t CAN_DATA_LEN = 8;
 
 class CAN
 {
@@ -15,10 +15,10 @@ public:
   void recv();
   void send(uint32_t tx_id);
 
-  uint8_t rx_data_[DATA_LEN];
+  uint8_t rx_data_[CAN_DATA_LEN];
   CAN_RxHeaderTypeDef rx_header_;
 
-  uint8_t tx_data_[DATA_LEN];
+  uint8_t tx_data_[CAN_DATA_LEN];
 
 private:
   uint32_t send_mail_box_;

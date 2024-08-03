@@ -5,7 +5,7 @@
 
 namespace io
 {
-constexpr size_t MAX_FLOATS = 6;
+constexpr size_t PLOTTER_FLOAT_NUM = 6;
 
 class Plotter
 {
@@ -25,7 +25,7 @@ private:
   {
     uint8_t start[2] = {0xAA, 0xBB};
     uint8_t size;
-    float data[MAX_FLOATS];
+    float data[PLOTTER_FLOAT_NUM];
   };
 #pragma pack()
 
