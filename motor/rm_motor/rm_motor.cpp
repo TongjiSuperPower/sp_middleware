@@ -70,13 +70,14 @@ float GM6020::torque() const { return current_raw() * GM6020_RAW_TO_TORQUE; }
 
 void GM6020::cmd(float speed_or_torque)
 {
-  int16_t raw;
+  float raw;
   if (voltage_ctrl_) {
-    raw = static_cast<int16_t>(speed_or_torque / GM6020_RAW_TO_SPEED);
+    raw = speed_or_torque / GM6020_RAW_TO_SPEED;
     if (raw > GM6020_MAX_VOTAGE_RAW) raw = GM6020_MAX_VOTAGE_RAW;
     if (raw < -GM6020_MAX_VOTAGE_RAW) raw = -GM6020_MAX_VOTAGE_RAW;
-  } else {
-    raw = static_cast<int16_t>(speed_or_torque / GM6020_RAW_TO_TORQUE);
+  }
+  else {
+    raw = speed_or_torque / GM6020_RAW_TO_TORQUE;
     if (raw > GM6020_MAX_CURRENT_RAW) raw = GM6020_MAX_CURRENT_RAW;
     if (raw < -GM6020_MAX_CURRENT_RAW) raw = -GM6020_MAX_CURRENT_RAW;
   }
@@ -99,7 +100,7 @@ float M2006::torque() const { return current_raw() * M2006_RAW_TO_TORQUE * M2006
 
 void M2006::cmd(float torque)
 {
-  auto raw = static_cast<int16_t>(torque / M2006_P36 / M2006_RAW_TO_TORQUE);
+  float raw = torque / M2006_P36 / M2006_RAW_TO_TORQUE;
   if (raw > M2006_MAX_CURRENT_RAW) raw = M2006_MAX_CURRENT_RAW;
   if (raw < -M2006_MAX_CURRENT_RAW) raw = -M2006_MAX_CURRENT_RAW;
   cmd_raw(raw);
@@ -121,7 +122,7 @@ float M3508::torque() const { return current_raw() * M3508_RAW_TO_TORQUE * ratio
 
 void M3508::cmd(float torque)
 {
-  auto raw = static_cast<int16_t>(torque / ratio_ / M3508_RAW_TO_TORQUE);
+  float raw = torque / ratio_ / M3508_RAW_TO_TORQUE;
   if (raw > M3508_MAX_CURRENT_RAW) raw = M3508_MAX_CURRENT_RAW;
   if (raw < -M3508_MAX_CURRENT_RAW) raw = -M3508_MAX_CURRENT_RAW;
   cmd_raw(raw);
