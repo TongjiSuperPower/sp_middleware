@@ -11,6 +11,17 @@ enum class PIDSubtractMode
   ANGUlAR
 };
 
+struct PIDData
+{
+  float set;      // 设定值
+  float fdb;      // 反馈值
+  float pout;     // P项的输出值
+  float iout;     // I项的输出值
+  float dout;     // D项的输出值
+  float err[3];   // 误差缓冲区
+  float dbuf[3];  // D项的滤波器缓冲区
+};
+
 class PID
 {
 public:
@@ -22,7 +33,8 @@ public:
     float pid[3], float max_out, float max_iout, float alpha = 1.0f,
     PIDSubtractMode mode = PIDSubtractMode::LINEAR);
 
-  float out;  // PID的输出值
+  float out;     // PID的输出值
+  PIDData data;  // debug only
 
   void calc(float set, float fdb);
 
@@ -31,13 +43,6 @@ private:
   const float max_out_, max_iout_;
   const float alpha_;
   const PIDSubtractMode mode_;
-
-  struct pid_param_t
-  {
-    float pout, iout, dout;  // PID的输出，P项输出，I项输出，D项输出
-    float dbuf[3], err[3];   // D项的滤波器缓冲区，误差缓冲区
-    float set, fdb;          // 设定值，反馈值
-  } pid_data_;
 };
 
 }  // namespace tools
