@@ -7,7 +7,7 @@
 
 namespace tools
 {
-//Çø·ÖposÄ£Ê½ºÍdeltaÄ£Ê½
+//åŒºåˆ†posæ¨¡å¼å’Œdeltaæ¨¡å¼
 enum class PIDMode
 {
   POSITION = 0,
@@ -19,16 +19,16 @@ class PID
 private:
   struct pid_param_t
   {
-    PIDMode mode;             // PIDÄ£Ê½
-    float kp, ki, kd;         // PIDµÄÈý¸ö²ÎÊý
-    float pout, iout, dout;   // PIDµÄÊä³ö£¬PÏîÊä³ö£¬IÏîÊä³ö£¬DÏîÊä³ö
-    float max_out, max_iout;  // PIDµÄÊä³öÏÞÖÆ£¬IÏîÊä³öÏÞÖÆ
-    float dbuf[3], err[3];    // DÏîµÄÂË²¨Æ÷»º³åÇø£¬Îó²î»º³åÇø
-    float set, fdb;           // Éè¶¨Öµ£¬·´À¡Öµ
-    float alpha;              // DÏîÂË²¨Æ÷ÏµÊý
+    PIDMode mode;             // PIDæ¨¡å¼
+    float kp, ki, kd;         // PIDçš„ä¸‰ä¸ªå‚æ•°
+    float pout, iout, dout;   // PIDçš„è¾“å‡ºï¼ŒPé¡¹è¾“å‡ºï¼ŒIé¡¹è¾“å‡ºï¼ŒDé¡¹è¾“å‡º
+    float max_out, max_iout;  // PIDçš„è¾“å‡ºé™åˆ¶ï¼ŒIé¡¹è¾“å‡ºé™åˆ¶
+    float dbuf[3], err[3];    // Dé¡¹çš„æ»¤æ³¢å™¨ç¼“å†²åŒºï¼Œè¯¯å·®ç¼“å†²åŒº
+    float set, fdb;           // è®¾å®šå€¼ï¼Œåé¦ˆå€¼
+    float alpha;              // Dé¡¹æ»¤æ³¢å™¨ç³»æ•°
   } pid_data_;
 
-  // ÏÞÖÆÊäÈëÖµÔÚ×î´óÖµºÍ×îÐ¡ÖµÖ®¼ä
+  // é™åˆ¶è¾“å…¥å€¼åœ¨æœ€å¤§å€¼å’Œæœ€å°å€¼ä¹‹é—´
   inline void limitMax(float & input, float max)
   {
     if (input > max)
@@ -38,7 +38,7 @@ private:
   }
 
 public:
-  float pid_out_;  // PIDµÄÊä³ö
+  float pid_out_;  // PIDçš„è¾“å‡º
   PID(PIDMode mode, const float pid[3], float max_out, float max_iout, float alpha);
   ~PID() {}
   float pid_calc(float set, float fdb);

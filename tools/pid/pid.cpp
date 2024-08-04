@@ -23,11 +23,11 @@ float PID::pid_calc(float set, float fdb)
 {
   if (set != pid_data_.set) pid_data_.iout /= 2.0f;
 
-  // 微分先行
+  // 寰垎鍏堣
   pid_data_.dbuf[2] = pid_data_.dbuf[1];
   pid_data_.dbuf[1] = pid_data_.dbuf[0];
   pid_data_.dbuf[0] = pid_data_.fdb - fdb;
-  // 滤波
+  // 婊ゆ尝
   pid_data_.dbuf[0] =
     pid_data_.alpha * pid_data_.dbuf[0] + (1.0f - pid_data_.alpha) * pid_data_.dbuf[1];
 
@@ -41,7 +41,7 @@ float PID::pid_calc(float set, float fdb)
   if (pid_data_.mode == PIDMode::POSITION) {
     // Kp
     pid_data_.pout = pid_data_.kp * pid_data_.err[0];
-    // Ki,梯形积分
+    // Ki,姊舰绉垎
     pid_data_.iout += pid_data_.ki * (pid_data_.err[0] + pid_data_.err[1]) / 2.0f;
     limitMax(pid_data_.iout, pid_data_.max_iout);
     // Kd
@@ -51,7 +51,7 @@ float PID::pid_calc(float set, float fdb)
   else if (pid_data_.mode == PIDMode::DELTA) {
     // Kp
     pid_data_.pout = pid_data_.kp * (pid_data_.err[0] - pid_data_.err[1]);
-    // Ki,梯形积分
+    // Ki,姊舰绉垎
     pid_data_.iout += pid_data_.ki * (pid_data_.err[0] + pid_data_.err[1]) / 2.0f;
     limitMax(pid_data_.iout, pid_data_.max_iout);
     //Kd
