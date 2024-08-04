@@ -2,9 +2,8 @@
 
 namespace tools
 {
-PID::PID(
-  float kp, float ki, float kd, float max_out, float max_iout, float alpha, PIDSubtractMode mode)
-: kp_(kp), ki_(ki), kd_(kd), max_out_(max_out), max_iout_(max_iout), alpha_(alpha), mode_(mode)
+PID::PID(float dt, float kp, float ki, float kd, float max_out, float max_iout, float alpha)
+: dt_(dt), kp_(kp), ki_(ki), kd_(kd), max_out_(max_out), max_iout_(max_iout), alpha_(alpha)
 {
   this->out = 0.0f;
 
@@ -14,11 +13,6 @@ PID::PID(
   this->data.dbuf[0] = this->data.dbuf[1] = this->data.dbuf[2] = 0.0f;
 }
 
-PID::PID(float pid[3], float max_out, float max_iout, float alpha, PIDSubtractMode mode)
-: PID(pid[0], pid[1], pid[2], max_out, max_iout, alpha, mode)
-{
-}
-
 void PID::calc(float set, float fdb)
 {
   if (set != this->data.set) this->data.iout /= 2.0f;
@@ -26,14 +20,14 @@ void PID::calc(float set, float fdb)
   // 微分先行
   this->data.dbuf[2] = this->data.dbuf[1];
   this->data.dbuf[1] = this->data.dbuf[0];
-  this->data.dbuf[0] = this->data.fdb - fdb;
+  this->data.dbuf[0] = (this->data.fdb - fdb) / dt_;
 
   // 滤波
   this->data.dbuf[0] = alpha_ * this->data.dbuf[0] + (1.0f - alpha_) * this->data.dbuf[1];
 
   this->data.err[2] = this->data.err[1];
   this->data.err[1] = this->data.err[0];
-  this->data.err[0] = (mode_ == PIDSubtractMode::LINEAR) ? set - fdb : limit_angle(set - fdb);
+  this->data.err[0] = set - fdb;
 
   this->data.set = set;
   this->data.fdb = fdb;

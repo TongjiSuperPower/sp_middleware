@@ -5,12 +5,6 @@
 
 namespace tools
 {
-enum class PIDSubtractMode
-{
-  LINEAR,
-  ANGUlAR
-};
-
 struct PIDData
 {
   float set;      // 设定值
@@ -25,13 +19,7 @@ struct PIDData
 class PID
 {
 public:
-  PID(
-    float kp, float ki, float kd, float max_out, float max_iout, float alpha = 1.0f,
-    PIDSubtractMode mode = PIDSubtractMode::LINEAR);
-
-  PID(
-    float pid[3], float max_out, float max_iout, float alpha = 1.0f,
-    PIDSubtractMode mode = PIDSubtractMode::LINEAR);
+  PID(float dt, float kp, float ki, float kd, float max_out, float max_iout, float alpha = 1.0f);
 
   float out;     // PID的输出值
   PIDData data;  // debug only
@@ -39,10 +27,10 @@ public:
   void calc(float set, float fdb);
 
 private:
+  const float dt_;
   const float kp_, ki_, kd_;
   const float max_out_, max_iout_;
   const float alpha_;
-  const PIDSubtractMode mode_;
 };
 
 }  // namespace tools
