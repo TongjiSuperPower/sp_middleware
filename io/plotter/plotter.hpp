@@ -3,6 +3,8 @@
 
 #include "usart.h"
 
+// something ...
+
 namespace io
 {
 constexpr size_t PLOTTER_FLOAT_NUM = 6;
