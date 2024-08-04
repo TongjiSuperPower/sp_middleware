@@ -10,6 +10,9 @@ constexpr float PI = M_PI;
 // (-PI, PI]
 float limit_angle(float angle);
 
+// [-max, max]
+float limit_max(float input, float max);
+
 int deadband_limit(int input, int deadline);
 
 }  // namespace tools

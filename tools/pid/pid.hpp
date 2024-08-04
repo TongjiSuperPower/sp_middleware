@@ -1,9 +1,7 @@
-#ifndef _PID_HPP
-#define _PID_HPP
+#ifndef PID_HPP
+#define PID_HPP
 
-#include <cmath>
-
-#include "cstdint"
+#include "tools/math_tools/math_tools.hpp"
 
 namespace tools
 {
@@ -28,15 +26,6 @@ private:
     float alpha;              // D项滤波器系数
   } pid_data_;
 
-  // 限制输入值在最大值和最小值之间
-  inline void limitMax(float & input, float max)
-  {
-    if (input > max)
-      input = max;
-    else if (input < -max)
-      input = -max;
-  }
-
 public:
   float pid_out_;  // PID的输出
   PID(PIDMode mode, const float pid[3], float max_out, float max_iout, float alpha);
@@ -46,4 +35,4 @@ public:
 
 }  // namespace tools
 
-#endif  // _PID_HPP
+#endif  // PID_HPP

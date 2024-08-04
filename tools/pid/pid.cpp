@@ -43,7 +43,7 @@ float PID::pid_calc(float set, float fdb)
     pid_data_.pout = pid_data_.kp * pid_data_.err[0];
     // Ki,梯形积分
     pid_data_.iout += pid_data_.ki * (pid_data_.err[0] + pid_data_.err[1]) / 2.0f;
-    limitMax(pid_data_.iout, pid_data_.max_iout);
+    pid_data_.iout = limit_max(pid_data_.iout, pid_data_.max_iout);
     // Kd
     pid_data_.dout = pid_data_.kd * pid_data_.dbuf[0];
   }
@@ -53,13 +53,13 @@ float PID::pid_calc(float set, float fdb)
     pid_data_.pout = pid_data_.kp * (pid_data_.err[0] - pid_data_.err[1]);
     // Ki,梯形积分
     pid_data_.iout += pid_data_.ki * (pid_data_.err[0] + pid_data_.err[1]) / 2.0f;
-    limitMax(pid_data_.iout, pid_data_.max_iout);
+    pid_data_.iout = limit_max(pid_data_.iout, pid_data_.max_iout);
     //Kd
     pid_data_.dout = pid_data_.kd * pid_data_.dbuf[0];
   }
 
   pid_out_ = pid_data_.pout + pid_data_.iout + pid_data_.dout;
-  limitMax(pid_out_, pid_data_.max_out);
+  pid_out_ = limit_max(pid_out_, pid_data_.max_out);
 
   return pid_out_;
 }
