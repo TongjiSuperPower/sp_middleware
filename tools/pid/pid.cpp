@@ -2,20 +2,19 @@
 
 namespace tools
 {
-PID::PID(PIDSubtractMode mode, const float pid[3], float max_out, float max_iout, float alpha)
-: mode_(mode)
+PID::PID(
+  float kp, float ki, float kd, float max_out, float max_iout, float alpha, PIDSubtractMode mode)
+: kp_(kp), ki_(ki), kd_(kd), max_out_(max_out), max_iout_(max_iout), alpha_(alpha), mode_(mode)
 {
-  pid_data_.kp = pid[0];
-  pid_data_.ki = pid[1];
-  pid_data_.kd = pid[2];
-  pid_data_.max_out = max_out;
-  pid_data_.max_iout = max_iout;
-  pid_data_.alpha = alpha;
-
   this->out = pid_data_.pout = pid_data_.iout = pid_data_.dout = 0.0f;
   pid_data_.dbuf[0] = pid_data_.dbuf[1] = pid_data_.dbuf[2] = 0.0f;
   pid_data_.err[0] = pid_data_.err[1] = pid_data_.err[2] = 0.0f;
   pid_data_.set = pid_data_.fdb = 0.0f;
+}
+
+PID::PID(float pid[3], float max_out, float max_iout, float alpha, PIDSubtractMode mode)
+: PID(pid[0], pid[1], pid[2], max_out, max_iout, alpha, mode)
+{
 }
 
 void PID::calc(float set, float fdb)
@@ -27,8 +26,7 @@ void PID::calc(float set, float fdb)
   pid_data_.dbuf[1] = pid_data_.dbuf[0];
   pid_data_.dbuf[0] = pid_data_.fdb - fdb;
   // 滤波
-  pid_data_.dbuf[0] =
-    pid_data_.alpha * pid_data_.dbuf[0] + (1.0f - pid_data_.alpha) * pid_data_.dbuf[1];
+  pid_data_.dbuf[0] = alpha_ * pid_data_.dbuf[0] + (1.0f - alpha_) * pid_data_.dbuf[1];
 
   pid_data_.err[2] = pid_data_.err[1];
   pid_data_.err[1] = pid_data_.err[0];
@@ -38,14 +36,14 @@ void PID::calc(float set, float fdb)
   pid_data_.fdb = fdb;
 
   // Kp
-  pid_data_.pout = pid_data_.kp * pid_data_.err[0];
+  pid_data_.pout = kp_ * pid_data_.err[0];
   // Ki,梯形积分
-  pid_data_.iout += pid_data_.ki * (pid_data_.err[0] + pid_data_.err[1]) / 2.0f;
-  pid_data_.iout = limit_max(pid_data_.iout, pid_data_.max_iout);
+  pid_data_.iout += ki_ * (pid_data_.err[0] + pid_data_.err[1]) / 2.0f;
+  pid_data_.iout = limit_max(pid_data_.iout, max_iout_);
   // Kd
-  pid_data_.dout = pid_data_.kd * pid_data_.dbuf[0];
+  pid_data_.dout = kd_ * pid_data_.dbuf[0];
 
-  this->out = limit_max(pid_data_.pout + pid_data_.iout + pid_data_.dout, pid_data_.max_out);
+  this->out = limit_max(pid_data_.pout + pid_data_.iout + pid_data_.dout, max_out_);
 }
 
 }  // namespace tools
