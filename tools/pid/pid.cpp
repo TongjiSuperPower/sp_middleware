@@ -2,65 +2,45 @@
 
 namespace tools
 {
-PID::PID(PIDMode mode, const float pid[3], float max_out, float max_iout, float alpha)
+PID::PID(float dt, float kp, float ki, float kd, float max_out, float max_iout, float alpha)
+: dt_(dt), kp_(kp), ki_(ki), kd_(kd), max_out_(max_out), max_iout_(max_iout), alpha_(alpha)
 {
-  pid_data_.mode = mode;
+  this->out = 0.0f;
 
-  pid_data_.kp = pid[0];
-  pid_data_.ki = pid[1];
-  pid_data_.kd = pid[2];
-  pid_data_.max_out = max_out;
-  pid_data_.max_iout = max_iout;
-  pid_data_.alpha = alpha;
-
-  pid_out_ = pid_data_.pout = pid_data_.iout = pid_data_.dout = 0.0f;
-  pid_data_.dbuf[0] = pid_data_.dbuf[1] = pid_data_.dbuf[2] = 0.0f;
-  pid_data_.err[0] = pid_data_.err[1] = pid_data_.err[2] = 0.0f;
-  pid_data_.set = pid_data_.fdb = 0.0f;
+  this->data.set = this->data.fdb = 0.0f;
+  this->data.pout = this->data.iout = this->data.dout = 0.0f;
+  this->data.err[0] = this->data.err[1] = this->data.err[2] = 0.0f;
+  this->data.dbuf[0] = this->data.dbuf[1] = this->data.dbuf[2] = 0.0f;
 }
 
-float PID::pid_calc(float set, float fdb)
+void PID::calc(float set, float fdb)
 {
-  if (set != pid_data_.set) pid_data_.iout /= 2.0f;
+  if (set != this->data.set) this->data.iout /= 2.0f;
 
-  // 微分先行
-  pid_data_.dbuf[2] = pid_data_.dbuf[1];
-  pid_data_.dbuf[1] = pid_data_.dbuf[0];
-  pid_data_.dbuf[0] = pid_data_.fdb - fdb;
-  // 滤波
-  pid_data_.dbuf[0] =
-    pid_data_.alpha * pid_data_.dbuf[0] + (1.0f - pid_data_.alpha) * pid_data_.dbuf[1];
+  // 寰垎鍏堣
+  this->data.dbuf[2] = this->data.dbuf[1];
+  this->data.dbuf[1] = this->data.dbuf[0];
+  this->data.dbuf[0] = (this->data.fdb - fdb) / dt_;
 
-  pid_data_.err[2] = pid_data_.err[1];
-  pid_data_.err[1] = pid_data_.err[0];
-  pid_data_.err[0] = set - fdb;
+  // 婊ゆ尝
+  this->data.dbuf[0] = alpha_ * this->data.dbuf[0] + (1.0f - alpha_) * this->data.dbuf[1];
 
-  pid_data_.set = set;
-  pid_data_.fdb = fdb;
+  this->data.err[2] = this->data.err[1];
+  this->data.err[1] = this->data.err[0];
+  this->data.err[0] = set - fdb;
 
-  if (pid_data_.mode == PIDMode::POSITION) {
-    // Kp
-    pid_data_.pout = pid_data_.kp * pid_data_.err[0];
-    // Ki,梯形积分
-    pid_data_.iout += pid_data_.ki * (pid_data_.err[0] + pid_data_.err[1]) / 2.0f;
-    limitMax(pid_data_.iout, pid_data_.max_iout);
-    // Kd
-    pid_data_.dout = pid_data_.kd * pid_data_.dbuf[0];
-  }
+  this->data.set = set;
+  this->data.fdb = fdb;
 
-  else if (pid_data_.mode == PIDMode::DELTA) {
-    // Kp
-    pid_data_.pout = pid_data_.kp * (pid_data_.err[0] - pid_data_.err[1]);
-    // Ki,梯形积分
-    pid_data_.iout += pid_data_.ki * (pid_data_.err[0] + pid_data_.err[1]) / 2.0f;
-    limitMax(pid_data_.iout, pid_data_.max_iout);
-    //Kd
-    pid_data_.dout = pid_data_.kd * pid_data_.dbuf[0];
-  }
+  // Kp
+  this->data.pout = kp_ * this->data.err[0];
+  // Ki,姊舰绉垎
+  this->data.iout += ki_ * (this->data.err[0] + this->data.err[1]) / 2.0f;
+  this->data.iout = limit_max(this->data.iout, max_iout_);
+  // Kd
+  this->data.dout = kd_ * this->data.dbuf[0];
 
-  pid_out_ = pid_data_.pout + pid_data_.iout + pid_data_.dout;
-  limitMax(pid_out_, pid_data_.max_out);
-
-  return pid_out_;
+  this->out = limit_max(this->data.pout + this->data.iout + this->data.dout, max_out_);
 }
+
 }  // namespace tools

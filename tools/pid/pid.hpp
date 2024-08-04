@@ -1,49 +1,38 @@
-#ifndef _PID_HPP
-#define _PID_HPP
+#ifndef PID_HPP
+#define PID_HPP
 
-#include <cmath>
-
-#include "cstdint"
+#include "tools/math_tools/math_tools.hpp"
 
 namespace tools
 {
-//Çø·ÖposÄ£Ê½ºÍdeltaÄ£Ê½
-enum class PIDMode
+struct PIDData
 {
-  POSITION = 0,
-  DELTA
+  float set;      // è®¾å®šå€¼
+  float fdb;      // åé¦ˆå€¼
+  float pout;     // Pé¡¹çš„è¾“å‡ºå€¼
+  float iout;     // Ié¡¹çš„è¾“å‡ºå€¼
+  float dout;     // Dé¡¹çš„è¾“å‡ºå€¼
+  float err[3];   // è¯¯å·®ç¼“å†²åŒº
+  float dbuf[3];  // Dé¡¹çš„æ»¤æ³¢å™¨ç¼“å†²åŒº
 };
 
 class PID
 {
-private:
-  struct pid_param_t
-  {
-    PIDMode mode;             // PIDÄ£Ê½
-    float kp, ki, kd;         // PIDµÄÈý¸ö²ÎÊý
-    float pout, iout, dout;   // PIDµÄÊä³ö£¬PÏîÊä³ö£¬IÏîÊä³ö£¬DÏîÊä³ö
-    float max_out, max_iout;  // PIDµÄÊä³öÏÞÖÆ£¬IÏîÊä³öÏÞÖÆ
-    float dbuf[3], err[3];    // DÏîµÄÂË²¨Æ÷»º³åÇø£¬Îó²î»º³åÇø
-    float set, fdb;           // Éè¶¨Öµ£¬·´À¡Öµ
-    float alpha;              // DÏîÂË²¨Æ÷ÏµÊý
-  } pid_data_;
-
-  // ÏÞÖÆÊäÈëÖµÔÚ×î´óÖµºÍ×îÐ¡ÖµÖ®¼ä
-  inline void limitMax(float & input, float max)
-  {
-    if (input > max)
-      input = max;
-    else if (input < -max)
-      input = -max;
-  }
-
 public:
-  float pid_out_;  // PIDµÄÊä³ö
-  PID(PIDMode mode, const float pid[3], float max_out, float max_iout, float alpha);
-  ~PID() {}
-  float pid_calc(float set, float fdb);
+  PID(float dt, float kp, float ki, float kd, float max_out, float max_iout, float alpha = 1.0f);
+
+  float out;     // PIDçš„è¾“å‡ºå€¼
+  PIDData data;  // debug only
+
+  void calc(float set, float fdb);
+
+private:
+  const float dt_;
+  const float kp_, ki_, kd_;
+  const float max_out_, max_iout_;
+  const float alpha_;
 };
 
 }  // namespace tools
 
-#endif  // _PID_HPP
+#endif  // PID_HPP
