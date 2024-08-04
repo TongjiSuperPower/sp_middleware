@@ -13,6 +13,11 @@ enum class PIDSubtractMode
 
 class PID
 {
+public:
+  PID(PIDSubtractMode mode, const float pid[3], float max_out, float max_iout, float alpha);
+  float out;  // PID的输出值
+  void calc(float set, float fdb);
+
 private:
   PIDSubtractMode mode_;
   struct pid_param_t
@@ -24,12 +29,6 @@ private:
     float set, fdb;           // 设定值，反馈值
     float alpha;              // D项滤波器系数
   } pid_data_;
-
-public:
-  float pid_out_;  // PID的输出
-  PID(PIDSubtractMode mode, const float pid[3], float max_out, float max_iout, float alpha);
-  ~PID() {}
-  float pid_calc(float set, float fdb);
 };
 
 }  // namespace tools

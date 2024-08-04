@@ -12,13 +12,13 @@ PID::PID(PIDSubtractMode mode, const float pid[3], float max_out, float max_iout
   pid_data_.max_iout = max_iout;
   pid_data_.alpha = alpha;
 
-  pid_out_ = pid_data_.pout = pid_data_.iout = pid_data_.dout = 0.0f;
+  this->out = pid_data_.pout = pid_data_.iout = pid_data_.dout = 0.0f;
   pid_data_.dbuf[0] = pid_data_.dbuf[1] = pid_data_.dbuf[2] = 0.0f;
   pid_data_.err[0] = pid_data_.err[1] = pid_data_.err[2] = 0.0f;
   pid_data_.set = pid_data_.fdb = 0.0f;
 }
 
-float PID::pid_calc(float set, float fdb)
+void PID::calc(float set, float fdb)
 {
   if (set != pid_data_.set) pid_data_.iout /= 2.0f;
 
@@ -45,9 +45,7 @@ float PID::pid_calc(float set, float fdb)
   // Kd
   pid_data_.dout = pid_data_.kd * pid_data_.dbuf[0];
 
-  pid_out_ = pid_data_.pout + pid_data_.iout + pid_data_.dout;
-  pid_out_ = limit_max(pid_out_, pid_data_.max_out);
-
-  return pid_out_;
+  this->out = limit_max(pid_data_.pout + pid_data_.iout + pid_data_.dout, pid_data_.max_out);
 }
+
 }  // namespace tools
