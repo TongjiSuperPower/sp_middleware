@@ -5,19 +5,18 @@
 
 namespace tools
 {
-//区分pos模式和delta模式
-enum class PIDMode
+enum class PIDSubtractMode
 {
-  POSITION = 0,
-  DELTA
+  LINEAR,
+  ANGUlAR
 };
 
 class PID
 {
 private:
+  PIDSubtractMode mode_;
   struct pid_param_t
   {
-    PIDMode mode;             // PID模式
     float kp, ki, kd;         // PID的三个参数
     float pout, iout, dout;   // PID的输出，P项输出，I项输出，D项输出
     float max_out, max_iout;  // PID的输出限制，I项输出限制
@@ -28,7 +27,7 @@ private:
 
 public:
   float pid_out_;  // PID的输出
-  PID(PIDMode mode, const float pid[3], float max_out, float max_iout, float alpha);
+  PID(PIDSubtractMode mode, const float pid[3], float max_out, float max_iout, float alpha);
   ~PID() {}
   float pid_calc(float set, float fdb);
 };

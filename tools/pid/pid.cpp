@@ -2,10 +2,9 @@
 
 namespace tools
 {
-PID::PID(PIDMode mode, const float pid[3], float max_out, float max_iout, float alpha)
+PID::PID(PIDSubtractMode mode, const float pid[3], float max_out, float max_iout, float alpha)
+: mode_(mode)
 {
-  pid_data_.mode = mode;
-
   pid_data_.kp = pid[0];
   pid_data_.ki = pid[1];
   pid_data_.kd = pid[2];
@@ -33,30 +32,18 @@ float PID::pid_calc(float set, float fdb)
 
   pid_data_.err[2] = pid_data_.err[1];
   pid_data_.err[1] = pid_data_.err[0];
-  pid_data_.err[0] = set - fdb;
+  pid_data_.err[0] = (mode_ == PIDSubtractMode::LINEAR) ? set - fdb : limit_angle(set - fdb);
 
   pid_data_.set = set;
   pid_data_.fdb = fdb;
 
-  if (pid_data_.mode == PIDMode::POSITION) {
-    // Kp
-    pid_data_.pout = pid_data_.kp * pid_data_.err[0];
-    // Ki,梯形积分
-    pid_data_.iout += pid_data_.ki * (pid_data_.err[0] + pid_data_.err[1]) / 2.0f;
-    pid_data_.iout = limit_max(pid_data_.iout, pid_data_.max_iout);
-    // Kd
-    pid_data_.dout = pid_data_.kd * pid_data_.dbuf[0];
-  }
-
-  else if (pid_data_.mode == PIDMode::DELTA) {
-    // Kp
-    pid_data_.pout = pid_data_.kp * (pid_data_.err[0] - pid_data_.err[1]);
-    // Ki,梯形积分
-    pid_data_.iout += pid_data_.ki * (pid_data_.err[0] + pid_data_.err[1]) / 2.0f;
-    pid_data_.iout = limit_max(pid_data_.iout, pid_data_.max_iout);
-    //Kd
-    pid_data_.dout = pid_data_.kd * pid_data_.dbuf[0];
-  }
+  // Kp
+  pid_data_.pout = pid_data_.kp * pid_data_.err[0];
+  // Ki,梯形积分
+  pid_data_.iout += pid_data_.ki * (pid_data_.err[0] + pid_data_.err[1]) / 2.0f;
+  pid_data_.iout = limit_max(pid_data_.iout, pid_data_.max_iout);
+  // Kd
+  pid_data_.dout = pid_data_.kd * pid_data_.dbuf[0];
 
   pid_out_ = pid_data_.pout + pid_data_.iout + pid_data_.dout;
   pid_out_ = limit_max(pid_out_, pid_data_.max_out);
