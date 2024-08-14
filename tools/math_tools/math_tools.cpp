@@ -20,4 +20,18 @@ float limit_max(float input, float max)
 
 int deadband_limit(int input, int deadline) { return std::fabs(input) < deadline ? 0 : input; }
 
+float uint_to_float(uint32_t input, float min, float max, size_t bits)
+{
+  auto span = max - min;
+  auto norm = static_cast<float>(input) / ((1 << bits) - 1);
+  return norm * span + min;
+}
+
+uint32_t float_to_uint(float input, float min, float max, size_t bits)
+{
+  auto span = max - min;
+  auto norm = (input - min) / span;
+  return norm * ((1 << bits) - 1);
+}
+
 }  // namespace tools
