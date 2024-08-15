@@ -57,6 +57,6 @@ void DM_Motor::write_enable(uint8_t * data) const
   data[7] = 0xFC;
 }
 
-void DM_Motor::cmd(float torque) { cmd_torque_ = torque; }
+void DM_Motor::cmd(float torque) { cmd_torque_ = tools::limit_max(torque, tmax_); }
 
 }  // namespace motor
