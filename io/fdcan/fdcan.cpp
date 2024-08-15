@@ -14,12 +14,6 @@ FDCAN::FDCAN(FDCAN_HandleTypeDef * hfdcan) : hfdcan_(hfdcan)
   tx_header_.MessageMarker = 0x00;
 }
 
-uint32_t FDCAN::rx_id() const { return rx_header_.Identifier; }
-
-uint8_t * FDCAN::rx_data() { return rx_data_; }
-
-uint8_t * FDCAN::tx_data() { return tx_data_; }
-
 void FDCAN::start()
 {
   HAL_FDCAN_Start(hfdcan_);                                                   // dismiss return
@@ -28,13 +22,14 @@ void FDCAN::start()
 
 void FDCAN::recv()
 {
-  HAL_FDCAN_GetRxMessage(hfdcan_, FDCAN_RX_FIFO0, &rx_header_, rx_data_);  // dismiss return
+  HAL_FDCAN_GetRxMessage(hfdcan_, FDCAN_RX_FIFO0, &rx_header_, this->rx_data);  // dismiss return
+  this->rx_id = rx_header_.Identifier;
 }
 
-void FDCAN::send(uint32_t tx_id)
+void FDCAN::send(uint16_t tx_id)
 {
   tx_header_.Identifier = tx_id;
-  HAL_FDCAN_AddMessageToTxFifoQ(hfdcan_, &tx_header_, tx_data_);  // dismiss return
+  HAL_FDCAN_AddMessageToTxFifoQ(hfdcan_, &tx_header_, this->tx_data);  // dismiss return
 }
 
 }  // namespace io

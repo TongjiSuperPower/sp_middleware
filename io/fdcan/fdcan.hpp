@@ -12,20 +12,18 @@ class FDCAN
 public:
   FDCAN(FDCAN_HandleTypeDef * hfdcan);
 
-  uint32_t rx_id() const;
-  uint8_t * rx_data();
-  uint8_t * tx_data();
+  uint16_t rx_id;
+  uint8_t rx_data[FDCAN_DATA_LEN];
+  uint8_t tx_data[FDCAN_DATA_LEN];
 
   void start();
   void recv();
-  void send(uint32_t tx_id);
+  void send(uint16_t tx_id);
 
 private:
   FDCAN_HandleTypeDef * hfdcan_;
   FDCAN_RxHeaderTypeDef rx_header_;
   FDCAN_TxHeaderTypeDef tx_header_;
-  uint8_t rx_data_[FDCAN_DATA_LEN];
-  uint8_t tx_data_[FDCAN_DATA_LEN];
 };
 
 }  // namespace io
