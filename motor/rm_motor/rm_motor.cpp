@@ -28,8 +28,10 @@ void RM_Motor::read(uint8_t * data, uint32_t stamp_ms)
     has_read_ = true;
     return;
   }
-
-  if (std::abs(angle_ecd_ - last_ecd) > 4096) circle_ += (speed_rpm_ > 0) ? 1 : -1;
+  if (angle_ecd_ - last_ecd > 4095)
+    circle_--;
+  else if (angle_ecd_ - last_ecd < -4095)
+    circle_++;
 }
 
 void RM_Motor::write(uint8_t * data) const
@@ -75,7 +77,8 @@ void GM6020::cmd(float speed_or_torque)
     raw = static_cast<int16_t>(speed_or_torque / GM6020_RAW_TO_SPEED);
     if (raw > GM6020_MAX_VOTAGE_RAW) raw = GM6020_MAX_VOTAGE_RAW;
     if (raw < -GM6020_MAX_VOTAGE_RAW) raw = -GM6020_MAX_VOTAGE_RAW;
-  } else {
+  }
+  else {
     raw = static_cast<int16_t>(speed_or_torque / GM6020_RAW_TO_TORQUE);
     if (raw > GM6020_MAX_CURRENT_RAW) raw = GM6020_MAX_CURRENT_RAW;
     if (raw < -GM6020_MAX_CURRENT_RAW) raw = -GM6020_MAX_CURRENT_RAW;

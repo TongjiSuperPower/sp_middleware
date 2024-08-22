@@ -21,7 +21,7 @@ PID::PID(PIDMode mode, const float pid[3], float max_out, float max_iout, float 
 
 float PID::pid_calc(float set, float fdb)
 {
-  if (set != pid_data_.set) pid_data_.iout /= 2.0f;
+  // if (set != pid_data_.set) pid_data_.iout /= 2.0f;
 
   // Œ¢∑÷œ»––
   pid_data_.dbuf[2] = pid_data_.dbuf[1];
