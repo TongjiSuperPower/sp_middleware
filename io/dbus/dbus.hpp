@@ -27,7 +27,7 @@ public:
   DBusSwitchMode switch_r;
   DBusSwitchMode switch_l;
 
-  void start();
+  void restart();
   void update(uint32_t stamp_ms);
 
   bool is_open() const;
@@ -41,8 +41,6 @@ private:
   uint32_t last_read_ms_;
 
   uint8_t buff_[DBUS_BUFF_SIZE];
-
-  void request();
 };
 
 }  // namespace io

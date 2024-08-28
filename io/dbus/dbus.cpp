@@ -17,10 +17,6 @@ DBusSwitchMode get_switch(uint8_t raw)
 DBus::DBus(UART_HandleTypeDef * huart, bool use_dma)
 : huart_(huart), use_dma_(use_dma), has_read_(false)
 {
-}
-
-void DBus::start()
-{
   has_read_ = false;
 
   stick_rh = 0.0f;
@@ -29,8 +25,20 @@ void DBus::start()
   stick_lv = 0.0f;
   switch_r = DBusSwitchMode::DOWN;
   switch_l = DBusSwitchMode::DOWN;
+}
 
-  request();
+void DBus::restart()
+{
+  if (use_dma_) {
+    // dismiss return
+    HAL_UARTEx_ReceiveToIdle_DMA(huart_, buff_, DBUS_BUFF_SIZE);
+
+    // ref: https://github.com/HNUYueLuRM/basic_framework/blob/master/bsp/usart/bsp_usart.c
+    __HAL_DMA_DISABLE_IT(huart_->hdmarx, DMA_IT_HT);
+  } else {
+    // dismiss return
+    HAL_UARTEx_ReceiveToIdle_IT(huart_, buff_, DBUS_BUFF_SIZE);
+  }
 }
 
 void DBus::update(uint32_t stamp_ms)
@@ -50,26 +58,11 @@ void DBus::update(uint32_t stamp_ms)
 
   // TODO mouse and keyboard
 
-  request();
+  restart();
 }
 
 bool DBus::is_open() const { return has_read_; }
 
 bool DBus::is_alive(uint32_t now_ms) const { return is_open() && (now_ms - last_read_ms_ < 100); }
-
-void DBus::request()
-{
-  if (use_dma_) {
-    // dismiss return
-    HAL_UARTEx_ReceiveToIdle_DMA(huart_, buff_, DBUS_BUFF_SIZE);
-
-    // ref: https://github.com/HNUYueLuRM/basic_framework/blob/master/bsp/usart/bsp_usart.c
-    __HAL_DMA_DISABLE_IT(huart_->hdmarx, DMA_IT_HT);
-  }
-  else {
-    // dismiss return
-    HAL_UARTEx_ReceiveToIdle_IT(huart_, buff_, DBUS_BUFF_SIZE);
-  }
-}
 
 }  // namespace io
