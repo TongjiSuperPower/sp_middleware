@@ -29,7 +29,10 @@ void RM_Motor::read(uint8_t * data, uint32_t stamp_ms)
     return;
   }
 
-  if (std::abs(angle_ecd_ - last_ecd) > 4096) circle_ += (speed_rpm_ > 0) ? 1 : -1;
+  if (angle_ecd_ - last_ecd > 4096)
+    circle_--;
+  else if (angle_ecd_ - last_ecd < -4096)
+    circle_++;
 }
 
 void RM_Motor::write(uint8_t * data) const
