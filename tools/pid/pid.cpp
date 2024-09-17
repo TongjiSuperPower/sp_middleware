@@ -32,7 +32,7 @@ void PID::calc(float set, float fdb)
 
   // Kp
   this->data.pout = kp_ * this->data.err[0];
-  // Ki,梯形积分
+  // Ki, 梯形积分
   this->data.iout += ki_ * (this->data.err[0] + this->data.err[1]) / 2.0f * dt_;
   this->data.iout = limit_max(this->data.iout, max_iout_);
   // Kd

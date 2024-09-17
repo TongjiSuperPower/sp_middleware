@@ -8,16 +8,19 @@ namespace motor
 class DM_Motor
 {
 public:
-  // can_id: 给电机发送数据的ID, 对应tx_id
-  // master_id: 电机反馈回来数据的ID, 对应rx_id
+  // can_id: 电机控制帧ID, 对应tx_id
+  // master_id: 电机反馈帧ID, 对应rx_id
+  // pmax: position最大值, 单位: rad
+  // vmax: velocity最大值, 单位: rad/s
+  // tmax: torque最大值, 单位: N·m
   DM_Motor(uint16_t can_id, uint16_t master_id, float pmax, float vmax, float tmax);
 
-  const uint16_t rx_id;
-  const uint16_t tx_id;
+  const uint16_t rx_id;  // 电机反馈帧ID
+  const uint16_t tx_id;  // 电机控制帧ID
 
-  float angle;   // rad
-  float speed;   // rad/s
-  float torque;  // N·m
+  float angle;   // 只读! 单位: rad
+  float speed;   // 只读! 单位: rad/s
+  float torque;  // 只读! 单位: N·m
 
   bool is_open() const;
   bool is_alive(uint32_t now_ms) const;
@@ -26,7 +29,7 @@ public:
   void write(uint8_t * data) const;
   void write_enable(uint8_t * data) const;
 
-  // 只实现了MIT力控模式
+  // MIT力控模式, 单位: N·m
   void cmd(float torque);
 
 private:
