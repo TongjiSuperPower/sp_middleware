@@ -2,18 +2,21 @@
 
 namespace io
 {
+LED::LED(TIM_HandleTypeDef * htim) : htim_(htim) {}
 
-Led::Led(TIM_HandleTypeDef * htim) : htim_(htim)
+void LED::start()
 {
-  HAL_TIM_PWM_Start(htim_, TIM_CHANNEL_1);
-  HAL_TIM_PWM_Start(htim_, TIM_CHANNEL_2);
-  HAL_TIM_PWM_Start(htim_, TIM_CHANNEL_3);
+  HAL_TIM_PWM_Start(htim_, TIM_CHANNEL_1);  // dismiss return
+  HAL_TIM_PWM_Start(htim_, TIM_CHANNEL_2);  // dismiss return
+  HAL_TIM_PWM_Start(htim_, TIM_CHANNEL_3);  // dismiss return
 }
 
-void Led::set(uint16_t red, uint16_t green, uint16_t blue)
+void LED::set(float r, float g, float b)
 {
-  __HAL_TIM_SetCompare(htim_, TIM_CHANNEL_1, blue);
-  __HAL_TIM_SetCompare(htim_, TIM_CHANNEL_2, green);
-  __HAL_TIM_SetCompare(htim_, TIM_CHANNEL_3, red);
+  __HAL_TIM_SET_AUTORELOAD(htim_, 65535);
+  __HAL_TIM_SET_COMPARE(htim_, TIM_CHANNEL_1, (htim_->Instance->ARR + 1) * b);
+  __HAL_TIM_SET_COMPARE(htim_, TIM_CHANNEL_2, (htim_->Instance->ARR + 1) * g);
+  __HAL_TIM_SET_COMPARE(htim_, TIM_CHANNEL_3, (htim_->Instance->ARR + 1) * r);
 }
+
 }  // namespace io

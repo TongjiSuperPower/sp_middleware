@@ -1,15 +1,19 @@
-#ifndef IO__LED_HPP_
-#define IO__LED_HPP_
+#ifndef IO__LED_HPP
+#define IO__LED_HPP
 
 #include "tim.h"
 
 namespace io
 {
-class Led
+class LED
 {
 public:
-  Led(TIM_HandleTypeDef * htim);
-  void set(uint16_t red, uint16_t green, uint16_t blue);
+  LED(TIM_HandleTypeDef * htim);
+
+  void start();
+
+  // 取值范围: [0, 1]
+  void set(float r, float g, float b);
 
 private:
   TIM_HandleTypeDef * htim_;
@@ -17,4 +21,4 @@ private:
 
 }  // namespace io
 
-#endif  // IO__LED_HPP_
+#endif  // IO__LED_HPP
