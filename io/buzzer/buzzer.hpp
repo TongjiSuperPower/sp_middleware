@@ -8,18 +8,20 @@ namespace io
 class Buzzer
 {
 public:
+  // clock_hz: 定时器的时钟频率, 单位: Hz
   Buzzer(TIM_HandleTypeDef * htim, uint16_t channel, float clock_hz);
 
   void start();
   void stop();
-  void set(float hz, float duty_cycle = 0.5);
+
+  // hz: 发声频率, 单位: Hz
+  // duty: 占空比, 取值范围: [0, 1], 0.5时声音最响
+  void set(float hz, float duty = 0.5);
 
 private:
   TIM_HandleTypeDef * htim_;
   uint16_t channel_;
-  float clock_hz_;
-  uint16_t arr_;
-  uint16_t ccr_;
+  const float clock_hz_;
 };
 
 }  // namespace io
