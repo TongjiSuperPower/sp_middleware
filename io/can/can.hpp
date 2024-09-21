@@ -1,5 +1,5 @@
-#ifndef _CAN_HPP_
-#define _CAN_HPP_
+#ifndef IO__CAN_HPP
+#define IO__CAN_HPP
 
 #include "can.h"
 
@@ -12,20 +12,32 @@ class CAN
 public:
   CAN(CAN_HandleTypeDef * hcan);
 
-  void recv();
+  uint32_t rx_id;                 // 只读! recv()的输出
+  uint8_t rx_data[CAN_DATA_LEN];  // 只读! recv()的输出
+  uint8_t tx_data[CAN_DATA_LEN];  // 只写! send()的输入
+
+  // 使用C板官方示例的CAN过滤器配置
+  // ref: https://github.com/RoboMaster/Development-Board-C-Examples/blob/master/20.standard_robot/bsp/boards/bsp_can.c
+  void config();
+
+  // 手动配置CAN过滤器的过滤规则
+  // ref: https://github.com/HNUYueLuRM/basic_framework/blob/master/bsp/can/bsp_can.c
+  void config(const CAN_FilterTypeDef & filter);
+
+  // 启动CAN通信
+  void start();
+
+  // 接收1帧标准数据帧或扩展数据帧
+  // rx_fifo: 缓冲区位置, 默认为CAN_RX_FIFO0
+  void recv(uint32_t rx_fifo = CAN_RX_FIFO0);
+
+  // 发送1帧标准数据帧或扩展数据帧
   void send(uint32_t tx_id);
 
-  uint8_t rx_data_[CAN_DATA_LEN];
-  CAN_RxHeaderTypeDef rx_header_;
-
-  uint8_t tx_data_[CAN_DATA_LEN];
-
 private:
-  uint32_t send_mail_box_;
   CAN_HandleTypeDef * hcan_;
-
-  CAN_TxHeaderTypeDef tx_header_;
 };
+
 }  // namespace io
 
-#endif  // _CAN_HPP_
+#endif  // IO__CAN_HPP
