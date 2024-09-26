@@ -107,21 +107,18 @@ bool RM_Motor::is_alive(uint32_t now_ms) const
 
 void RM_Motor::read(uint8_t * data, uint32_t stamp_ms)
 {
+  // 更新时间戳
   last_read_ms_ = stamp_ms;
 
+  // 数据解析
   uint16_t angle_ecd = (data[0] << 8) | data[1];
   int16_t speed_rpm = (data[2] << 8) | data[3];
   int16_t current_raw = (data[4] << 8) | data[5];
-  this->angle = (float(angle_ecd - 4095) / 8192 + circle_) * 2 * tools::PI / ratio_;
-  this->speed = float(speed_rpm) / 60 * 2 * tools::PI / ratio_;
-  this->torque = float(current_raw) * get_raw_to_torque(motor_type_) * ratio_;
-  this->temperature = data[6];
 
-  // 首次读取, 不做多圈编码
+  // 首次读取时, 初始化last_ecd_
   if (!has_read_) {
     has_read_ = true;
     last_ecd_ = angle_ecd;
-    return;
   }
 
   // 多圈编码
@@ -130,6 +127,12 @@ void RM_Motor::read(uint8_t * data, uint32_t stamp_ms)
   else if (angle_ecd - last_ecd_ < -4096)
     circle_++;
   last_ecd_ = angle_ecd;
+
+  // 更新公有属性
+  this->angle = (float(angle_ecd - 4095) / 8192 + circle_) * 2 * tools::PI / ratio_;
+  this->speed = float(speed_rpm) / 60 * 2 * tools::PI / ratio_;
+  this->torque = float(current_raw) * get_raw_to_torque(motor_type_) * ratio_;
+  this->temperature = data[6];
 }
 
 void RM_Motor::write(uint8_t * data) const
