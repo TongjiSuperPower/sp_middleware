@@ -5,6 +5,8 @@
 
 namespace motor
 {
+constexpr float J4310_MAX_TORQUE = 7.0f;  // N·m
+
 class DM_Motor
 {
 public:

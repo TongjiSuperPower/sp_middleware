@@ -8,6 +8,10 @@ namespace motor
 constexpr float M2006_P36 = 36.0f;             // 原装减速箱减速比
 constexpr float M3508_P19 = 3591.0f / 187.0f;  // 原装减速箱减速比
 
+constexpr float M2006_P36_MAX_TORQUE = 0.18f * 10;  // N·m
+constexpr float M3508_P19_MAX_TORQUE = 0.3f * 20;   // N·m
+constexpr float GM6020_MAX_TORQUE = 0.741f * 3;     // N·m
+
 enum class RM_Motors
 {
   M2006,    // 无减速箱
