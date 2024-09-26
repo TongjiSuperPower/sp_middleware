@@ -1,9 +1,100 @@
 #include "rm_motor.hpp"
 
+#include "tools/math_tools/math_tools.hpp"
+
 namespace motor
 {
-RM_Motor::RM_Motor(uint8_t motor_id)
-: motor_id_(motor_id), has_read_(false), circle_(0), cmd_raw_(0)
+constexpr int16_t M2006_MAX_RAW = 10000;
+constexpr int16_t M3508_MAX_RAW = 16384;
+constexpr int16_t GM6020_MAX_RAW = 16384;
+constexpr int16_t GM6020_V_MAX_RAW = 25000;
+
+constexpr float M2006_RAW_TO_TORQUE = 0.18f / M2006_P36 * 10 / M2006_MAX_RAW;
+constexpr float M3508_RAW_TO_TORQUE = 0.3f / M3508_P19 * 20 / M3508_MAX_RAW;
+constexpr float GM6020_RAW_TO_TORQUE = 0.741f * 3 / GM6020_MAX_RAW;
+constexpr float GM6020_RAW_TO_SPEED = 13.33f / 60 * 2 * tools::PI * 24 / GM6020_V_MAX_RAW;
+
+constexpr float M2006_CMD_TO_RAW = 1.0f / M2006_RAW_TO_TORQUE;
+constexpr float M3508_CMD_TO_RAW = 1.0f / M3508_RAW_TO_TORQUE;
+constexpr float GM6020_CMD_TO_RAW = 1.0f / GM6020_RAW_TO_TORQUE;
+constexpr float GM6020_V_CMD_TO_RAW = 1.0f / GM6020_RAW_TO_SPEED;
+
+uint16_t get_rx_id(uint8_t motor_id, RM_Motors motor_type)
+{
+  switch (motor_type) {
+    case RM_Motors::M2006:
+    case RM_Motors::M3508:
+      return motor_id + 0x200;
+    default:
+      return motor_id + 0x204;
+  }
+}
+
+uint16_t get_tx_id(uint8_t motor_id, RM_Motors motor_type)
+{
+  switch (motor_type) {
+    case RM_Motors::GM6020:
+      return motor_id < 5 ? 0x1FE : 0x2FE;
+    case RM_Motors::GM6020_V:
+      return motor_id < 5 ? 0x1FF : 0x2FF;
+    default:
+      return motor_id < 5 ? 0x200 : 0x1FF;
+  }
+}
+
+float get_raw_to_torque(RM_Motors motor_type)
+{
+  switch (motor_type) {
+    case RM_Motors::M2006:
+      return M2006_RAW_TO_TORQUE;
+    case RM_Motors::M3508:
+      return M3508_RAW_TO_TORQUE;
+    default:
+      return GM6020_RAW_TO_TORQUE;
+  }
+}
+
+float get_cmd_to_raw(RM_Motors motor_type)
+{
+  switch (motor_type) {
+    case RM_Motors::M2006:
+      return M2006_CMD_TO_RAW;
+    case RM_Motors::M3508:
+      return M3508_CMD_TO_RAW;
+    case RM_Motors::GM6020:
+      return GM6020_CMD_TO_RAW;
+    default:
+      return GM6020_V_CMD_TO_RAW;
+  }
+}
+
+int16_t get_max_raw(RM_Motors motor_type)
+{
+  switch (motor_type) {
+    case RM_Motors::M2006:
+      return M2006_MAX_RAW;
+    case RM_Motors::M3508:
+      return M3508_MAX_RAW;
+    case RM_Motors::GM6020:
+      return GM6020_MAX_RAW;
+    default:
+      return GM6020_V_MAX_RAW;
+  }
+}
+
+RM_Motor::RM_Motor(uint8_t motor_id, RM_Motors motor_type, float ratio)
+: rx_id(get_rx_id(motor_id, motor_type)),
+  tx_id(get_tx_id(motor_id, motor_type)),
+  angle(0),
+  speed(0),
+  torque(0),
+  temperature(0),
+  motor_id_(motor_id),
+  motor_type_(motor_type),
+  ratio_(ratio),
+  has_read_(false),
+  circle_(0),
+  cmd_raw_(0)
 {
 }
 
@@ -17,118 +108,46 @@ bool RM_Motor::is_alive(uint32_t now_ms) const
 void RM_Motor::read(uint8_t * data, uint32_t stamp_ms)
 {
   last_read_ms_ = stamp_ms;
-  auto last_ecd = angle_ecd_;
 
-  angle_ecd_ = static_cast<uint16_t>((data[0] << 8) | data[1]);
-  speed_rpm_ = static_cast<int16_t>((data[2] << 8) | data[3]);
-  current_raw_ = static_cast<int16_t>((data[4] << 8) | data[5]);
-  temperate_ = static_cast<uint8_t>(data[6]);
+  uint16_t angle_ecd = (data[0] << 8) | data[1];
+  int16_t speed_rpm = (data[2] << 8) | data[3];
+  int16_t current_raw = (data[4] << 8) | data[5];
+  this->angle = (float(angle_ecd - 4095) / 8192 + circle_) * 2 * tools::PI / ratio_;
+  this->speed = float(speed_rpm) / 60 * 2 * tools::PI / ratio_;
+  this->torque = float(current_raw) * get_raw_to_torque(motor_type_) * ratio_;
+  this->temperature = data[6];
 
+  // 首次读取, 不做多圈编码
   if (!has_read_) {
     has_read_ = true;
+    last_ecd_ = angle_ecd;
     return;
   }
 
-  if (angle_ecd_ - last_ecd > 4096)
+  // 多圈编码
+  if (angle_ecd - last_ecd_ > 4096)
     circle_--;
-  else if (angle_ecd_ - last_ecd < -4096)
+  else if (angle_ecd - last_ecd_ < -4096)
     circle_++;
+  last_ecd_ = angle_ecd;
 }
 
 void RM_Motor::write(uint8_t * data) const
 {
-  data[(motor_id_ - 1) % 4 * 2 + 0] = static_cast<uint8_t>(cmd_raw_ >> 8);
-  data[(motor_id_ - 1) % 4 * 2 + 1] = static_cast<uint8_t>(cmd_raw_);
+  data[(motor_id_ - 1) % 4 * 2 + 0] = cmd_raw_ >> 8;
+  data[(motor_id_ - 1) % 4 * 2 + 1] = cmd_raw_;
 }
 
-float RM_Motor::angle() const
+void RM_Motor::cmd(float value)
 {
-  return (static_cast<float>(angle_ecd_ - 4095) / 8192 + circle_) * 2 * tools::PI;
-}
+  auto raw = value / ratio_ * get_cmd_to_raw(motor_type_);
+  auto max_raw = get_max_raw(motor_type_);
 
-float RM_Motor::speed() const { return static_cast<float>(speed_rpm_) / 60 * 2 * tools::PI; }
+  if (raw > max_raw) raw = max_raw;
+  if (raw < -max_raw) raw = -max_raw;
 
-int16_t RM_Motor::current_raw() const { return current_raw_; }
-
-void RM_Motor::cmd_raw(int16_t raw) { cmd_raw_ = raw; }
-
-// -------------------- GM6020 --------------------
-
-GM6020::GM6020(uint8_t motor_id, bool voltage_ctrl)
-: RM_Motor(motor_id), voltage_ctrl_(voltage_ctrl)
-{
-}
-
-uint16_t GM6020::rx_id() const { return 0x204 + motor_id_; }
-
-uint16_t GM6020::tx_id() const
-{
-  if (motor_id_ < 5)
-    return (voltage_ctrl_) ? 0x1FF : 0x1FE;
-  else
-    return (voltage_ctrl_) ? 0x2FF : 0x2FE;
-}
-
-float GM6020::torque() const { return current_raw() * GM6020_RAW_TO_TORQUE; }
-
-void GM6020::cmd(float speed_or_torque)
-{
-  float raw;
-  if (voltage_ctrl_) {
-    raw = speed_or_torque / GM6020_RAW_TO_SPEED;
-    if (raw > GM6020_MAX_VOTAGE_RAW) raw = GM6020_MAX_VOTAGE_RAW;
-    if (raw < -GM6020_MAX_VOTAGE_RAW) raw = -GM6020_MAX_VOTAGE_RAW;
-  }
-  else {
-    raw = speed_or_torque / GM6020_RAW_TO_TORQUE;
-    if (raw > GM6020_MAX_CURRENT_RAW) raw = GM6020_MAX_CURRENT_RAW;
-    if (raw < -GM6020_MAX_CURRENT_RAW) raw = -GM6020_MAX_CURRENT_RAW;
-  }
-  cmd_raw(raw);
-}
-
-// -------------------- M2006 --------------------
-
-M2006::M2006(uint8_t motor_id) : RM_Motor(motor_id) {}
-
-uint16_t M2006::rx_id() const { return 0x200 + motor_id_; }
-
-uint16_t M2006::tx_id() const { return (motor_id_ < 5) ? 0x200 : 0x1FF; }
-
-float M2006::angle() const { return RM_Motor::angle() / M2006_P36; }
-
-float M2006::speed() const { return RM_Motor::speed() / M2006_P36; }
-
-float M2006::torque() const { return current_raw() * M2006_RAW_TO_TORQUE * M2006_P36; }
-
-void M2006::cmd(float torque)
-{
-  float raw = torque / M2006_P36 / M2006_RAW_TO_TORQUE;
-  if (raw > M2006_MAX_CURRENT_RAW) raw = M2006_MAX_CURRENT_RAW;
-  if (raw < -M2006_MAX_CURRENT_RAW) raw = -M2006_MAX_CURRENT_RAW;
-  cmd_raw(raw);
-}
-
-// -------------------- M3508 --------------------
-
-M3508::M3508(uint8_t motor_id, float ratio) : RM_Motor(motor_id), ratio_(ratio) {}
-
-uint16_t M3508::rx_id() const { return 0x200 + motor_id_; }
-
-uint16_t M3508::tx_id() const { return (motor_id_ < 5) ? 0x200 : 0x1FF; }
-
-float M3508::angle() const { return RM_Motor::angle() / ratio_; }
-
-float M3508::speed() const { return RM_Motor::speed() / ratio_; }
-
-float M3508::torque() const { return current_raw() * M3508_RAW_TO_TORQUE * ratio_; }
-
-void M3508::cmd(float torque)
-{
-  float raw = torque / ratio_ / M3508_RAW_TO_TORQUE;
-  if (raw > M3508_MAX_CURRENT_RAW) raw = M3508_MAX_CURRENT_RAW;
-  if (raw < -M3508_MAX_CURRENT_RAW) raw = -M3508_MAX_CURRENT_RAW;
-  cmd_raw(raw);
+  // 更新私有属性cmd_raw_, 待write()使用
+  cmd_raw_ = raw;
 }
 
 }  // namespace motor

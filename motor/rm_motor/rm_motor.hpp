@@ -3,14 +3,34 @@
 
 #include <cstdint>
 
-#include "tools/math_tools/math_tools.hpp"
-
 namespace motor
 {
+constexpr float M2006_P36 = 36.0f;             // 原装减速箱减速比
+constexpr float M3508_P19 = 3591.0f / 187.0f;  // 原装减速箱减速比
+
+enum class RM_Motors
+{
+  M2006,    // 无减速箱
+  M3508,    // 无减速箱
+  GM6020,   // 电流控制
+  GM6020_V  // 电压控制
+};
+
 class RM_Motor
 {
 public:
-  RM_Motor(uint8_t motor_id);
+  // motor_id: 电机ID, 取值: 1, 2, ..., 8
+  // motor_type: 电机型号， 取值见`RM_Motors`
+  // ratio: 减速比
+  RM_Motor(uint8_t motor_id, RM_Motors motor_type, float ratio = 1.0f);
+
+  const uint16_t rx_id;  // 电机反馈帧ID
+  const uint16_t tx_id;  // 电机控制帧ID
+
+  float angle;          // 只读! 单位: rad
+  float speed;          // 只读! 单位: rad/s
+  float torque;         // 只读! 单位: N·m
+  uint8_t temperature;  // 只读! 单位: 摄氏度
 
   bool is_open() const;
   bool is_alive(uint32_t now_ms) const;
@@ -18,91 +38,22 @@ public:
   void read(uint8_t * data, uint32_t stamp_ms);
   void write(uint8_t * data) const;
 
-  float angle() const;
-  float speed() const;
-  int16_t current_raw() const;
-
-  void cmd_raw(int16_t raw);
-
-protected:
-  uint8_t motor_id_;
+  // 如果非`RM_Motors::GM6020_V`, 单位: N·m
+  // 如果是`RM_Motors::GM6020_V`, 单位: rad/s
+  void cmd(float value);
 
 private:
+  const uint8_t motor_id_;
+  const RM_Motors motor_type_;
+  const float ratio_;
+
   bool has_read_;
   uint32_t last_read_ms_;
 
   int32_t circle_;
-  uint16_t angle_ecd_;
-  int16_t speed_rpm_;
-  int16_t current_raw_;
-  int16_t temperate_;
+  uint16_t last_ecd_;
 
   int16_t cmd_raw_;
-};
-
-// -------------------- GM6020 --------------------
-
-constexpr int16_t GM6020_MAX_VOTAGE_RAW = 25000;
-constexpr int16_t GM6020_MAX_CURRENT_RAW = 16384;
-constexpr float GM6020_RAW_TO_SPEED = (13.33 / 60 * 2 * tools::PI) * 24 / GM6020_MAX_VOTAGE_RAW;
-constexpr float GM6020_RAW_TO_TORQUE = 0.741 * 3 / GM6020_MAX_CURRENT_RAW;
-
-class GM6020 : public RM_Motor
-{
-public:
-  GM6020(uint8_t motor_id, bool voltage_ctrl = true);
-  uint16_t rx_id() const;
-  uint16_t tx_id() const;
-  float torque() const;
-  void cmd(float speed_or_torque);
-
-private:
-  bool voltage_ctrl_;
-};
-
-// -------------------- M2006 --------------------
-
-constexpr int16_t M2006_MAX_CURRENT_RAW = 10000;
-constexpr float M2006_P36 = 36;
-constexpr float M2006_RAW_TO_TORQUE = 0.18 / M2006_P36 * 10 / M2006_MAX_CURRENT_RAW;
-
-class M2006 : public RM_Motor
-{
-public:
-  M2006(uint8_t motor_id);
-
-  uint16_t rx_id() const;
-  uint16_t tx_id() const;
-
-  float angle() const;
-  float speed() const;
-  float torque() const;
-
-  void cmd(float torque);
-};
-
-// -------------------- M3508 --------------------
-
-constexpr int16_t M3508_MAX_CURRENT_RAW = 16384;
-constexpr float M3508_P19 = 3591.0 / 187.0;
-constexpr float M3508_RAW_TO_TORQUE = 0.3 / M3508_P19 * 20 / M3508_MAX_CURRENT_RAW;
-
-class M3508 : public RM_Motor
-{
-public:
-  M3508(uint8_t motor_id, float ratio = M3508_P19);
-
-  uint16_t rx_id() const;
-  uint16_t tx_id() const;
-
-  float angle() const;
-  float speed() const;
-  float torque() const;
-
-  void cmd(float torque);
-
-private:
-  float ratio_;
 };
 
 }  // namespace motor
