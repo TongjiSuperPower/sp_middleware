@@ -6,21 +6,38 @@ namespace tools
 class DiffGear
 {
 public:
+  // ratio: 锥齿轮减速比
   // reverse_l: left反向旋转
   // reverse_r: right反向旋转
-  DiffGear(bool reverse_l = false, bool reverse_r = true);
+  DiffGear(float ratio, bool reverse_l = false, bool reverse_r = true);
 
-  float v_left;   // 只读! calc()计算结果, left转速, 单位: rad/s
-  float v_right;  // 只读! calc()计算结果, right转速, 单位: rad/s
+  float pitch;    // 只读! calc_end_angle()计算结果, 单位: rad
+  float roll;     // 只读! calc_end_angle()计算结果,  单位: rad
+  float v_left;   // 只读! calc_gear_speed()计算结果, left转速, 单位: rad/s
+  float v_right;  // 只读! calc_gear_speed()计算结果, right转速, 单位: rad/s
+
+  // 初始化各齿轮转角
+  // angle_l: 左侧齿轮转角, 单位: rad
+  // angle_r: 右侧齿轮转角, 单位: rad
+  void init_gear_angle(float angle_l, float angle_r);
+
+  // 各齿轮转角 -> 末端转角
+  // angle_l: 左侧齿轮转角, 单位: rad
+  // angle_r: 右侧齿轮转角, 单位: rad
+  void calc_end_angle(float angle_l, float angle_r);
 
   // 末端转速 -> 各齿轮转速
   // v_pitch: 大拇指朝左，右手螺旋方向转速, 单位: rad/s
   // v_roll: 大拇指朝前，右手螺旋方向转速, 单位: rad/s
-  void calc(float v_pitch, float v_roll);
+  void calc_gear_speed(float v_pitch, float v_roll);
 
 private:
-  float sign_l_;
-  float sign_r_;
+  const float ratio_;
+  const float sign_l_;
+  const float sign_r_;
+
+  float angle_l0_;
+  float angle_r0_;
 };
 
 }  // namespace tools
