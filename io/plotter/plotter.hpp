@@ -7,6 +7,15 @@ namespace io
 {
 constexpr size_t PLOTTER_FLOAT_NUM = 6;
 
+#pragma pack(1)
+struct PlotFrame
+{
+  uint8_t start[2] = {0xAA, 0xBB};
+  uint8_t size;
+  float data[PLOTTER_FLOAT_NUM];
+};
+#pragma pack()
+
 class Plotter
 {
 public:
@@ -20,15 +29,6 @@ public:
   void plot(float value1, float value2, float value3, float value4, float value5, float value6);
 
 private:
-#pragma pack(1)
-  struct PlotFrame
-  {
-    uint8_t start[2] = {0xAA, 0xBB};
-    uint8_t size;
-    float data[PLOTTER_FLOAT_NUM];
-  };
-#pragma pack()
-
   UART_HandleTypeDef * huart_;
   bool use_dma_;
   HAL_StatusTypeDef hal_status_;
