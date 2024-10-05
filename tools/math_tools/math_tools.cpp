@@ -9,14 +9,16 @@ float limit_angle(float angle)
   return angle;
 }
 
-float limit_max(float input, float max)
+float limit_min_max(float input, float min, float max)
 {
   if (input > max)
     input = max;
-  else if (input < -max)
-    input = -max;
+  else if (input < min)
+    input = min;
   return input;
 }
+
+float limit_max(float input, float max) { return limit_min_max(input, -max, max); }
 
 int deadband_limit(int input, int deadline) { return std::fabs(input) < deadline ? 0 : input; }
 
