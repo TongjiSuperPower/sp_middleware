@@ -20,8 +20,6 @@ float limit_min_max(float input, float min, float max)
 
 float limit_max(float input, float max) { return limit_min_max(input, -max, max); }
 
-int deadband_limit(int input, int deadline) { return std::fabs(input) < deadline ? 0 : input; }
-
 float uint_to_float(uint32_t input, float min, float max, size_t bits)
 {
   auto span = max - min;
