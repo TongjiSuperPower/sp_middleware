@@ -41,7 +41,7 @@ target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
 
 # 如何确定R_ab
 
-例如, C板横着安装在云台上, 同时C板的CAN一侧朝前:
+例如, C板横着安装在云台上, 同时C板CAN一侧朝前:
 
 对于云台系{a}: 
 - x轴正方向为子弹发射方向
@@ -50,9 +50,9 @@ target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
 - 注意，只有在云台和底盘平行时, z轴才和yaw轴重合
 
 对于bmi088系{b}:
-- x轴正方向为字母"R"的头顶所指方向
+- x轴正方向为C板上字母"R"的头顶一侧
 - y轴正方向指向C板SWD一侧
-- z轴正方向垂直C板向上, 同样符合右手螺旋
+- z轴正方向垂直C板顶面朝上, 同样符合右手螺旋
 
 R_ab是旋转矩阵, 它的3列依次表示坐标系{b}的3个基向量在坐标系{a}下的坐标:
 
