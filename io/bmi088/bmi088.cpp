@@ -52,12 +52,16 @@ namespace io
 {
 BMI088::BMI088(
   SPI_HandleTypeDef * hspi, GPIO_TypeDef * csb1_port, uint16_t csb1_pin, GPIO_TypeDef * csb2_port,
-  uint16_t csb2_pin)
+  uint16_t csb2_pin, const float r_ab[3][3])
 : hspi_(hspi),
   csb1_port_(csb1_port),
   csb2_port_(csb2_port),
   csb1_pin_(csb1_pin),
-  csb2_pin_(csb2_pin)
+  csb2_pin_(csb2_pin),
+  r_ab_{
+    {r_ab[0][0], r_ab[0][1], r_ab[0][2]},
+    {r_ab[1][0], r_ab[1][1], r_ab[1][2]},
+    {r_ab[2][0], r_ab[2][1], r_ab[2][2]}}
 {
 }
 
@@ -125,6 +129,9 @@ void BMI088::acc_update()
   int16_t acc_x_int = (rx_buff_[2 + 1] << 8) | rx_buff_[2 + 0];
   int16_t acc_y_int = (rx_buff_[2 + 3] << 8) | rx_buff_[2 + 2];
   int16_t acc_z_int = (rx_buff_[2 + 5] << 8) | rx_buff_[2 + 4];
+  float acc_x = acc_x_int * BMI088_ACC_INT_TO_MPS2;
+  float acc_y = acc_y_int * BMI088_ACC_INT_TO_MPS2;
+  float acc_z = acc_z_int * BMI088_ACC_INT_TO_MPS2;
 
   // 接收温度数据
   acc_read(BMI088_TEMPERATURE_DATA, 2);
@@ -134,9 +141,9 @@ void BMI088::acc_update()
   if (temperature_int > 1023) temperature_int -= 2048;  // ref: 5.3.7
 
   // 更新公开属性
-  this->acc[0] = acc_x_int * BMI088_ACC_INT_TO_MPS2;
-  this->acc[1] = acc_y_int * BMI088_ACC_INT_TO_MPS2;
-  this->acc[2] = acc_z_int * BMI088_ACC_INT_TO_MPS2;
+  this->acc[0] = r_ab_[0][0] * acc_x + r_ab_[0][1] * acc_y + r_ab_[0][2] * acc_z;
+  this->acc[1] = r_ab_[1][0] * acc_x + r_ab_[1][1] * acc_y + r_ab_[1][2] * acc_z;
+  this->acc[2] = r_ab_[2][0] * acc_x + r_ab_[2][1] * acc_y + r_ab_[2][2] * acc_z;
   this->temperature = temperature_int * BMI088_TEMPERATURE_FACTOR + BMI088_TEMPERATURE_OFFSET;
 }
 
@@ -215,11 +222,14 @@ void BMI088::gyro_update()
   int16_t gyro_x_int = (rx_buff_[1 + 1] << 8) | rx_buff_[1 + 0];
   int16_t gyro_y_int = (rx_buff_[1 + 3] << 8) | rx_buff_[1 + 2];
   int16_t gyro_z_int = (rx_buff_[1 + 5] << 8) | rx_buff_[1 + 4];
+  float gyro_x = gyro_x_int * BMI088_GYRO_INT_TO_RPS;
+  float gyro_y = gyro_y_int * BMI088_GYRO_INT_TO_RPS;
+  float gyro_z = gyro_z_int * BMI088_GYRO_INT_TO_RPS;
 
   // 更新公开属性
-  this->gyro[0] = gyro_x_int * BMI088_GYRO_INT_TO_RPS;
-  this->gyro[1] = gyro_y_int * BMI088_GYRO_INT_TO_RPS;
-  this->gyro[2] = gyro_z_int * BMI088_GYRO_INT_TO_RPS;
+  this->gyro[0] = r_ab_[0][0] * gyro_x + r_ab_[0][1] * gyro_y + r_ab_[0][2] * gyro_z;
+  this->gyro[1] = r_ab_[1][0] * gyro_x + r_ab_[1][1] * gyro_y + r_ab_[1][2] * gyro_z;
+  this->gyro[2] = r_ab_[2][0] * gyro_x + r_ab_[2][1] * gyro_y + r_ab_[2][2] * gyro_z;
 }
 
 void BMI088::gyro_read(uint8_t reg, uint8_t len)

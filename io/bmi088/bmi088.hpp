@@ -11,9 +11,10 @@ class BMI088
 public:
   // CSB1: SPI片选信号, 低电平时选中加速度计
   // CSB2: SPI片选信号, 低电平时选中陀螺仪
+  // R_ab: bmi088原始坐标系{b}在机器人坐标系{a}下的坐标矩阵, 详见io/bmi088/readme.md
   BMI088(
     SPI_HandleTypeDef * hspi, GPIO_TypeDef * csb1_port, uint16_t csb1_pin, GPIO_TypeDef * csb2_port,
-    uint16_t csb2_pin);
+    uint16_t csb2_pin, const float r_ab[3][3]);
 
   float acc[3];       // 只读! 单位: m/s^2
   float gyro[3];      // 只读! 单位: rad/s
@@ -28,6 +29,7 @@ private:
   GPIO_TypeDef * csb2_port_;
   uint16_t csb1_pin_;
   uint16_t csb2_pin_;
+  const float r_ab_[3][3];
 
   uint8_t rx_buff_[8];
   uint8_t tx_buff_[8];
