@@ -56,7 +56,11 @@ target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
 
 R_ab是旋转矩阵, 它的3列依次表示坐标系{b}的3个基向量在坐标系{a}下的坐标:
 
-`{{0.0f, -1.0f, 0.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 1.0f}}`
+```
+{{0.0f, -1.0f, 0.0f}, 
+ {1.0f,  0.0f, 0.0f},
+ {0.0f,  0.0f, 1.0f}}
+```
 
 # Note
 
