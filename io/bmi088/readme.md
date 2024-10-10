@@ -39,24 +39,27 @@ target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
 )
 ```
 
+# 如何确定R_ab
+
+例如, C板横着安装在云台上, 同时C板的CAN一侧朝前:
+
+对于云台系{a}: 
+- x轴正方向为子弹发射方向
+- y轴正方向沿pitch轴指向云台的左侧
+- z轴正方向可以根据右手螺旋确定
+- 注意，只有在云台和底盘平行时, z轴才和yaw轴重合
+
+对于bmi088系{b}:
+- x轴正方向为字母"R"的头顶所指方向
+- y轴正方向指向C板SWD一侧
+- z轴正方向垂直C板向上, 同样符合右手螺旋
+
+R_ab是旋转矩阵, 它的3列依次表示坐标系{b}的3个基向量在坐标系{a}下的坐标:
+
+`{{0.0f, -1.0f, 0.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 1.0f}}`
+
 # Note
 
 BMI088数据手册: https://www.bosch-sensortec.com/media/boschsensortec/downloads/datasheets/bst-bmi088-ds001.pdf
 
 SPI传输速度很快, 因此采用阻塞方式读取, 而不是中断或者DMA: https://community.st.com/t5/stm32-mcus-products/overrun-flag-when-using-spi-in-interrupt-mode-hal-spi-receive-it/td-p/305622
-
-## 如何确定R_ab
-
-例如, C板横着安装在云台上, 即C板的CAN口朝前:
-
-对于云台系{a}: 
-- x轴正方向为子弹发射方向,
-- y轴正方向为沿pitch轴方向指向云台的左侧
-- z轴正方向可以根据右手螺旋确定, 注意z轴只有在云台水平时和yaw轴重合
-
-对于bmi088系{b}:
-- x轴正方向为字母"R"的头顶所指方向
-- y轴正方向为SWD烧录口朝向
-- z轴正方向垂直C板向上
-
-此时R_ab为`{{0.0f, -1.0f, 0.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 1.0f}}`
