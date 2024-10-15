@@ -7,8 +7,12 @@ namespace tools
 {
 struct PIDData
 {
-  float set;      // 设定值
-  float fdb;      // 反馈值(feedback)
+  float set;  // 设定值
+  float fdb;  // 反馈值(feedback)
+
+  float speed_set;  // 原外环输出值
+  // float speed_fdb;  // 外环输出值
+
   float pout;     // P项输出值
   float iout;     // I项输出值
   float dout;     // D项输出值
@@ -28,13 +32,16 @@ public:
   // alpha: D项滤波系数, alpha=1时不滤波
   PID(float dt, float kp, float ki, float kd, float max_out, float max_iout, float alpha = 1.0f);
 
-  float out;     // 只读! PID输出值
+  float out;  // 只读! PID输出值
+  float speed_fdb;
   PIDData data;  // 只读! PID计算数据
 
   // 计算PID输出值
   // set: 目标值
   // fdb: 反馈值(feedback)
   void calc(float set, float fdb);
+  void calc_swerve(float set, float fdb, float speed_set);
+  int8_t reversal;
 
 private:
   const float dt_;
