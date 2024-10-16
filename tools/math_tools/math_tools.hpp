@@ -23,12 +23,6 @@ float uint_to_float(uint32_t input, float min, float max, size_t bits);
 // [min, max]
 uint32_t float_to_uint(float input, float min, float max, size_t bits);
 
-// 平方根的倒数
-float inv_sqrt(float x);
-
-// 平方根
-float sqrt(float x);
-
 }  // namespace tools
 
 #endif  // TOOLS__MATH_TOOLS_HPP

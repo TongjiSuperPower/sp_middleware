@@ -1,8 +1,6 @@
 #ifndef TOOLS__SWERVE_HPP
 #define TOOLS__SWERVE_HPP
 
-#include "tools/math_tools/math_tools.hpp"
-
 namespace tools
 {
 class Swerve
