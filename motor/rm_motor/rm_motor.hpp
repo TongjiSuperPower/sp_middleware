@@ -26,7 +26,7 @@ public:
   // motor_id: 电机ID, 取值: 1, 2, ..., 8
   // motor_type: 电机型号， 取值见`RM_Motors`
   // ratio: 减速比
-  RM_Motor(uint8_t motor_id, RM_Motors motor_type, float ratio = 1.0f);
+  RM_Motor(uint8_t motor_id, RM_Motors motor_type, float ratio = 1.0f, bool multi_circle = true);
 
   const uint16_t rx_id;  // 电机反馈帧ID
   const uint16_t tx_id;  // 电机控制帧ID
@@ -50,6 +50,7 @@ private:
   const uint8_t motor_id_;
   const RM_Motors motor_type_;
   const float ratio_;
+  const bool multi_circle_;
 
   bool has_read_;
   uint32_t last_read_ms_;

@@ -82,7 +82,7 @@ int16_t get_max_raw(RM_Motors motor_type)
   }
 }
 
-RM_Motor::RM_Motor(uint8_t motor_id, RM_Motors motor_type, float ratio)
+RM_Motor::RM_Motor(uint8_t motor_id, RM_Motors motor_type, float ratio, bool multi_circle)
 : rx_id(get_rx_id(motor_id, motor_type)),
   tx_id(get_tx_id(motor_id, motor_type)),
   angle(0),
@@ -92,6 +92,7 @@ RM_Motor::RM_Motor(uint8_t motor_id, RM_Motors motor_type, float ratio)
   motor_id_(motor_id),
   motor_type_(motor_type),
   ratio_(ratio),
+  multi_circle_(multi_circle),
   has_read_(false),
   circle_(0),
   cmd_raw_(0)
@@ -128,8 +129,10 @@ void RM_Motor::read(uint8_t * data, uint32_t stamp_ms)
     circle_++;
   last_ecd_ = angle_ecd;
 
+  float angle_rad = float(angle_ecd - 4095) / 8192 * 2 * tools::PI / ratio_;
+
   // 更新公有属性
-  this->angle = (float(angle_ecd - 4095) / 8192 + circle_) * 2 * tools::PI / ratio_;
+  this->angle = multi_circle_ ? angle_rad + circle_ * 2 * tools::PI / ratio_ : angle_rad;
   this->speed = float(speed_rpm) / 60 * 2 * tools::PI / ratio_;
   this->torque = float(current_raw) * get_raw_to_torque(motor_type_) * ratio_;
   this->temperature = data[6];
