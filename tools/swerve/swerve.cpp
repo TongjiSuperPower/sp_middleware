@@ -1,37 +1,52 @@
 #include "swerve.hpp"
 
-#include <cmath>
+#include "tools/math_tools/math_tools.hpp"
 
 namespace tools
 {
-Swerve::Swerve(float wheel_radius, float half_length, float half_width)
-: r_(wheel_radius), l_(half_length), w_(half_width)
+Swerve::Swerve(float wheel_radius, float half_length, float half_width, bool invert_pivot)
+: r_(wheel_radius), l_(half_length), w_(half_width), sign_(invert_pivot ? -1.0f : 1.0f)
 {
-  this->speed_lf = 0.0f;
-  this->speed_lr = 0.0f;
-  this->speed_rf = 0.0f;
-  this->speed_rr = 0.0f;
-
-  this->angle_lf = 0.0f;  // left-front转向角度初始化为0弧度
-  this->angle_lr = 0.0f;  // left-rear转向角度初始化为0弧度
-  this->angle_rf = 0.0f;  // right-front转向角度初始化为0弧度
-  this->angle_rr = 0.0f;  // right-rear转向角度初始化为0弧度
 }
 
-void Swerve::calc(float vx, float vy, float wz)
+void Swerve::init(float yaw_lf, float yaw_lr, float yaw_rf, float yaw_rr)
 {
-  float para_xy = vx * vx + vy * vy + (l_ * wz) * (l_ * wz) + (w_ * wz) * (w_ * wz);
-  float para_x = 2 * w_ * wz * vx;
-  float para_y = 2 * l_ * wz * vy;
-
-  this->speed_rf = -std::sqrt(para_xy - para_x + para_y) / r_;
-  this->speed_lf = -std::sqrt(para_xy - para_x - para_y) / r_;
-  this->speed_lr = -std::sqrt(para_xy + para_x - para_y) / r_;
-  this->speed_rr = -std::sqrt(para_xy + para_x + para_y) / r_;
-
-  this->angle_rf = std::atan2(vy + l_ * wz, vx - w_ * wz);
-  this->angle_lf = std::atan2(vy + l_ * wz, vx + w_ * wz);
-  this->angle_lr = std::atan2(vy - l_ * wz, vx + w_ * wz);
-  this->angle_rr = std::atan2(vy - l_ * wz, vx - w_ * wz);
+  yaw0_lf_ = yaw_lf;
+  yaw0_lr_ = yaw_lr;
+  yaw0_rf_ = yaw_rf;
+  yaw0_rr_ = yaw_rr;
 }
+
+void Swerve::calc(
+  float vx, float vy, float wz, float yaw_lf, float yaw_lr, float yaw_rf, float yaw_rr)
+{
+  // 计算中间变量: 各轮速度向量
+  float v_lf[2] = {vx - wz * w_, vy + wz * l_};
+  float v_lr[2] = {vx + wz * w_, vy + wz * l_};
+  float v_rf[2] = {vx - wz * w_, vy - wz * l_};
+  float v_rr[2] = {vx + wz * w_, vy - wz * l_};
+
+  // 计算各舵转角和各舵角度
+  convert(v_lf, yaw_lf, yaw0_lf_, this->angle_lf, this->speed_lf);
+  convert(v_lr, yaw_lr, yaw0_lr_, this->angle_lr, this->speed_lr);
+  convert(v_rf, yaw_rf, yaw0_rf_, this->angle_rf, this->speed_rf);
+  convert(v_rr, yaw_rr, yaw0_rr_, this->angle_rr, this->speed_rr);
+}
+
+void Swerve::convert(const float v[2], float yaw, float yaw0, float & angle, float & speed)
+{
+  // ref: https://github.com/rm-controls/rm_controllers/blob/master/rm_chassis_controllers/src/swerve.cpp
+
+  float v_angle = std::atan2(v[1], v[0]);
+  float v_angle_flipped = tools::limit_angle(v_angle + tools::PI);
+  float pivot_angle = sign_ * tools::limit_angle(yaw - yaw0);
+
+  float a = tools::limit_angle(v_angle - pivot_angle);
+  float b = tools::limit_angle(v_angle_flipped - pivot_angle);
+  float pivot_angle_set = (a < b) ? v_angle : v_angle_flipped;
+
+  angle = tools::limit_angle(sign_ * pivot_angle_set + yaw0);
+  speed = std::sqrt(v[0] * v[0] + v[1] * v[1]) / r_ * std::cos(a);
+}
+
 }  // namespace tools
