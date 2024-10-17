@@ -3,6 +3,8 @@
 namespace io
 {
 CAN::CAN(CAN_HandleTypeDef * hcan) : hcan_(hcan) {}
+ 
+ 
 
 void CAN::config()
 {
