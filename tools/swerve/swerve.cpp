@@ -22,8 +22,8 @@ void Swerve::calc(
 {
   // 计算中间变量: 各轮速度向量
   float v_lf[2] = {vx - wz * w_, vy + wz * l_};
-  float v_lr[2] = {vx + wz * w_, vy + wz * l_};
-  float v_rf[2] = {vx - wz * w_, vy - wz * l_};
+  float v_lr[2] = {vx - wz * w_, vy - wz * l_};
+  float v_rf[2] = {vx + wz * w_, vy + wz * l_};
   float v_rr[2] = {vx + wz * w_, vy - wz * l_};
 
   // 计算各舵转角和各舵角度
@@ -43,9 +43,11 @@ void Swerve::convert(const float v[2], float yaw, float yaw0, float & angle, flo
 
   float a = tools::limit_angle(v_angle - pivot_angle);
   float b = tools::limit_angle(v_angle_flipped - pivot_angle);
-  float pivot_angle_set = (a < b) ? v_angle : v_angle_flipped;
+
+  float pivot_angle_set = (std::abs(a) < std::abs(b)) ? v_angle : v_angle_flipped;
 
   angle = tools::limit_angle(sign_ * pivot_angle_set + yaw0);
+
   speed = std::sqrt(v[0] * v[0] + v[1] * v[1]) / r_ * std::cos(a);
 }
 
