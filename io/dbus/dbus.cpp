@@ -57,9 +57,9 @@ void DBus::update(uint32_t stamp_ms)
   int16_t mouse_vs = (buff_[11] << 8) | buff_[10];
   uint16_t keyboard_value = (buff_[15] << 8) | buff_[14];
 
-  this->mouse.vx = mouse_vx;
-  this->mouse.vy = mouse_vy;
-  this->mouse.vs = mouse_vs;
+  this->mouse.vx = mouse_vx / 32768.0f;
+  this->mouse.vy = mouse_vy / 32768.0f;
+  this->mouse.vs = mouse_vs / 32768.0f;
   this->mouse.left = (buff_[12] == 1);
   this->mouse.right = (buff_[13] == 1);
 

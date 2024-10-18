@@ -75,9 +75,9 @@ void VT02::update_mouse_and_keys()
   uint16_t keyboard_value = (buff_[REFEREE_DATA_START + 9] << 8) | buff_[REFEREE_DATA_START + 8];
 
   // 更新公有属性
-  this->mouse.vx = mouse_vx;
-  this->mouse.vy = mouse_vy;
-  this->mouse.vs = mouse_vs;
+  this->mouse.vx = mouse_vx / 32768.0f;
+  this->mouse.vy = mouse_vy / 32768.0f;
+  this->mouse.vs = mouse_vs / 32768.0f;
   this->mouse.left = (buff_[REFEREE_DATA_START + 6] == 1);
   this->mouse.right = (buff_[REFEREE_DATA_START + 7] == 1);
 

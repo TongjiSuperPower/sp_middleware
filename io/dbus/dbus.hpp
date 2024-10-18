@@ -16,11 +16,11 @@ enum class DBusSwitchMode
 
 struct DBusMouseData
 {
-  float vx;
-  float vy;
-  float vs;  // 鼠标滚轮, s代表scroll
-  float left;
-  float right;
+  float vx;  // 取值范围: [-1, 1]
+  float vy;  // 取值范围: [-1, 1]
+  float vs;  // 取值范围: [-1, 1], 鼠标滚轮, s代表scroll
+  bool left;
+  bool right;
 };
 
 struct DBusKeysData
