@@ -1,18 +1,6 @@
 #include "mahony.hpp"
 
-#include "cmath"
-
-// 平方根的倒数
-static float inv_sqrt(float x)
-{
-  float halfx = 0.5f * x;
-  float y = x;
-  long i = *(long *)&y;
-  i = 0x5f3759df - (i >> 1);
-  y = *(float *)&i;
-  y = y * (1.5f - (halfx * y * y));
-  return y;
-}
+#include <cmath>
 
 namespace tools
 {
@@ -41,7 +29,7 @@ void Mahony::update(float ax, float ay, float az, float wx, float wy, float wz)
   }
 
   // Normalise accelerometer measurement
-  float norm = inv_sqrt(ax * ax + ay * ay + az * az);
+  float norm = 1.0f / std::sqrt(ax * ax + ay * ay + az * az);
   ax *= norm;
   ay *= norm;
   az *= norm;
@@ -92,7 +80,7 @@ void Mahony::update(float ax, float ay, float az, float wx, float wy, float wz)
   float q3 = this->q[3] + (this->q[0] * wz + this->q[1] * wy - this->q[2] * wx);
 
   // Normalise quaternion
-  norm = inv_sqrt(q0 * q0 + q1 * q1 + q2 * q2 + q3 * q3);
+  norm = 1.0f / std::sqrt(q0 * q0 + q1 * q1 + q2 * q2 + q3 * q3);
   this->q[0] = q0 * norm;
   this->q[1] = q1 * norm;
   this->q[2] = q2 * norm;
@@ -109,7 +97,7 @@ void Mahony::update(float ax, float ay, float az, float wx, float wy, float wz)
 
 void Mahony::init(float ax, float ay, float az)
 {
-  float norm = inv_sqrt(ax * ax + ay * ay + az * az);
+  float norm = 1.0f / std::sqrt(ax * ax + ay * ay + az * az);
   ax *= norm;
   ay *= norm;
   az *= norm;
@@ -130,7 +118,7 @@ void Mahony::init(float ax, float ay, float az)
   float q2 = cr2 * sp2 * cy2 + sr2 * cp2 * sy2;
   float q3 = cr2 * cp2 * sy2 - sr2 * sp2 * cy2;
 
-  norm = inv_sqrt(q0 * q0 + q1 * q1 + q2 * q2 + q3 * q3);
+  norm = 1.0f / std::sqrt(q0 * q0 + q1 * q1 + q2 * q2 + q3 * q3);
   this->q[0] = q0 * norm;
   this->q[1] = q1 * norm;
   this->q[2] = q2 * norm;

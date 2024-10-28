@@ -7,8 +7,9 @@ namespace tools
 {
 struct PIDData
 {
-  float set;      // 设定值
-  float fdb;      // 反馈值(feedback)
+  float set;  // 设定值
+  float fdb;  // 反馈值(feedback)
+
   float pout;     // P项输出值
   float iout;     // I项输出值
   float dout;     // D项输出值
@@ -34,7 +35,7 @@ public:
   // 计算PID输出值
   // set: 目标值
   // fdb: 反馈值(feedback)
-  void calc(float set, float fdb);
+  void calc(float set, float fdb, bool angular = false);
 
 private:
   const float dt_;
