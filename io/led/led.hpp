@@ -1,5 +1,5 @@
-#ifndef IO__LED_HPP
-#define IO__LED_HPP
+#ifndef SP__LED_HPP
+#define SP__LED_HPP
 
 #include "tim.h"
 
@@ -21,4 +21,4 @@ private:
 
 }  // namespace sp
 
-#endif  // IO__LED_HPP
+#endif  // SP__LED_HPP

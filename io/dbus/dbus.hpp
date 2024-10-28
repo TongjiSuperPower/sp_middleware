@@ -1,5 +1,5 @@
-#ifndef IO__DBUS_HPP
-#define IO__DBUS_HPP
+#ifndef SP__DBUS_HPP
+#define SP__DBUS_HPP
 
 #include "usart.h"
 
@@ -78,4 +78,4 @@ private:
 
 }  // namespace sp
 
-#endif  // IO__DBUS_HPP
+#endif  // SP__DBUS_HPP

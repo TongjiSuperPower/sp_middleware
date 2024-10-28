@@ -1,5 +1,5 @@
-#ifndef IO__BUZZER_HPP
-#define IO__BUZZER_HPP
+#ifndef SP__BUZZER_HPP
+#define SP__BUZZER_HPP
 
 #include "tim.h"
 
@@ -26,4 +26,4 @@ private:
 
 }  // namespace sp
 
-#endif  // IO__BUZZER_HPP
+#endif  // SP__BUZZER_HPP

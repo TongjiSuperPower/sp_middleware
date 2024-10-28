@@ -1,5 +1,5 @@
-#ifndef TOOLS__SWERVE_HPP
-#define TOOLS__SWERVE_HPP
+#ifndef SP__SWERVE_HPP
+#define SP__SWERVE_HPP
 
 namespace sp
 {
@@ -49,4 +49,4 @@ private:
 
 }  // namespace sp
 
-#endif  // TOOLS__SWERVE_HPP
+#endif  // SP__SWERVE_HPP

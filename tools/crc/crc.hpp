@@ -1,5 +1,5 @@
-#ifndef TOOLS__CRC_HPP
-#define TOOLS__CRC_HPP
+#ifndef SP__CRC_HPP
+#define SP__CRC_HPP
 
 #include <cstdint>
 
@@ -19,4 +19,4 @@ bool check_crc16(uint8_t * data, uint32_t len);
 
 }  // namespace sp
 
-#endif  // TOOLS__CRC_HPP
+#endif  // SP__CRC_HPP

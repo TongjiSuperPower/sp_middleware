@@ -1,5 +1,5 @@
-#ifndef IO__CAN_HPP
-#define IO__CAN_HPP
+#ifndef SP__CAN_HPP
+#define SP__CAN_HPP
 
 #include "can.h"
 
@@ -40,4 +40,4 @@ private:
 
 }  // namespace sp
 
-#endif  // IO__CAN_HPP
+#endif  // SP__CAN_HPP

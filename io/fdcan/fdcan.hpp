@@ -1,5 +1,5 @@
-#ifndef IO__FDCAN_HPP
-#define IO__FDCAN_HPP
+#ifndef SP__FDCAN_HPP
+#define SP__FDCAN_HPP
 
 #include "fdcan.h"
 
@@ -28,4 +28,4 @@ private:
 
 }  // namespace sp
 
-#endif  // IO__FDCAN_HPP
+#endif  // SP__FDCAN_HPP

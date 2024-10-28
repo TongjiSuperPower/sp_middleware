@@ -1,5 +1,5 @@
-#ifndef IO__REFEREE_DEF_H
-#define IO__REFEREE_DEF_H
+#ifndef SP__REFEREE_DEF_H
+#define SP__REFEREE_DEF_H
 
 #define REFEREE_HEAD_LEN 5
 #define REFEREE_CMD_ID_LEN 2
@@ -12,4 +12,4 @@
 
 #define REFEREE_DATA_START 7
 
-#endif  // IO__REFEREE_DEF_H
+#endif  // SP__REFEREE_DEF_H

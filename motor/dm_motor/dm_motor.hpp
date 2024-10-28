@@ -1,5 +1,5 @@
-#ifndef MOTOR__DM_MOTOR_HPP
-#define MOTOR__DM_MOTOR_HPP
+#ifndef SP__DM_MOTOR_HPP
+#define SP__DM_MOTOR_HPP
 
 #include <cstdint>
 
@@ -47,4 +47,4 @@ private:
 
 }  // namespace sp
 
-#endif  // MOTOR__DM_MOTOR_HPP
+#endif  // SP__DM_MOTOR_HPP

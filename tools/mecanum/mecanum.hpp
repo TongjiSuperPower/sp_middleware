@@ -1,5 +1,5 @@
-#ifndef TOOLS__MECANUM_HPP
-#define TOOLS__MECANUM_HPP
+#ifndef SP__MECANUM_HPP
+#define SP__MECANUM_HPP
 
 #include "tools/math_tools/math_tools.hpp"
 
@@ -42,4 +42,4 @@ private:
 
 }  // namespace sp
 
-#endif  // TOOLS__MECANUM_HPP
+#endif  // SP__MECANUM_HPP

@@ -1,5 +1,5 @@
-#ifndef IO__SERVO_HPP
-#define IO__SERVO_HPP
+#ifndef SP__SERVO_HPP
+#define SP__SERVO_HPP
 
 #include "tim.h"
 
@@ -28,4 +28,4 @@ private:
 
 }  // namespace sp
 
-#endif  // IO__SERVO_HPP
+#endif  // SP__SERVO_HPP

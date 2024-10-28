@@ -1,5 +1,5 @@
-#ifndef IO__WS2812_HPP
-#define IO__WS2812_HPP
+#ifndef SP__WS2812_HPP
+#define SP__WS2812_HPP
 
 #include "spi.h"
 
@@ -18,4 +18,4 @@ private:
 
 }  // namespace sp
 
-#endif  // IO__WS2812_HPP
+#endif  // SP__WS2812_HPP

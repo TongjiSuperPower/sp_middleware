@@ -1,5 +1,5 @@
-#ifndef IO__BMI088_HPP
-#define IO__BMI088_HPP
+#ifndef SP__BMI088_HPP
+#define SP__BMI088_HPP
 
 #include "gpio.h"
 #include "spi.h"
@@ -47,4 +47,4 @@ private:
 
 }  // namespace sp
 
-#endif  // IO__BMI088_HPP
+#endif  // SP__BMI088_HPP

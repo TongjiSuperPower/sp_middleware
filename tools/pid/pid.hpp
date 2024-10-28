@@ -1,5 +1,5 @@
-#ifndef PID_HPP
-#define PID_HPP
+#ifndef SP__PID_HPP
+#define SP__PID_HPP
 
 #include "tools/math_tools/math_tools.hpp"
 
@@ -46,4 +46,4 @@ private:
 
 }  // namespace sp
 
-#endif  // PID_HPP
+#endif  // SP__PID_HPP

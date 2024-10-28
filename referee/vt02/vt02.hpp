@@ -1,5 +1,5 @@
-#ifndef IO__VT02_HPP
-#define IO__VT02_HPP
+#ifndef SP__VT02_HPP
+#define SP__VT02_HPP
 
 #include "usart.h"
 
@@ -72,4 +72,4 @@ private:
 
 }  // namespace sp
 
-#endif  // IO__VT02_HPP
+#endif  // SP__VT02_HPP

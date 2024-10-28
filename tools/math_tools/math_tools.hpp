@@ -1,5 +1,5 @@
-#ifndef TOOLS__MATH_TOOLS_HPP
-#define TOOLS__MATH_TOOLS_HPP
+#ifndef SP__MATH_TOOLS_HPP
+#define SP__MATH_TOOLS_HPP
 
 #include <cmath>
 #include <cstdint>
@@ -25,4 +25,4 @@ uint32_t float_to_uint(float input, float min, float max, size_t bits);
 
 }  // namespace sp
 
-#endif  // TOOLS__MATH_TOOLS_HPP
+#endif  // SP__MATH_TOOLS_HPP

@@ -1,5 +1,5 @@
-#ifndef TOOLS_MAHONY_HPP
-#define TOOLS_MAHONY_HPP
+#ifndef SP__MAHONY_HPP
+#define SP__MAHONY_HPP
 
 namespace sp
 {
@@ -32,4 +32,4 @@ private:
 
 }  // namespace sp
 
-#endif  // TOOLS_MAHONY_HPP
+#endif  // SP__MAHONY_HPP

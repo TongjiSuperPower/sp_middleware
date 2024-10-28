@@ -1,5 +1,5 @@
-#ifndef TOOLS__DUAL_MOTOR_HPP
-#define TOOLS__DUAL_MOTOR_HPP
+#ifndef SP__DUAL_MOTOR_HPP
+#define SP__DUAL_MOTOR_HPP
 
 namespace sp
 {
@@ -39,4 +39,4 @@ private:
 
 }  // namespace sp
 
-#endif  // TOOLS__DUAL_MOTOR_HPP
+#endif  // SP__DUAL_MOTOR_HPP

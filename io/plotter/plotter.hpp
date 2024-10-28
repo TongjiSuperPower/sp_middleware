@@ -1,5 +1,5 @@
-#ifndef IO__PLOTTER_HPP
-#define IO__PLOTTER_HPP
+#ifndef SP__PLOTTER_HPP
+#define SP__PLOTTER_HPP
 
 #include "usart.h"
 
@@ -39,4 +39,4 @@ private:
 
 }  // namespace sp
 
-#endif  // IO__PLOTTER_HPP
+#endif  // SP__PLOTTER_HPP

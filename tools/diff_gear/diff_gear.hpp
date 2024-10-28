@@ -1,5 +1,5 @@
-#ifndef TOOLS_DIFF_GEAR_HPP
-#define TOOLS_DIFF_GEAR_HPP
+#ifndef SP__DIFF_GEAR_HPP
+#define SP__DIFF_GEAR_HPP
 
 namespace sp
 {
@@ -42,4 +42,4 @@ private:
 
 }  // namespace sp
 
-#endif  // TOOLS_DIFF_GEAR_HPP
+#endif  // SP__DIFF_GEAR_HPP
