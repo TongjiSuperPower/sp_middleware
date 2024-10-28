@@ -3,7 +3,7 @@
 
 #include "tim.h"
 
-namespace io
+namespace sp
 {
 class Servo
 {
@@ -26,6 +26,6 @@ private:
   const float max_angle_;
 };
 
-}  // namespace io
+}  // namespace sp
 
 #endif  // IO__SERVO_HPP

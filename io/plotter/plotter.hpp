@@ -3,7 +3,7 @@
 
 #include "usart.h"
 
-namespace io
+namespace sp
 {
 constexpr size_t PLOTTER_FLOAT_NUM = 6;
 
@@ -37,6 +37,6 @@ private:
   void send();
 };
 
-}  // namespace io
+}  // namespace sp
 
 #endif  // IO__PLOTTER_HPP

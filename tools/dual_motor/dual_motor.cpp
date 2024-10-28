@@ -1,6 +1,6 @@
 #include "dual_motor.hpp"
 
-namespace tools
+namespace sp
 {
 DualMotor::DualMotor(bool reverse_l, bool reverse_r)
 : sign_l_((reverse_l) ? -1.0f : 1.0f), sign_r_((reverse_r) ? -1.0f : 1.0f)
@@ -24,4 +24,4 @@ void DualMotor::calc_speeds(float speed)
   this->speed_r = sign_r_ * speed;
 }
 
-}  // namespace tools
+}  // namespace sp

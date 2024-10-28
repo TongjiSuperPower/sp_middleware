@@ -3,7 +3,7 @@
 
 #include <cstdint>
 
-namespace motor
+namespace sp
 {
 constexpr float J4310_MAX_TORQUE = 7.0f;  // N·m
 
@@ -45,6 +45,6 @@ private:
   float cmd_torque_;
 };
 
-}  // namespace motor
+}  // namespace sp
 
 #endif  // MOTOR__DM_MOTOR_HPP

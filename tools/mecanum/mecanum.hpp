@@ -3,7 +3,7 @@
 
 #include "tools/math_tools/math_tools.hpp"
 
-namespace tools
+namespace sp
 {
 class Mecanum
 {
@@ -40,6 +40,6 @@ private:
   const float sign_rr_;
 };
 
-}  // namespace tools
+}  // namespace sp
 
 #endif  // TOOLS__MECANUM_HPP

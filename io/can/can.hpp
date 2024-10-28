@@ -3,7 +3,7 @@
 
 #include "can.h"
 
-namespace io
+namespace sp
 {
 constexpr size_t CAN_DATA_LEN = 8;
 
@@ -38,6 +38,6 @@ private:
   CAN_HandleTypeDef * hcan_;
 };
 
-}  // namespace io
+}  // namespace sp
 
 #endif  // IO__CAN_HPP

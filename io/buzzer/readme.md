@@ -6,10 +6,10 @@
 #include "io/buzzer/buzzer.hpp"
 
 // C板
-io::Buzzer buzzer(&htim4, TIM_CHANNEL_3, 84e6);
+sp::Buzzer buzzer(&htim4, TIM_CHANNEL_3, 84e6);
 
 // 达妙
-// io::Buzzer buzzer(&htim12, TIM_CHANNEL_2, 240e6);
+// sp::Buzzer buzzer(&htim12, TIM_CHANNEL_2, 240e6);
 
 extern "C" void buzzer_task()
 {

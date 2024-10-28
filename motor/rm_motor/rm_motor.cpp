@@ -2,7 +2,7 @@
 
 #include "tools/math_tools/math_tools.hpp"
 
-namespace motor
+namespace sp
 {
 constexpr int16_t M2006_MAX_RAW = 10000;
 constexpr int16_t M3508_MAX_RAW = 16384;
@@ -12,7 +12,7 @@ constexpr int16_t GM6020_V_MAX_RAW = 25000;
 constexpr float M2006_RAW_TO_TORQUE = 0.18f / M2006_P36 * 10 / M2006_MAX_RAW;
 constexpr float M3508_RAW_TO_TORQUE = 0.3f / M3508_P19 * 20 / M3508_MAX_RAW;
 constexpr float GM6020_RAW_TO_TORQUE = 0.741f * 3 / GM6020_MAX_RAW;
-constexpr float GM6020_RAW_TO_SPEED = 13.33f / 60 * 2 * tools::PI * 24 / GM6020_V_MAX_RAW;
+constexpr float GM6020_RAW_TO_SPEED = 13.33f / 60 * 2 * PI * 24 / GM6020_V_MAX_RAW;
 
 constexpr float M2006_CMD_TO_RAW = 1.0f / M2006_RAW_TO_TORQUE;
 constexpr float M3508_CMD_TO_RAW = 1.0f / M3508_RAW_TO_TORQUE;
@@ -129,11 +129,11 @@ void RM_Motor::read(uint8_t * data, uint32_t stamp_ms)
     circle_++;
   last_ecd_ = angle_ecd;
 
-  float angle_rad = float(angle_ecd - 4095) / 8192 * 2 * tools::PI / ratio_;
+  float angle_rad = float(angle_ecd - 4095) / 8192 * 2 * PI / ratio_;
 
   // 更新公有属性
-  this->angle = multi_circle_ ? angle_rad + circle_ * 2 * tools::PI / ratio_ : angle_rad;
-  this->speed = float(speed_rpm) / 60 * 2 * tools::PI / ratio_;
+  this->angle = multi_circle_ ? angle_rad + circle_ * 2 * PI / ratio_ : angle_rad;
+  this->speed = float(speed_rpm) / 60 * 2 * PI / ratio_;
   this->torque = float(current_raw) * get_raw_to_torque(motor_type_) * ratio_;
   this->temperature = data[6];
 }
@@ -156,4 +156,4 @@ void RM_Motor::cmd(float value)
   cmd_raw_ = raw;
 }
 
-}  // namespace motor
+}  // namespace sp

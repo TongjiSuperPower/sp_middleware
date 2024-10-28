@@ -17,7 +17,7 @@ constexpr float BMI088_ACC_INT_TO_MPS2 = BMI088_ACC_INT_TO_G * G_TO_MPS2;
 
 // ref: datasheet 5.5.2
 constexpr float BMI088_GYRO_INT_TO_DPS = 2000.0f / (BMI088_GYRO_RANGE_SET + 1) / 32767;
-constexpr float BMI088_GYRO_INT_TO_RPS = BMI088_GYRO_INT_TO_DPS / 180 * tools::PI;
+constexpr float BMI088_GYRO_INT_TO_RPS = BMI088_GYRO_INT_TO_DPS / 180 * PI;
 
 // ref: datasheet 5.3.7
 constexpr float BMI088_TEMPERATURE_FACTOR = 0.125f;
@@ -48,7 +48,7 @@ const uint8_t BMI088_GYRO_INIT_TABLE[BMI088_GYRO_INIT_TABLE_SIZE][3] = {
 
 // clang-format on
 
-namespace io
+namespace sp
 {
 BMI088::BMI088(
   SPI_HandleTypeDef * hspi, GPIO_TypeDef * csb1_port, uint16_t csb1_pin, GPIO_TypeDef * csb2_port,
@@ -263,4 +263,4 @@ void BMI088::gyro_write(uint8_t reg, uint8_t data)
   HAL_GPIO_WritePin(csb2_port_, csb2_pin_, GPIO_PIN_SET);
 }
 
-}  // namespace io
+}  // namespace sp

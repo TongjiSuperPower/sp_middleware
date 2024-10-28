@@ -1,6 +1,6 @@
 #include "diff_gear.hpp"
 
-namespace tools
+namespace sp
 {
 DiffGear::DiffGear(float ratio, bool reverse_l, bool reverse_r)
 : ratio_(ratio), sign_l_((reverse_l) ? -1.0f : 1.0f), sign_r_((reverse_r) ? -1.0f : 1.0f)
@@ -25,4 +25,4 @@ void DiffGear::calc_gear_speed(float v_pitch, float v_roll)
   this->v_right = sign_r_ * (v_pitch - v_roll * ratio_);
 }
 
-}  // namespace tools
+}  // namespace sp

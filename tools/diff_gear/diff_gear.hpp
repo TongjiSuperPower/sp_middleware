@@ -1,7 +1,7 @@
 #ifndef TOOLS_DIFF_GEAR_HPP
 #define TOOLS_DIFF_GEAR_HPP
 
-namespace tools
+namespace sp
 {
 class DiffGear
 {
@@ -40,6 +40,6 @@ private:
   float angle_r0_;
 };
 
-}  // namespace tools
+}  // namespace sp
 
 #endif  // TOOLS_DIFF_GEAR_HPP

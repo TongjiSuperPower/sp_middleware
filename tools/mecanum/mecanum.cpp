@@ -1,6 +1,6 @@
 #include "mecanum.hpp"
 
-namespace tools
+namespace sp
 {
 Mecanum::Mecanum(
   float wheel_radius, float half_length, float half_width, bool reverse_lf, bool reverse_lr,
@@ -28,4 +28,4 @@ void Mecanum::calc(float vx, float vy, float wz)
   this->speed_rr = sign_rr_ * (vx - vy + (l_ + w_) * wz) / r_;
 }
 
-}  // namespace tools
+}  // namespace sp

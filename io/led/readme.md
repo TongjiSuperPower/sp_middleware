@@ -5,7 +5,7 @@
 #include "cmsis_os.h"
 #include "io/led/led.hpp"
 
-io::LED led(&htim5);
+sp::LED led(&htim5);
 
 extern "C" void led_task()
 {

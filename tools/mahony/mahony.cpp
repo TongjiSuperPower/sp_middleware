@@ -2,7 +2,7 @@
 
 #include <cmath>
 
-namespace tools
+namespace sp
 {
 Mahony::Mahony(float dt, float kp, float ki)
 : dt_(dt),
@@ -129,4 +129,4 @@ void Mahony::init(float ax, float ay, float az)
   this->roll = roll0;
 }
 
-}  // namespace tools
+}  // namespace sp

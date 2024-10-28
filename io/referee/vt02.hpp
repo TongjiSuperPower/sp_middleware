@@ -3,7 +3,7 @@
 
 #include "usart.h"
 
-namespace io
+namespace sp
 {
 constexpr size_t VT02_BUFF_SIZE = 50;
 
@@ -70,6 +70,6 @@ private:
   void update_mouse_and_keys();
 };
 
-}  // namespace io
+}  // namespace sp
 
 #endif  // IO__VT02_HPP

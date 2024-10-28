@@ -4,7 +4,7 @@
 #include <cmath>
 #include <cstdint>
 
-namespace tools
+namespace sp
 {
 constexpr float PI = M_PI;
 
@@ -23,6 +23,6 @@ float uint_to_float(uint32_t input, float min, float max, size_t bits);
 // [min, max]
 uint32_t float_to_uint(float input, float min, float max, size_t bits);
 
-}  // namespace tools
+}  // namespace sp
 
 #endif  // TOOLS__MATH_TOOLS_HPP

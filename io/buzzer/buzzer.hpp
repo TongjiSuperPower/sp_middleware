@@ -3,7 +3,7 @@
 
 #include "tim.h"
 
-namespace io
+namespace sp
 {
 class Buzzer
 {
@@ -24,6 +24,6 @@ private:
   const float clock_hz_;
 };
 
-}  // namespace io
+}  // namespace sp
 
 #endif  // IO__BUZZER_HPP

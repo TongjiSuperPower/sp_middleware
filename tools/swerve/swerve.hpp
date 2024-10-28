@@ -1,7 +1,7 @@
 #ifndef TOOLS__SWERVE_HPP
 #define TOOLS__SWERVE_HPP
 
-namespace tools
+namespace sp
 {
 class Swerve
 {
@@ -47,6 +47,6 @@ private:
   void convert(const float v[2], float yaw, float yaw0, float & angle, float & speed);
 };
 
-}  // namespace tools
+}  // namespace sp
 
 #endif  // TOOLS__SWERVE_HPP

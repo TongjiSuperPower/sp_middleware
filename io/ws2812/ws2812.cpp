@@ -1,6 +1,6 @@
 #include "ws2812.hpp"
 
-namespace io
+namespace sp
 {
 constexpr uint8_t CODE0 = 0xC0;
 constexpr uint8_t CODE1 = 0xF0;
@@ -18,4 +18,4 @@ void WS2812::set(uint8_t r, uint8_t g, uint8_t b)
   HAL_SPI_Transmit(hspi_, buff_, 24, 0xFFFF);  // dismiss return
 }
 
-}  // namespace io
+}  // namespace sp

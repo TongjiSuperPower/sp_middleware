@@ -1,6 +1,6 @@
 #include "fdcan.hpp"
 
-namespace io
+namespace sp
 {
 FDCAN::FDCAN(FDCAN_HandleTypeDef * hfdcan) : hfdcan_(hfdcan)
 {
@@ -32,4 +32,4 @@ void FDCAN::send(uint16_t tx_id)
   HAL_FDCAN_AddMessageToTxFifoQ(hfdcan_, &tx_header_, this->tx_data);  // dismiss return
 }
 
-}  // namespace io
+}  // namespace sp

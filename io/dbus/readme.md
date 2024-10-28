@@ -6,10 +6,10 @@
 #include "io/dbus/dbus.hpp"
 
 // C板
-io::DBus remote(&huart3);
+sp::DBus remote(&huart3);
 
 // 达妙
-// io::DBus remote(&huart5, false);
+// sp::DBus remote(&huart5, false);
 
 extern "C" void uart_task()
 {

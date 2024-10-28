@@ -1,6 +1,6 @@
 #include "dbus.hpp"
 
-namespace io
+namespace sp
 {
 static float get_stick(uint16_t raw) { return (raw - 1024) / 660.0f; }
 
@@ -85,4 +85,4 @@ bool DBus::is_open() const { return has_read_; }
 
 bool DBus::is_alive(uint32_t now_ms) const { return is_open() && (now_ms - last_read_ms_ < 100); }
 
-}  // namespace io
+}  // namespace sp

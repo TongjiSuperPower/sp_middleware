@@ -1,6 +1,6 @@
 #include "buzzer.hpp"
 
-namespace io
+namespace sp
 {
 Buzzer::Buzzer(TIM_HandleTypeDef * htim, uint16_t channel, float clock_hz)
 : htim_(htim), channel_(channel), clock_hz_(clock_hz)
@@ -26,4 +26,4 @@ void Buzzer::set(float hz, float duty)
   __HAL_TIM_SET_COUNTER(htim_, 0);
 }
 
-}  // namespace io
+}  // namespace sp

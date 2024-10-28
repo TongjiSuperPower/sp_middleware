@@ -1,6 +1,6 @@
 #include "led.hpp"
 
-namespace io
+namespace sp
 {
 LED::LED(TIM_HandleTypeDef * htim) : htim_(htim) {}
 
@@ -19,4 +19,4 @@ void LED::set(float r, float g, float b)
   __HAL_TIM_SET_COMPARE(htim_, TIM_CHANNEL_3, (htim_->Instance->ARR + 1) * r);
 }
 
-}  // namespace io
+}  // namespace sp

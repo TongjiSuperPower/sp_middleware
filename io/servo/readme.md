@@ -6,10 +6,10 @@
 #include "io/servo/servo.hpp"
 
 // C板
-io::Servo servo(&htim1, TIM_CHANNEL_1, 84e6, 180.0f); // 开发板最上面的PWM端口, 180度舵机
+sp::Servo servo(&htim1, TIM_CHANNEL_1, 84e6, 180.0f); // 开发板最上面的PWM端口, 180度舵机
 
 // 达妙
-// io::Servo servo(&htim1, TIM_CHANNEL_3, 240e6, 180.0f); // 开发板最上面的PWM端口, 180度舵机
+// sp::Servo servo(&htim1, TIM_CHANNEL_3, 240e6, 180.0f); // 开发板最上面的PWM端口, 180度舵机
 
 extern "C" void fpv_task()
 {

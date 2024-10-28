@@ -1,7 +1,7 @@
 #ifndef TOOLS_MAHONY_HPP
 #define TOOLS_MAHONY_HPP
 
-namespace tools
+namespace sp
 {
 class Mahony
 {
@@ -30,6 +30,6 @@ private:
   void init(float ax, float ay, float az);
 };
 
-}  // namespace tools
+}  // namespace sp
 
 #endif  // TOOLS_MAHONY_HPP

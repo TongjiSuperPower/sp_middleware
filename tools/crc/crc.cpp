@@ -45,7 +45,7 @@ const uint16_t CRC16_TABLE[256] = {
   0xf78f, 0xe606, 0xd49d, 0xc514, 0xb1ab, 0xa022, 0x92b9, 0x8330, 0x7bc7, 0x6a4e, 0x58d5, 0x495c,
   0x3de3, 0x2c6a, 0x1ef1, 0x0f78};
 
-namespace tools
+namespace sp
 {
 uint8_t get_crc8(uint8_t * data, uint16_t len)
 {
@@ -85,4 +85,4 @@ bool check_crc16(uint8_t * data, uint32_t len)
   return get_crc16(data, len - 2) == crc16;
 }
 
-}  // namespace tools
+}  // namespace sp

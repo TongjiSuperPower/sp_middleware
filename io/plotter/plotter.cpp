@@ -1,6 +1,6 @@
 #include "plotter.hpp"
 
-namespace io
+namespace sp
 {
 Plotter::Plotter(UART_HandleTypeDef * huart, bool use_dma)
 : huart_(huart), use_dma_(use_dma), hal_status_(HAL_OK)
@@ -79,4 +79,4 @@ void Plotter::send()
   }
 }
 
-}  // namespace io
+}  // namespace sp

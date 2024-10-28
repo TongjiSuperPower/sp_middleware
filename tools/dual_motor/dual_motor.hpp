@@ -1,7 +1,7 @@
 #ifndef TOOLS__DUAL_MOTOR_HPP
 #define TOOLS__DUAL_MOTOR_HPP
 
-namespace tools
+namespace sp
 {
 class DualMotor
 {
@@ -37,6 +37,6 @@ private:
   float angle_r0_;
 };
 
-}  // namespace tools
+}  // namespace sp
 
 #endif  // TOOLS__DUAL_MOTOR_HPP

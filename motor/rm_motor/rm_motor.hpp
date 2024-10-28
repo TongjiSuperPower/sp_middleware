@@ -3,7 +3,7 @@
 
 #include <cstdint>
 
-namespace motor
+namespace sp
 {
 constexpr float M2006_P36 = 36.0f;             // 原装减速箱减速比
 constexpr float M3508_P19 = 3591.0f / 187.0f;  // 原装减速箱减速比
@@ -61,6 +61,6 @@ private:
   int16_t cmd_raw_;
 };
 
-}  // namespace motor
+}  // namespace sp
 
 #endif  // MOTOR__RM_MOTOR_HPP

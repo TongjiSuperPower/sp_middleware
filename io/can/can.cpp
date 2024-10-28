@@ -1,6 +1,6 @@
 #include "can.hpp"
 
-namespace io
+namespace sp
 {
 CAN::CAN(CAN_HandleTypeDef * hcan) : hcan_(hcan) {}
 
@@ -57,4 +57,4 @@ void CAN::send(uint32_t tx_id)
   HAL_CAN_AddTxMessage(hcan_, &tx_header, tx_data, &mailbox);  // dismiss return
 }
 
-}  // namespace io
+}  // namespace sp

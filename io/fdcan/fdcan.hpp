@@ -3,7 +3,7 @@
 
 #include "fdcan.h"
 
-namespace io
+namespace sp
 {
 constexpr size_t FDCAN_DATA_LEN = 8;
 
@@ -26,6 +26,6 @@ private:
   FDCAN_TxHeaderTypeDef tx_header_;
 };
 
-}  // namespace io
+}  // namespace sp
 
 #endif  // IO__FDCAN_HPP

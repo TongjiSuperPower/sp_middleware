@@ -3,7 +3,7 @@
 
 #include "usart.h"
 
-namespace io
+namespace sp
 {
 constexpr size_t DBUS_BUFF_SIZE = 18;
 
@@ -76,6 +76,6 @@ private:
   uint8_t buff_[DBUS_BUFF_SIZE];
 };
 
-}  // namespace io
+}  // namespace sp
 
 #endif  // IO__DBUS_HPP

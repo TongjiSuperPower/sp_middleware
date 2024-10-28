@@ -6,8 +6,8 @@
 #include "io/can/can.hpp"
 #include "motor/rm_motor/rm_motor.hpp"
 
-io::CAN can1(&hcan1);
-motor::RM_Motor motor6020(1, motor::RM_Motors::GM6020);  // 一个电机ID为1, 电流控制模式的6020
+sp::CAN can1(&hcan1);
+sp::RM_Motor motor6020(1, sp::RM_Motors::GM6020);  // 一个电机ID为1, 电流控制模式的6020
 
 extern "C" void can_task()
 {

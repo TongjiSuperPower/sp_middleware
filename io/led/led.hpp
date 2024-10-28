@@ -3,7 +3,7 @@
 
 #include "tim.h"
 
-namespace io
+namespace sp
 {
 class LED
 {
@@ -19,6 +19,6 @@ private:
   TIM_HandleTypeDef * htim_;
 };
 
-}  // namespace io
+}  // namespace sp
 
 #endif  // IO__LED_HPP

@@ -4,7 +4,7 @@
 #include "gpio.h"
 #include "spi.h"
 
-namespace io
+namespace sp
 {
 class BMI088
 {
@@ -45,6 +45,6 @@ private:
   void gyro_write(uint8_t reg, uint8_t data);
 };
 
-}  // namespace io
+}  // namespace sp
 
 #endif  // IO__BMI088_HPP

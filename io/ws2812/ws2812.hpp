@@ -3,7 +3,7 @@
 
 #include "spi.h"
 
-namespace io
+namespace sp
 {
 class WS2812
 {
@@ -16,6 +16,6 @@ private:
   uint8_t buff_[24];
 };
 
-}  // namespace io
+}  // namespace sp
 
 #endif  // IO__WS2812_HPP

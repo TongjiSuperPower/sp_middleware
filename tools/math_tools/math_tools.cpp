@@ -1,6 +1,6 @@
 #include "math_tools.hpp"
 
-namespace tools
+namespace sp
 {
 float limit_angle(float angle)
 {
@@ -34,4 +34,4 @@ uint32_t float_to_uint(float input, float min, float max, size_t bits)
   return norm * ((1 << bits) - 1);
 }
 
-}  // namespace tools
+}  // namespace sp

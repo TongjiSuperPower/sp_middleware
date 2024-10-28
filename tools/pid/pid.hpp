@@ -3,7 +3,7 @@
 
 #include "tools/math_tools/math_tools.hpp"
 
-namespace tools
+namespace sp
 {
 struct PIDData
 {
@@ -44,6 +44,6 @@ private:
   const float alpha_;
 };
 
-}  // namespace tools
+}  // namespace sp
 
 #endif  // PID_HPP

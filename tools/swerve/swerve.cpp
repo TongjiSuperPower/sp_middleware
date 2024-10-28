@@ -2,7 +2,7 @@
 
 #include "tools/math_tools/math_tools.hpp"
 
-namespace tools
+namespace sp
 {
 Swerve::Swerve(float wheel_radius, float half_length, float half_width, bool invert_pivot)
 : r_(wheel_radius), l_(half_length), w_(half_width), sign_(invert_pivot ? -1.0f : 1.0f)
@@ -38,17 +38,17 @@ void Swerve::convert(const float v[2], float yaw, float yaw0, float & angle, flo
   // ref: https://github.com/rm-controls/rm_controllers/blob/master/rm_chassis_controllers/src/swerve.cpp
 
   float v_angle = std::atan2(v[1], v[0]);
-  float v_angle_flipped = tools::limit_angle(v_angle + tools::PI);
-  float pivot_angle = sign_ * tools::limit_angle(yaw - yaw0);
+  float v_angle_flipped = limit_angle(v_angle + PI);
+  float pivot_angle = sign_ * limit_angle(yaw - yaw0);
 
-  float a = tools::limit_angle(v_angle - pivot_angle);
-  float b = tools::limit_angle(v_angle_flipped - pivot_angle);
+  float a = limit_angle(v_angle - pivot_angle);
+  float b = limit_angle(v_angle_flipped - pivot_angle);
 
   float pivot_angle_set = (std::abs(a) < std::abs(b)) ? v_angle : v_angle_flipped;
 
-  angle = tools::limit_angle(sign_ * pivot_angle_set + yaw0);
+  angle = limit_angle(sign_ * pivot_angle_set + yaw0);
 
   speed = std::sqrt(v[0] * v[0] + v[1] * v[1]) / r_ * std::cos(a);
 }
 
-}  // namespace tools
+}  // namespace sp

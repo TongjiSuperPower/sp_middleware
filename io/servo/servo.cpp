@@ -1,6 +1,6 @@
 #include "servo.hpp"
 
-namespace io
+namespace sp
 {
 Servo::Servo(TIM_HandleTypeDef * htim, uint16_t channel, float clock_hz, float max_angle)
 : htim_(htim), channel_(channel), clock_hz_(clock_hz), max_angle_(max_angle)
@@ -19,4 +19,4 @@ void Servo::set(float angle)
   __HAL_TIM_SET_COMPARE(htim_, channel_, (angle / max_angle_) * 2000 + 500);  // [500, 2500]
 }
 
-}  // namespace io
+}  // namespace sp
