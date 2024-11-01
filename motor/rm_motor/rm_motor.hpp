@@ -43,7 +43,7 @@ public:
   void write(uint8_t * data) const;
 
   // 如果非`RM_Motors::GM6020_V`, 单位: N·m
-  // 如果是`RM_Motors::GM6020_V`, 单位: rad/s
+  // 如果是`RM_Motors::GM6020_V`, 单位: V
   void cmd(float value);
 
 private:

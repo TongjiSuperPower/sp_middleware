@@ -12,12 +12,11 @@ constexpr int16_t GM6020_V_MAX_RAW = 25000;
 constexpr float M2006_RAW_TO_TORQUE = 0.18f / M2006_P36 * 10 / M2006_MAX_RAW;
 constexpr float M3508_RAW_TO_TORQUE = 0.3f / M3508_P19 * 20 / M3508_MAX_RAW;
 constexpr float GM6020_RAW_TO_TORQUE = 0.741f * 3 / GM6020_MAX_RAW;
-constexpr float GM6020_RAW_TO_SPEED = 13.33f / 60 * 2 * PI * 24 / GM6020_V_MAX_RAW;
 
 constexpr float M2006_CMD_TO_RAW = 1.0f / M2006_RAW_TO_TORQUE;
 constexpr float M3508_CMD_TO_RAW = 1.0f / M3508_RAW_TO_TORQUE;
 constexpr float GM6020_CMD_TO_RAW = 1.0f / GM6020_RAW_TO_TORQUE;
-constexpr float GM6020_V_CMD_TO_RAW = 1.0f / GM6020_RAW_TO_SPEED;
+constexpr float GM6020_V_CMD_TO_RAW = GM6020_V_MAX_RAW / 24.0f;
 
 uint16_t get_rx_id(uint8_t motor_id, RM_Motors motor_type)
 {
