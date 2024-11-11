@@ -6,9 +6,8 @@
 
 namespace sp
 {
-// 数据段最长为127
-// ref: RoboMaster 裁判系统串口协议附录 V1.6.3（20240527）.pdf
-constexpr size_t PM02_BUFF_SIZE = referee::HEAD_LEN + referee::CMD_ID_LEN + 127 + referee::TAIL_LEN;
+// ref: https://github.com/HNUYueLuRM/basic_framework/blob/master/modules/referee/rm_referee.c#L21
+constexpr size_t PM02_BUFF_SIZE = 255;
 
 class PM02
 {
@@ -24,7 +23,7 @@ public:
   referee::ShootData shoot;           // 只读!
 
   void request();
-  void update();
+  void update(uint16_t size);
 
   // TODO UI
 
@@ -33,6 +32,7 @@ private:
   bool use_dma_;
 
   uint8_t buff_[PM02_BUFF_SIZE];
+  void update(uint8_t * frame_start, uint16_t size);
 };
 
 }  // namespace sp

@@ -16,40 +16,48 @@ void PM02::request()
     HAL_UARTEx_ReceiveToIdle_IT(huart_, buff_, PM02_BUFF_SIZE);  // dismiss return
 }
 
-void PM02::update()
+void PM02::update(uint16_t size) { update(buff_, size); }
+
+void PM02::update(uint8_t * frame_start, uint16_t size)
 {
-  if (buff_[0] != referee::SOF) return;
-  if (!check_crc8(buff_, referee::HEAD_LEN)) return;
+  if (size < referee::HEAD_LEN) return;
+  if (frame_start[0] != referee::SOF) return;
+  if (!check_crc8(frame_start, referee::HEAD_LEN)) return;
 
-  size_t data_len = (buff_[2] << 8) | buff_[1];
-  size_t len = referee::HEAD_LEN + referee::CMD_ID_LEN + data_len + referee::TAIL_LEN;
-  if (!check_crc16(buff_, len)) return;
+  size_t data_len = (frame_start[2] << 8) | frame_start[1];
+  size_t frame_len = referee::HEAD_LEN + referee::CMD_ID_LEN + data_len + referee::TAIL_LEN;
 
-  auto cmd_id = referee::CMD_ID((buff_[6] << 8) | buff_[5]);
+  if (size < frame_len) return;
+  if (!check_crc16(frame_start, frame_len)) return;
+
+  auto cmd_id = referee::CMD_ID((frame_start[6] << 8) | frame_start[5]);
 
   switch (cmd_id) {
     case referee::CMD_ID::GAME_STATUS:
-      std::memcpy(&(this->game_status), buff_ + referee::DATA_START, data_len);
+      std::memcpy(&(this->game_status), frame_start + referee::DATA_START, data_len);
       break;
     case referee::CMD_ID::GAME_RESULT:
-      std::memcpy(&(this->game_result), buff_ + referee::DATA_START, data_len);
+      std::memcpy(&(this->game_result), frame_start + referee::DATA_START, data_len);
       break;
     case referee::CMD_ID::GAME_ROBOT_HP:
-      std::memcpy(&(this->game_robot_hp), buff_ + referee::DATA_START, data_len);
+      std::memcpy(&(this->game_robot_hp), frame_start + referee::DATA_START, data_len);
       break;
     case referee::CMD_ID::ROBOT_STATUS:
-      std::memcpy(&(this->robot_status), buff_ + referee::DATA_START, data_len);
+      std::memcpy(&(this->robot_status), frame_start + referee::DATA_START, data_len);
       break;
     case referee::CMD_ID::POWER_HEAT_DATA:
-      std::memcpy(&(this->power_heat), buff_ + referee::DATA_START, data_len);
+      std::memcpy(&(this->power_heat), frame_start + referee::DATA_START, data_len);
       break;
     case referee::CMD_ID::SHOOT_DATA:
-      std::memcpy(&(this->shoot), buff_ + referee::DATA_START, data_len);
+      std::memcpy(&(this->shoot), frame_start + referee::DATA_START, data_len);
       break;
     // TODO 其它数据请参考官网最新版《RoboMaster裁判系统串口协议附录.pdf》
     default:
       break;
   }
+
+  // 递归解析, 因为缓冲区中可能包含多帧裁判系统的数据
+  update(frame_start + frame_len, size - frame_len);
 }
 
 }  // namespace sp
