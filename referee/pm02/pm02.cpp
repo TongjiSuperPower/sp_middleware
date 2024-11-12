@@ -23,11 +23,7 @@ void PM02::request()
   }
 }
 
-void PM02::update(uint16_t size)
-{
-  update(buff_, size);
-  std::memset(buff_, 0, size);
-}
+void PM02::update(uint16_t size) { update(buff_, size); }
 
 void PM02::update(uint8_t * frame_start, uint16_t size)
 {
