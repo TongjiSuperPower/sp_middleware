@@ -35,15 +35,18 @@ enum class CMD_ID : uint16_t
   GROUND_ROBOT_POSITION = 0x020B,  // 地面机器人位置数据
   RADAR_MARK_DATA = 0x020C,        // 雷达标记进度数据
   SENTRY_INFO = 0x020D,            // 哨兵自主决策信息同步
-  RADAR_INFO = 0x020F,             // 雷达自主决策信息同步
+  RADAR_INFO = 0x020E,             // 雷达自主决策信息同步
 
   STUDENT_INTERACTIVE = 0x0301,  // 机器人交互数据
   CUSTOM_ROBOT_DATA = 0x0302,    // 自定义控制器与机器人交互数据
-  REMOTE_CONTROL = 0x0304        // 键鼠遥控数据
+  MAP_COMMAND = 0x0303,          // 选手端小地图交互数据
+  REMOTE_CONTROL = 0x0304,       // 键鼠遥控数据
+  MAP_ROBOT_DATA = 0x0305,       // 选手端小地图接收雷达数据
 };
 
 #pragma pack(1)
 
+// 0x0001
 struct GameStatus
 {
   // bit 0-3: 比赛类型
@@ -64,11 +67,13 @@ struct GameStatus
   uint64_t sync_timestamp;  // UNIX时间，当机器人正确连接到裁判系统的NTP服务器后生效
 };
 
+// 0x0002
 struct GameResult
 {
   uint8_t winner;  // 0: 平局, 1: 红方胜利, 2: 蓝方胜利
 };
 
+// 0x0003
 struct GameRobotHP
 {
   uint16_t red_1_robot_hp;
@@ -89,6 +94,7 @@ struct GameRobotHP
   uint16_t blue_base_hp;
 };
 
+// 0x0201
 struct RobotStatus
 {
   uint8_t robot_id;
@@ -104,6 +110,7 @@ struct RobotStatus
   uint8_t power_management_output;
 };
 
+// 0x0202
 struct PowerHeatData
 {
   uint16_t chassis_voltage;  // 单位: mV
@@ -115,12 +122,31 @@ struct PowerHeatData
   uint16_t shooter_42mm_barrel_heat;
 };
 
+// 0x0207
 struct ShootData
 {
   uint8_t bullet_type;  // 1: 17mm弹丸, 2: 42mm弹丸
   uint8_t shooter_number;  // 1: 第1个17mm发射机构, 2: 第2个17mm发射机构, 3: 42mm发射机构
   uint8_t launching_frequency;  // 单位: Hz
   float initial_speed;          // 单位: m/s
+};
+
+// 0x0302
+struct CustomRobotData
+{
+  uint8_t data[30];
+};
+
+// 0x0304
+struct RemoteControl
+{
+  int16_t mouse_x;
+  int16_t mouse_y;
+  int16_t mouse_z;
+  int8_t left_button_down;   // 0: 未按下, 1: 按下
+  int8_t right_button_down;  // 0: 未按下, 1: 按下
+  uint16_t keyboard_value;  // 每个bit对应一个按键, 详见《RoboMaster裁判系统串口协议附录.pdf》
+  uint16_t reserved;
 };
 
 #pragma pack()
