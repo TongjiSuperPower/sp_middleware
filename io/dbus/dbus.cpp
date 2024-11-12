@@ -34,8 +34,10 @@ void DBus::request()
   }
 }
 
-void DBus::update(uint32_t stamp_ms)
+void DBus::update(uint16_t size, uint32_t stamp_ms)
 {
+  if (size != DBUS_BUFF_SIZE) return;
+
   has_read_ = true;
   last_read_ms_ = stamp_ms;
 

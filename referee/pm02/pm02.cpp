@@ -10,13 +10,24 @@ PM02::PM02(UART_HandleTypeDef * huart, bool use_dma) : huart_(huart), use_dma_(u
 
 void PM02::request()
 {
-  if (use_dma_)
-    HAL_UARTEx_ReceiveToIdle_DMA(huart_, buff_, PM02_BUFF_SIZE);  // dismiss return
-  else
-    HAL_UARTEx_ReceiveToIdle_IT(huart_, buff_, PM02_BUFF_SIZE);  // dismiss return
+  if (use_dma_) {
+    // dismiss return
+    HAL_UARTEx_ReceiveToIdle_DMA(huart_, buff_, PM02_BUFF_SIZE);
+
+    // ref: https://github.com/HNUYueLuRM/basic_framework/blob/master/bsp/usart/bsp_usart.c
+    __HAL_DMA_DISABLE_IT(huart_->hdmarx, DMA_IT_HT);
+  }
+  else {
+    // dismiss return
+    HAL_UARTEx_ReceiveToIdle_IT(huart_, buff_, PM02_BUFF_SIZE);
+  }
 }
 
-void PM02::update(uint16_t size) { update(buff_, size); }
+void PM02::update(uint16_t size)
+{
+  update(buff_, size);
+  std::memset(buff_, 0, size);
+}
 
 void PM02::update(uint8_t * frame_start, uint16_t size)
 {

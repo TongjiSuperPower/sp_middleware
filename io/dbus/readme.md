@@ -23,10 +23,10 @@ extern "C" void uart_task()
 
 extern "C" void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef * huart, uint16_t Size)
 {
-  UNUSED(Size);
+  auto stamp_ms = osKernelSysTick();
 
   if (huart == &huart3) {
-    remote.update(osKernelSysTick());
+    remote.update(Size, stamp_ms);
     remote.request();
   }
 }

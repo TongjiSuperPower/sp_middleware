@@ -61,7 +61,7 @@ public:
   DBusKeysData keys;    // 只读!
 
   void request();
-  void update(uint32_t stamp_ms);
+  void update(uint16_t size, uint32_t stamp_ms);
 
   bool is_open() const;
   bool is_alive(uint32_t now_ms) const;
