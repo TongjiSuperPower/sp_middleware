@@ -43,14 +43,14 @@ void DBus::update(uint16_t size, uint32_t stamp_ms)
 
   // 遥控器解析
 
-  this->stick_rh = get_stick((buff_[0] | (buff_[1] << 8)) & 0x07ff);
-  this->stick_rv = get_stick(((buff_[1] >> 3) | (buff_[2] << 5)) & 0x07ff);
-  this->stick_lh = get_stick(((buff_[2] >> 6) | (buff_[3] << 2) | (buff_[4] << 10)) & 0x07ff);
-  this->stick_lv = get_stick(((buff_[4] >> 1) | (buff_[5] << 7)) & 0x07ff);
-  this->stick_lu = get_stick(((buff_[16] | (buff_[17] << 8)) & 0x07ff));
+  this->ch_rh = get_stick((buff_[0] | (buff_[1] << 8)) & 0x07ff);
+  this->ch_rv = get_stick(((buff_[1] >> 3) | (buff_[2] << 5)) & 0x07ff);
+  this->ch_lh = get_stick(((buff_[2] >> 6) | (buff_[3] << 2) | (buff_[4] << 10)) & 0x07ff);
+  this->ch_lv = get_stick(((buff_[4] >> 1) | (buff_[5] << 7)) & 0x07ff);
+  this->ch_lu = get_stick(((buff_[16] | (buff_[17] << 8)) & 0x07ff));
 
-  this->switch_r = get_switch((buff_[5] >> 4) & 0x0003);
-  this->switch_l = get_switch(((buff_[5] >> 4) & 0x000C) >> 2);
+  this->sw_r = get_switch((buff_[5] >> 4) & 0x0003);
+  this->sw_l = get_switch(((buff_[5] >> 4) & 0x000C) >> 2);
 
   // 键鼠解析
 

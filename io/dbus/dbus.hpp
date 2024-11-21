@@ -48,14 +48,14 @@ class DBus
 public:
   DBus(UART_HandleTypeDef * huart, bool use_dma = true);
 
-  float stick_rh;  // 只读! 右侧水平, 取值范围: [-1, 1], 右正左负
-  float stick_rv;  // 只读! 右侧垂直, 取值范围: [-1, 1], 上正下负
-  float stick_lh;  // 只读! 左侧水平, 取值范围: [-1, 1], 右正左负
-  float stick_lv;  // 只读! 左侧垂直, 取值范围: [-1, 1], 上正下负
-  float stick_lu;  // 只读! 左上拨轮, 取值范围: [-1, 1], 左正右负
+  float ch_rh;  // 只读! 右水平摇杆, 取值范围: [-1, 1], 右正左负
+  float ch_rv;  // 只读! 右垂直摇杆, 取值范围: [-1, 1], 上正下负
+  float ch_lh;  // 只读! 左水平摇杆, 取值范围: [-1, 1], 右正左负
+  float ch_lv;  // 只读! 左垂直摇杆, 取值范围: [-1, 1], 上正下负
+  float ch_lu;  // 只读! 左上方拨轮, 取值范围: [-1, 1], 左正右负
 
-  DBusSwitchMode switch_r;  // 只读!
-  DBusSwitchMode switch_l;  // 只读!
+  DBusSwitchMode sw_r;  // 只读! 右三位开关
+  DBusSwitchMode sw_l;  // 只读! 左三位开关
 
   DBusMouseData mouse;  // 只读!
   DBusKeysData keys;    // 只读!
