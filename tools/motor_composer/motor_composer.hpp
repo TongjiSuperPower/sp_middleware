@@ -1,15 +1,15 @@
-#ifndef SP__DUAL_MOTOR_HPP
-#define SP__DUAL_MOTOR_HPP
+#ifndef SP__MOTOR_COMPOSER_HPP
+#define SP__MOTOR_COMPOSER_HPP
 
 namespace sp
 {
-class DualMotor
+class MotorComposer
 {
 public:
   // 将两个电机等效为一个电机
   // reverse_l: 左侧电机反向旋转
   // reverse_r: 右侧电机反向旋转
-  DualMotor(bool reverse_l = false, bool reverse_r = true);
+  MotorComposer(bool reverse_l = false, bool reverse_r = true);
 
   float angle;    // 只读! calc_angle()计算结果, 单位: rad
   float speed_l;  // 只读! calc_speeds()计算结果, 单位: rad/s
@@ -39,4 +39,4 @@ private:
 
 }  // namespace sp
 
-#endif  // SP__DUAL_MOTOR_HPP
+#endif  // SP__MOTOR_COMPOSER_HPP
