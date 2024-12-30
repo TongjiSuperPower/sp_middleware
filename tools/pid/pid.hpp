@@ -27,7 +27,7 @@ public:
   // max_out: PID最大输出值
   // max_iout I项最大输出值
   // alpha: D项滤波系数, alpha=1时不滤波
-  PID(float dt, float kp, float ki, float kd, float max_out, float max_iout, float alpha = 1.0f);
+  PID(float dt, float kp, float ki, float kd, float max_out, float max_iout, float alpha = 1.0f, bool angular = 0);
 
   float out;     // 只读! PID输出值
   PIDData data;  // 只读! PID计算数据
@@ -42,6 +42,8 @@ private:
   const float kp_, ki_, kd_;
   const float max_out_, max_iout_;
   const float alpha_;
+  const float dynamic_ki_;
+  const bool angular_;  // 是否为角度控制
 };
 
 }  // namespace sp
