@@ -38,13 +38,13 @@ private:
   const float w_;
   const float sign_;
 
-  float yaw0_lf_;
-  float yaw0_lr_;
-  float yaw0_rf_;
-  float yaw0_rr_;
+  float yaw_offset_lf_;
+  float yaw_offset_lr_;
+  float yaw_offset_rf_;
+  float yaw_offset_rr_;
 
   // 各轮速度向量 -> 各轮转速和各舵角度
-  void convert(const float v[2], float yaw, float yaw0, float & angle, float & speed);
+  void convert(const float v[2], float yaw, float yaw_offset, float & angle, float & speed);
 };
 
 }  // namespace sp
