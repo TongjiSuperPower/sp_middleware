@@ -2,7 +2,7 @@
 
 namespace sp
 {
-PID::PID(float dt, float kp, float ki, float kd, float max_out, float max_iout, float alpha, bool angluar)
+PID::PID(float dt, float kp, float ki, float kd, float max_out, float max_iout, float alpha, bool angular)
 : dt_(dt), kp_(kp), ki_(ki), kd_(kd), max_out_(max_out), max_iout_(max_iout), alpha_(alpha), angular_(angular)
 {
   this->out = 0.0f;
