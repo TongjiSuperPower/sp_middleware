@@ -18,7 +18,7 @@ struct PIDData
   float dbuf[3] = {0};  // D项滤波器缓冲区
 
   float trapezoid = 0;   // 梯形积分
-  float dynamic_ki = 0;  // 动态积分
+  float dynamic_ki = 0;  // 梯形积分
 };
 
 class PID
