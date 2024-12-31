@@ -19,6 +19,18 @@ void DiffGear::calc_end_angle(float angle_l, float angle_r)
   this->roll = (sign_l_ * (angle_l - angle_l0_) - sign_r_ * (angle_r - angle_r0_)) / 2 / ratio_;
 }
 
+void DiffGear::calc_end_speed(float speed_l, float speed_r)
+{
+  this->v_pitch = (sign_l_ * speed_l + sign_r_ * speed_r) / 2;
+  this->v_roll = (sign_l_ * speed_l - sign_r_ * speed_r) / 2 / ratio_;
+}
+
+void DiffGear::calc_end_torque(float torque_l, float torque_r)
+{
+  this->t_pitch = (sign_l_ * torque_l + sign_r_ * torque_r);
+  this->t_roll = (sign_l_ * torque_l - sign_r_ * torque_r) * ratio_;
+}
+
 void DiffGear::calc_gear_speed(float v_pitch, float v_roll)
 {
   this->v_left = sign_l_ * (v_pitch + v_roll * ratio_);
