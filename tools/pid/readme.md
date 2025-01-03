@@ -14,8 +14,7 @@ target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
 
 ### 初始化
 ```cpp
-sp::PID motor_pid((dt,kp,ki,kd,max_out,max_iout,
-alpha,angular,dynamic);
+sp::PID motor_pid((dt,kp,ki,kd,max_out,max_iout,alpha,angular,dynamic);
 ```
 `dt`: 循环周期，单位为s
 
@@ -53,7 +52,7 @@ ans = motor_pid.out;
   - 功能：比例部分基于当前的误差计算控制输入。误差越大，控制输入越大。
   - 效果：可以快速减小误差，但通常会留下一个稳态误差。
   - 数学表达：
-  $$ P_{out} = K_p \times?e(t) $$
+  $$P_{out} = K_p \times?e(t)$$
   - 其中 $K_p$ 是比例增益， $e(t)$ 是当前误差。 
 
 ### I-积分环节；
