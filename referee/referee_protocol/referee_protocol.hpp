@@ -27,6 +27,7 @@ enum class CMD_ID : uint16_t
   POWER_HEAT_DATA = 0x0202,        // 实时底盘缓冲能量和射击热量数据
   ROBOT_POS = 0x0203,              // 机器人位置数据
   BUFF = 0x0204,                   // 机器人增益数据
+                                   // 没有0x0205    
   HURT_DATA = 0x0206,              // 伤害状态数据
   SHOOT_DATA = 0x0207,             // 实时射击数据
   PROJECTILE_ALLOWANCE = 0x0208,   // 允许发弹量
@@ -54,7 +55,7 @@ enum class CMD_ID : uint16_t
 
 #pragma pack(1)
 
-// 0x0001 场地事件数据
+// 0x0001 比赛状态数据
 struct GameStatus
 {
   uint8_t game_type : 4;   
@@ -130,6 +131,22 @@ struct EventData
   uint32_t reserved : 8;                        // bit 23-31
   // 保留
 }
+
+//// 0x0104 裁判警告数据
+struct RefereeWarning
+{
+  uint8_t level;
+  uint8_t offefending_robot_id;
+  uint8_t count;
+};
+
+// 0x0105 飞镖发射相关数据
+struct DartInfo
+{
+  uint8_t dart_remaining_time;
+  uint16_t dart_info;
+};
+
 
 // 0x0201 机器人状态数据
 struct RobotStatus
@@ -327,7 +344,7 @@ struct MapCommand
   uint16_t cmd_source;       // 信息来源 ID
 };
 
-// 0x0304 键鼠遥控数据
+// 0x0304 键鼠遥控数据 图传链路
 struct RemoteControl
 {
   int16_t mouse_x;
@@ -387,7 +404,7 @@ struct CustomInfo
   uint8_t user_data[30];  // 字符
 };
 
-// 0x0309 自定义控制器接收机器人数据
+// 0x0309 自定义控制器接收机器人数据 图传链路
 struct RobotCustomData
 {
   uint8_t data[30];
