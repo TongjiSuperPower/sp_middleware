@@ -308,6 +308,8 @@ struct RadarInfo
   uint8_t reserved                      : 5; // bits 3-7
 };
 
+// 0x0301 机器人交互数据
+// ToDo, 子内容太多，还没想好怎么写
 
 // 0x0302 自定义控制器与机器人交互数据
 struct CustomRobotData
