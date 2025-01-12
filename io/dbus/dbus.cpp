@@ -1,5 +1,7 @@
 #include "dbus.hpp"
 
+#include <cmath>
+
 namespace sp
 {
 static float get_stick(uint16_t raw) { return (raw - 1024) / 660.0f; }
