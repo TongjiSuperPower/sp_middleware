@@ -42,22 +42,46 @@ void DBus::update(uint16_t size, uint32_t stamp_ms)
   last_read_ms_ = stamp_ms;
 
   // 遥控器解析
+  float ch_rh = get_stick((buff_[0] | (buff_[1] << 8)) & 0x07ff);
+  float ch_rv = get_stick(((buff_[1] >> 3) | (buff_[2] << 5)) & 0x07ff);
+  float ch_lh = get_stick(((buff_[2] >> 6) | (buff_[3] << 2) | (buff_[4] << 10)) & 0x07ff);
+  float ch_lv = get_stick(((buff_[4] >> 1) | (buff_[5] << 7)) & 0x07ff);
+  float ch_lu = get_stick(((buff_[16] | (buff_[17] << 8)) & 0x07ff));
 
-  this->ch_rh = get_stick((buff_[0] | (buff_[1] << 8)) & 0x07ff);
-  this->ch_rv = get_stick(((buff_[1] >> 3) | (buff_[2] << 5)) & 0x07ff);
-  this->ch_lh = get_stick(((buff_[2] >> 6) | (buff_[3] << 2) | (buff_[4] << 10)) & 0x07ff);
-  this->ch_lv = get_stick(((buff_[4] >> 1) | (buff_[5] << 7)) & 0x07ff);
-  this->ch_lu = get_stick(((buff_[16] | (buff_[17] << 8)) & 0x07ff));
+  DBusSwitchMode sw_r = get_switch((buff_[5] >> 4) & 0x0003);
+  DBusSwitchMode sw_l = get_switch(((buff_[5] >> 4) & 0x000C) >> 2);
 
-  this->sw_r = get_switch((buff_[5] >> 4) & 0x0003);
-  this->sw_l = get_switch(((buff_[5] >> 4) & 0x000C) >> 2);
+  // 遥控器数据异常
+  if (
+    fabs(ch_rh) > 1.0f || fabs(ch_rv) > 1.0f || fabs(ch_lh) > 1.0f || fabs(ch_lv) > 1.0f ||
+    fabs(ch_lu) > 1.0f)
+    return;
 
   // 键鼠解析
-
   int16_t mouse_vx = (buff_[7] << 8) | buff_[6];
   int16_t mouse_vy = (buff_[9] << 8) | buff_[8];
   int16_t mouse_vs = (buff_[11] << 8) | buff_[10];
+
   uint16_t keyboard_value = (buff_[15] << 8) | buff_[14];
+
+  // 鼠标数据异常
+  if (
+    fabs(mouse_vx / 32768.0f) > 1.0f || fabs(mouse_vy / 32768.0f) > 1.0f ||
+    fabs(mouse_vs / 32768.0f) > 1.0f)
+    return;
+
+  // 遥控器赋值
+
+  this->ch_rh = ch_rh;
+  this->ch_rv = ch_rv;
+  this->ch_lh = ch_lh;
+  this->ch_lv = ch_lv;
+  this->ch_lu = ch_lu;
+
+  this->sw_r = sw_r;
+  this->sw_l = sw_l;
+
+  // 键鼠赋值
 
   this->mouse.vx = mouse_vx / 32768.0f;
   this->mouse.vy = mouse_vy / 32768.0f;
