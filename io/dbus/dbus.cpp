@@ -53,8 +53,7 @@ void DBus::update(uint16_t size, uint32_t stamp_ms)
 
   // 遥控器数据异常
   if (
-    fabs(ch_rh) > 1.0f || fabs(ch_rv) > 1.0f || fabs(ch_lh) > 1.0f || fabs(ch_lv) > 1.0f ||
-    fabs(ch_lu) > 1.0f)
+    fabs(ch_rh) > 1.0f || fabs(ch_rv) > 1.0f || fabs(ch_lh) > 1.0f || fabs(ch_lv) > 1.0f)
     return;
 
   // 键鼠解析
