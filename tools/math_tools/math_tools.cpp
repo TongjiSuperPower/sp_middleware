@@ -20,6 +20,10 @@ float limit_min_max(float input, float min, float max)
 
 float limit_max(float input, float max) { return limit_min_max(input, -max, max); }
 
+bool scope_min_max(float input, float min, float max) { return (input >= min && input <= max); }
+
+bool scope_max(float input, float max) { return scope_min_max(input, -max, max); }
+
 float uint_to_float(uint32_t input, float min, float max, size_t bits)
 {
   auto span = max - min;

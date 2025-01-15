@@ -18,6 +18,12 @@ float limit_min_max(float input, float min, float max);
 float limit_max(float input, float max);
 
 // [min, max]
+bool scope_min_max(float input, float min, float max);
+
+// [-max, max]
+bool scope_max(float input, float max);
+
+// [min, max]
 float uint_to_float(uint32_t input, float min, float max, size_t bits);
 
 // [min, max]
