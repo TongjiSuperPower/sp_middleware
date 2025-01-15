@@ -65,6 +65,71 @@ void Plotter::plot(
   send();
 }
 
+void Plotter::plot(
+  float value1, float value2, float value3, float value4, float value5, float value6, float value7)
+{
+  plot_frame_.size = 4 * 7;
+  plot_frame_.data[0] = value1;
+  plot_frame_.data[1] = value2;
+  plot_frame_.data[2] = value3;
+  plot_frame_.data[3] = value4;
+  plot_frame_.data[4] = value5;
+  plot_frame_.data[5] = value6;
+  plot_frame_.data[6] = value7;
+  send();
+}
+
+void Plotter::plot(
+  float value1, float value2, float value3, float value4, float value5, float value6, float value7,
+  float value8)
+{
+  plot_frame_.size = 4 * 8;
+  plot_frame_.data[0] = value1;
+  plot_frame_.data[1] = value2;
+  plot_frame_.data[2] = value3;
+  plot_frame_.data[3] = value4;
+  plot_frame_.data[4] = value5;
+  plot_frame_.data[5] = value6;
+  plot_frame_.data[6] = value7;
+  plot_frame_.data[7] = value8;
+  send();
+}
+
+void Plotter::plot(
+  float value1, float value2, float value3, float value4, float value5, float value6, float value7,
+  float value8, float value9)
+{
+  plot_frame_.size = 4 * 9;
+  plot_frame_.data[0] = value1;
+  plot_frame_.data[1] = value2;
+  plot_frame_.data[2] = value3;
+  plot_frame_.data[3] = value4;
+  plot_frame_.data[4] = value5;
+  plot_frame_.data[5] = value6;
+  plot_frame_.data[6] = value7;
+  plot_frame_.data[7] = value8;
+  plot_frame_.data[8] = value9;
+  send();
+}
+
+void Plotter::plot(
+  float value1, float value2, float value3, float value4, float value5, float value6, float value7,
+  float value8, float value9, float value10)
+{
+  plot_frame_.size = 4 * 10;
+  plot_frame_.data[0] = value1;
+  plot_frame_.data[1] = value2;
+  plot_frame_.data[2] = value3;
+  plot_frame_.data[3] = value4;
+  plot_frame_.data[4] = value5;
+  plot_frame_.data[5] = value6;
+  plot_frame_.data[6] = value7;
+  plot_frame_.data[7] = value8;
+  plot_frame_.data[8] = value9;
+  plot_frame_.data[9] = value10;
+  send();
+}
+
 void Plotter::send()
 {
   if (use_dma_) {

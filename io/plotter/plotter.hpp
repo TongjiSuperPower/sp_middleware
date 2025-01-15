@@ -27,6 +27,18 @@ public:
   void plot(float value1, float value2, float value3, float value4);
   void plot(float value1, float value2, float value3, float value4, float value5);
   void plot(float value1, float value2, float value3, float value4, float value5, float value6);
+  void plot(
+    float value1, float value2, float value3, float value4, float value5, float value6,
+    float value7);
+  void plot(
+    float value1, float value2, float value3, float value4, float value5, float value6,
+    float value7, float value8);
+  void plot(
+    float value1, float value2, float value3, float value4, float value5, float value6,
+    float value7, float value8, float value9);
+  void plot(
+    float value1, float value2, float value3, float value4, float value5, float value6,
+    float value7, float value8, float value9, float value10);
 
 private:
   UART_HandleTypeDef * huart_;
