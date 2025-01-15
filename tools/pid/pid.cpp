@@ -39,7 +39,7 @@ void PID::calc(float set, float fdb)
 
   // Ki
   this->data.trapezoid = (this->data.err[0] + this->data.err[1]) / 2 * dt_;  // 梯形积分
-  this->data.dynamic_ki = ki_ / (1 + this->data.err[0]);                     // 变速积分
+  this->data.dynamic_ki = ki_ / (1 + std::abs(this->data.err[0]));           // 变速积分
   this->data.iout = limit_max(
     this->data.iout + (dynamic_ ? this->data.dynamic_ki : ki_) * this->data.trapezoid, max_iout_);
 
