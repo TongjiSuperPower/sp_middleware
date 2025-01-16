@@ -9,6 +9,7 @@ Plotter::Plotter(UART_HandleTypeDef * huart, bool use_dma)
 
 void Plotter::plot(float value1)
 {
+  static_assert(PLOTTER_FLOAT_NUM >= 1);
   plot_frame_.size = 4 * 1;
   plot_frame_.data[0] = value1;
   send();
@@ -16,6 +17,7 @@ void Plotter::plot(float value1)
 
 void Plotter::plot(float value1, float value2)
 {
+  static_assert(PLOTTER_FLOAT_NUM >= 2);
   plot_frame_.size = 4 * 2;
   plot_frame_.data[0] = value1;
   plot_frame_.data[1] = value2;
@@ -24,6 +26,7 @@ void Plotter::plot(float value1, float value2)
 
 void Plotter::plot(float value1, float value2, float value3)
 {
+  static_assert(PLOTTER_FLOAT_NUM >= 3);
   plot_frame_.size = 4 * 3;
   plot_frame_.data[0] = value1;
   plot_frame_.data[1] = value2;
@@ -33,6 +36,7 @@ void Plotter::plot(float value1, float value2, float value3)
 
 void Plotter::plot(float value1, float value2, float value3, float value4)
 {
+  static_assert(PLOTTER_FLOAT_NUM >= 4);
   plot_frame_.size = 4 * 4;
   plot_frame_.data[0] = value1;
   plot_frame_.data[1] = value2;
@@ -43,6 +47,7 @@ void Plotter::plot(float value1, float value2, float value3, float value4)
 
 void Plotter::plot(float value1, float value2, float value3, float value4, float value5)
 {
+  static_assert(PLOTTER_FLOAT_NUM >= 5);
   plot_frame_.size = 4 * 5;
   plot_frame_.data[0] = value1;
   plot_frame_.data[1] = value2;
@@ -55,6 +60,7 @@ void Plotter::plot(float value1, float value2, float value3, float value4, float
 void Plotter::plot(
   float value1, float value2, float value3, float value4, float value5, float value6)
 {
+  static_assert(PLOTTER_FLOAT_NUM >= 6);
   plot_frame_.size = 4 * 6;
   plot_frame_.data[0] = value1;
   plot_frame_.data[1] = value2;
@@ -68,6 +74,7 @@ void Plotter::plot(
 void Plotter::plot(
   float value1, float value2, float value3, float value4, float value5, float value6, float value7)
 {
+  static_assert(PLOTTER_FLOAT_NUM >= 7);
   plot_frame_.size = 4 * 7;
   plot_frame_.data[0] = value1;
   plot_frame_.data[1] = value2;
@@ -83,6 +90,7 @@ void Plotter::plot(
   float value1, float value2, float value3, float value4, float value5, float value6, float value7,
   float value8)
 {
+  static_assert(PLOTTER_FLOAT_NUM >= 8);
   plot_frame_.size = 4 * 8;
   plot_frame_.data[0] = value1;
   plot_frame_.data[1] = value2;
@@ -99,6 +107,7 @@ void Plotter::plot(
   float value1, float value2, float value3, float value4, float value5, float value6, float value7,
   float value8, float value9)
 {
+  static_assert(PLOTTER_FLOAT_NUM >= 9);
   plot_frame_.size = 4 * 9;
   plot_frame_.data[0] = value1;
   plot_frame_.data[1] = value2;
@@ -116,6 +125,7 @@ void Plotter::plot(
   float value1, float value2, float value3, float value4, float value5, float value6, float value7,
   float value8, float value9, float value10)
 {
+  static_assert(PLOTTER_FLOAT_NUM >= 10);
   plot_frame_.size = 4 * 10;
   plot_frame_.data[0] = value1;
   plot_frame_.data[1] = value2;

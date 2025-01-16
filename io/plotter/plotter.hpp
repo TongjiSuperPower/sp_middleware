@@ -5,7 +5,7 @@
 
 namespace sp
 {
-constexpr size_t PLOTTER_FLOAT_NUM = 6;
+constexpr size_t PLOTTER_FLOAT_NUM = 10;
 
 #pragma pack(1)
 struct PlotFrame
