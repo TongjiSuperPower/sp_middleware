@@ -7,23 +7,23 @@ namespace sp
 {
 enum class SuperCapMode
 {
-  AUTOMODE = 0x00,     // ×Ô¶¯Ä£Ê½£¨Ä¬ÈÏ£©
-  DISOUTPUT,           // Ö»³ä²»·Å
-  DISCHARGE,           // Ö»·Å²»³ä
-  DISCHARGE_DISOUTPUT  // ²»³ä²»·Å
+  AUTOMODE = 0x00,     // è‡ªåŠ¨æ¨¡å¼ï¼ˆé»˜è®¤ï¼‰
+  DISOUTPUT,           // åªå……ä¸æ”¾
+  DISCHARGE,           // åªæ”¾ä¸å……
+  DISCHARGE_DISOUTPUT  // ä¸å……ä¸æ”¾
 };
 
-constexpr float CAPACITANCE = 4.5454f;  // µçÈİÈİÁ¿
+constexpr float CAPACITANCE = 4.5454f;  // ç”µå®¹å®¹é‡
 
 class SuperCap
 {
 public:
-  const uint16_t rx_id = 0x301;  // µçÈİ·´À¡Ö¡ID
-  const uint16_t tx_id = 0x300;  // µçÈİ¿ØÖÆÖ¡ID
+  const uint16_t rx_id = 0x301;  // ç”µå®¹åé¦ˆå¸§ID
+  const uint16_t tx_id = 0x300;  // ç”µå®¹æ§åˆ¶å¸§ID
 
-  float power_in;   // µçÈİÊäÈë¹¦ÂÊ
-  float power_out;  // µçÈİ³ä·Åµç¹¦ÂÊ
-  float voltage;    // µçÈİµçÑ¹£¨·Åµ½3V£¬È»ºó3v->6Vºó¿ÉÔÙ´Î·Åµç£©
+  float power_in;   // ç”µå®¹è¾“å…¥åŠŸç‡
+  float power_out;  // ç”µå®¹å……æ”¾ç”µåŠŸç‡
+  float voltage;    // ç”µå®¹ç”µå‹ï¼ˆæ”¾åˆ°3Vï¼Œç„¶å3v->6Våå¯å†æ¬¡æ”¾ç”µï¼‰
 
   float cap_energy;
 
@@ -37,10 +37,10 @@ public:
 private:
   SuperCapMode mode_;
 
-  uint8_t temputer_;  // ÎÂ¶È(ÏÖ½×¶Îºã¶¨Îª25)
-  uint8_t status_;    // ×´Ì¬±êÖ¾Î»£¨ÏÖ½×¶Î±£ÁôÎª0x10£©
+  uint8_t temputer_;  // æ¸©åº¦(ç°é˜¶æ®µæ’å®šä¸º25)
+  uint8_t status_;    // çŠ¶æ€æ ‡å¿—ä½ï¼ˆç°é˜¶æ®µä¿ç•™ä¸º0x10ï¼‰
 
-  uint32_t last_read_ms_;  // ÉÏÒ»´Î¶ÁÈ¡Êı¾İµÄÊ±¼ä´Á
+  uint32_t last_read_ms_;  // ä¸Šä¸€æ¬¡è¯»å–æ•°æ®çš„æ—¶é—´æˆ³
 };
 
 }  // namespace sp

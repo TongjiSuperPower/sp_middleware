@@ -8,17 +8,17 @@ bool SuperCap::is_alive(uint32_t now_ms) const { return (now_ms - last_read_ms_ 
 
 void SuperCap::read(uint8_t * data, uint32_t stamp_ms)
 {
-  // Êı¾İ½âÎö
+  // æ•°æ®è§£æ
   this->power_in = ((int16_t)(((data)[1] << 8) | (data)[0])) / 10.0f;
   this->power_out = ((int16_t)(((data)[3] << 8) | (data)[2])) / 10.0f;
   this->voltage = ((int16_t)(((data)[5] << 8) | (data)[4])) / 100.0f;
   this->temputer_ = (data)[6];
   this->status_ = (data)[7];
 
-  // ¼ÆËãÄÜÁ¿
+  // è®¡ç®—èƒ½é‡
   this->cap_energy = 0.5f * CAPACITANCE * this->voltage * this->voltage;
 
-  // ¸üĞÂÊ±¼ä´Á
+  // æ›´æ–°æ—¶é—´æˆ³
   last_read_ms_ = stamp_ms;
 }
 
@@ -30,8 +30,8 @@ void SuperCap::write(
   data[1] = chassis_power_limit >> 8;
   data[2] = chassis_power_limit;
 
-  // data[3] = ±£Áô
-  // data[4] = ±£Áô
+  // data[3] = ä¿ç•™
+  // data[4] = ä¿ç•™
 
   data[5] = buffer_energy >> 8;
   data[6] = buffer_energy;

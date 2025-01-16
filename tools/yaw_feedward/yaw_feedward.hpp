@@ -8,15 +8,15 @@ namespace sp
 class YawFeedward
 {
 private:
-  const float dt_;       // 控制周期，单位s
-  const float inertia_;  // 转动惯量，单位kg·m^2
-  const float k_ff_;     // 前馈增益，单位N·m/(rad/s)
-  float alpha_set_;      // 目标角加速度，单位rad/s
+  const float dt_;       // 鎺у埗鍛ㄦ湡锛屽崟浣峴
+  const float inertia_;  // 杞姩鎯噺锛屽崟浣峩g路m^2
+  const float k_ff_;     // 鍓嶉澧炵泭锛屽崟浣峃路m/(rad/s)
+  float alpha_set_;      // 鐩爣瑙掑姞閫熷害锛屽崟浣峳ad/s
 
-  sp::LowPassFilter speed_filter{0.1f};  // 速度低通滤波器
+  sp::LowPassFilter speed_filter{0.1f};  // 閫熷害浣庨�氭护娉㈠櫒
 
 public:
-  float out = 0;  // 输出力矩，单位N·m（只读）
+  float out = 0;  // 杈撳嚭鍔涚煩锛屽崟浣峃路m锛堝彧璇伙級
   YawFeedward(float dt, float inertia, float k_ff = 1.0f);
   void calc(float speed_set);
 };

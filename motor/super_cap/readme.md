@@ -1,23 +1,23 @@
-# Ê¹ÓÃ·½·¨
+# ä½¿ç”¨æ–¹æ³•
 
-### ±à¼­`CMakeLists.txt`
+### ç¼–è¾‘`CMakeLists.txt`
 
 ```cmake
 target_sources(${CMAKE_PROJECT_NAME} PRIVATE
-    sp_middleware/motor/super_cap/super_cap.cpp # <- Ìí¼ÓÕâÒ»ÐÐ
+    sp_middleware/motor/super_cap/super_cap.cpp # <- æ·»åŠ è¿™ä¸€è¡Œ
 )
 
 target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
-    sp_middleware/ # <- Ìí¼ÓÕâÒ»ÐÐ
+    sp_middleware/ # <- æ·»åŠ è¿™ä¸€è¡Œ
 )
 ```
-### ³õÊ¼»¯
+### åˆå§‹åŒ–
 ```cpp
 sp::SuperCap::SuperCap(SuperCapMode mode);
 ```
-`mode`:³¬¼¶µçÈÝµÄÊ¹ÓÃÄ£Ê½
+`mode`:è¶…çº§ç”µå®¹çš„ä½¿ç”¨æ¨¡å¼
 
-Ê¹ÓÃ`SuperCapMode`
+ä½¿ç”¨`SuperCapMode`
 
 ### read
 ```cpp
