@@ -5,20 +5,11 @@
 namespace sp
 {
 DM_Motor::DM_Motor(uint16_t can_id, uint16_t master_id, float pmax, float vmax, float tmax)
-: rx_id(master_id),
-  tx_id(can_id),
-  angle(0),
-  speed(0),
-  torque(0),
-  pmax_(pmax),
-  vmax_(vmax),
-  tmax_(tmax),
-  has_read_(false),
-  cmd_torque_(0)
+: rx_id(master_id), tx_id(can_id), pmax_(pmax), vmax_(vmax), tmax_(tmax)
 {
 }
 
-bool DM_Motor::is_open() const { return has_read_; }
+bool DM_Motor::is_open() const { return this->error == 1; }
 
 bool DM_Motor::is_alive(uint32_t now_ms) const
 {
@@ -27,9 +18,9 @@ bool DM_Motor::is_alive(uint32_t now_ms) const
 
 void DM_Motor::read(uint8_t * data, uint32_t stamp_ms)
 {
-  has_read_ = true;
   last_read_ms_ = stamp_ms;
 
+  this->error = data[0] >> 4;
   this->angle = uint_to_float((data[1] << 8) | data[2], -pmax_, pmax_, 16);
   this->speed = uint_to_float((data[3] << 4) | (data[4] >> 4), -vmax_, vmax_, 12);
   this->torque = uint_to_float(((data[4] & 0xF) << 8) | data[5], -tmax_, tmax_, 12);
