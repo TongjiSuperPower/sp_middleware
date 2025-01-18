@@ -9,7 +9,7 @@ DM_Motor::DM_Motor(uint16_t can_id, uint16_t master_id, float pmax, float vmax, 
 {
 }
 
-bool DM_Motor::is_open() const { return this->error == 1; }
+bool DM_Motor::is_open() const { return has_read_; }
 
 bool DM_Motor::is_alive(uint32_t now_ms) const
 {
@@ -18,6 +18,7 @@ bool DM_Motor::is_alive(uint32_t now_ms) const
 
 void DM_Motor::read(uint8_t * data, uint32_t stamp_ms)
 {
+  has_read_ = true;
   last_read_ms_ = stamp_ms;
 
   this->error = data[0] >> 4;

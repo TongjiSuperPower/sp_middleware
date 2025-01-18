@@ -20,7 +20,7 @@ public:
   const uint16_t rx_id;  // 电机反馈帧ID
   const uint16_t tx_id;  // 电机控制帧ID
 
-  // 只读! 0: 失能, 1: 使能, 8: 超压, 9: 欠压, A: 过流, B: MOS过温, C: 线圈过温, D: 通讯丢失, E: 过载
+  // 只读! 8: 超压, 9: 欠压, A: 过流, B: MOS过温, C: 线圈过温, D: 通讯丢失, E: 过载
   uint8_t error = 0;
 
   float angle = 0;   // 只读! 单位: rad
@@ -42,6 +42,7 @@ private:
   const float vmax_;
   const float tmax_;
 
+  bool has_read_ = false;
   uint32_t last_read_ms_;
 
   float cmd_torque_;
