@@ -399,9 +399,9 @@ struct __attribute__((packed)) InteractionFigure
   uint8_t figure_name[3];  // 在图形删除、修改等操作中，作为索引
 
   // bit 0-2：图形操作 0：空操作 1：增加 2：修改 3：删除
-  uint32_t operate_tpye : 3;
+  uint32_t operate_type : 3;
   // bit 3-5：图形类型 0：直线 1：矩形 2：正圆 3：椭圆 4：圆弧 5：浮点数 6：整型数 7：字符
-  uint32_t figure_tpye : 3;
+  uint32_t figure_type : 3;
   // bit 6-9：图层数（0~9）
   uint32_t layer : 4;
   // bit 10-13：颜色 0：红/蓝（己方颜色） 1：黄色 2：绿色 3：橙色 4：紫红色 5：粉色 6：青色 7：黑色 8：白色
@@ -455,7 +455,7 @@ struct __attribute__((packed)) ExtClientCustomCharacter
 
 // 0x0301 0x0121 雷达自主决策指令 TODO
 
-// 0x0302 自定义控制器与机器人交互数据
+// 0x0302 自定义控制器与机器人交互数据 图传链路
 struct __attribute__((packed)) CustomRobotData
 {
   uint8_t data[30];
