@@ -128,7 +128,7 @@ void PM02::update(uint8_t * frame_start, uint16_t size)
     case referee::CMD_ID::MAP_COMMAND:
       std::memcpy(&(this->map_command), frame_start + referee::DATA_START, data_len);
       break;
-      
+
     default:
       break;
   }

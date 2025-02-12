@@ -74,7 +74,7 @@ struct GameStatus
   //       4: 比赛中
   //       5: 比赛结算中
   uint16_t stage_remain_time;  // 单位: s
-  uint64_t sync_timestamp;  // UNIX时间，当机器人正确连接到裁判系统的NTP服务器后生效
+  uint64_t sync_timestamp;     // UNIX时间，当机器人正确连接到裁判系统的NTP服务器后生效
 };
 
 // 0x0002 比赛结果数据
@@ -185,11 +185,11 @@ struct RobotPos
 // 0x0204 机器人增益数据
 struct Buff
 {
-  uint8_t recovery_y_buff;  // 机器人回血增益（百分比，值为 10 表示每秒恢复血量上限的 10%）
-  uint8_t cooling_buff;  // 机器人射击热量冷却倍率（直接值，值为 5 表示 5 倍冷却）
-  uint8_t defence_buff;  // 机器人防御增益（百分比，值为 50 表示 50%防御增益）
+  uint8_t recovery_y_buff;     // 机器人回血增益（百分比，值为 10 表示每秒恢复血量上限的 10%）
+  uint8_t cooling_buff;        // 机器人射击热量冷却倍率（直接值，值为 5 表示 5 倍冷却）
+  uint8_t defence_buff;        // 机器人防御增益（百分比，值为 50 表示 50%防御增益）
   uint8_t vulnerability_buff;  // 机器人负防御增益（百分比，值为 30 表示-30%防御增益）
-  uint16_t attack_buff;  // 机器人攻击增益（百分比，值为 50 表示 50%攻击增益）
+  uint16_t attack_buff;        // 机器人攻击增益（百分比，值为 50 表示 50%攻击增益）
   uint8_t remaining_energy;
   // bit  0-4：机器人剩余能量值反馈，
   // 以 16 进制标识机器人剩余能量值比例，
@@ -221,8 +221,8 @@ struct HurtData
 // 0x0207 实时射击数据
 struct ShootData
 {
-  uint8_t bullet_type;  // 1: 17mm弹丸, 2: 42mm弹丸
-  uint8_t shooter_number;  // 1: 第1个17mm发射机构, 2: 第2个17mm发射机构, 3: 42mm发射机构
+  uint8_t bullet_type;          // 1: 17mm弹丸, 2: 42mm弹丸
+  uint8_t shooter_number;       // 1: 第1个17mm发射机构, 2: 第2个17mm发射机构, 3: 42mm发射机构
   uint8_t launching_frequency;  // 单位: Hz
   float initial_speed;          // 单位: m/s
 };
@@ -236,33 +236,33 @@ struct ProjectileAllowance
 };
 
 // 0x0209 机器人RFID模块状态
-struct RfidStatus
+struct RFIDStatus
 {
-  uint32_t friendly_base : 1;       // bit 0：己方基地增益点
-  uint32_t friendly_central : 1;    // bit 1：己方中央高地增益点
-  uint32_t enemy_central : 1;       // bit 2：对方中央高地增益点
-  uint32_t friendly_trapezoid : 1;  // bit 3：己方梯形高地增益点
-  uint32_t enemy_trapezoid : 1;     // bit 4：对方梯形高地增益点
-  uint32_t friendly_flying_slope_f : 1;  // bit 5：己方地形跨越增益点（飞坡前，靠近己方一侧）
-  uint32_t friendly_flying_slope_b : 1;  // bit 6：己方地形跨越增益点（飞坡后，靠近己方一侧）
-  uint32_t enemy_flying_slope_f : 1;  // bit 7：对方地形跨越增益点（飞坡前，靠近对方一侧）
-  uint32_t enemy_flying_slope_b : 1;  // bit 8：对方地形跨越增益点（飞坡后，靠近对方一侧）
-  uint32_t friendly_ch_down : 1;    // bit 9：己方地形跨越增益点（中央高地下方）
-  uint32_t friendly_ch_up : 1;      // bit 10：己方地形跨越增益点（中央高地上方）
-  uint32_t enemy_ch_down : 1;       // bit 11：对方地形跨越增益点（中央高地下方）
-  uint32_t enemy_ch_up : 1;         // bit 12：对方地形跨越增益点（中央高地上方）
-  uint32_t friendly_road_down : 1;  // bit 13：己方地形跨越增益点（公路下方）
-  uint32_t friendly_road_up : 1;    // bit 14：己方地形跨越增益点（公路上方）
-  uint32_t enemy_road_down : 1;     // bit 15：对方地形跨越增益点（公路下方）
-  uint32_t enemy_road_up : 1;       // bit 16：对方地形跨越增益点（公路上方）
-  uint32_t friendly_fort : 1;       // bit 17：己方堡垒增益点
-  uint32_t friendly_outpost : 1;    // bit 18：己方前哨站增益点
+  uint32_t friendly_base : 1;             // bit 0：己方基地增益点
+  uint32_t friendly_central : 1;          // bit 1：己方中央高地增益点
+  uint32_t enemy_central : 1;             // bit 2：对方中央高地增益点
+  uint32_t friendly_trapezoid : 1;        // bit 3：己方梯形高地增益点
+  uint32_t enemy_trapezoid : 1;           // bit 4：对方梯形高地增益点
+  uint32_t friendly_flying_slope_f : 1;   // bit 5：己方地形跨越增益点（飞坡前，靠近己方一侧）
+  uint32_t friendly_flying_slope_b : 1;   // bit 6：己方地形跨越增益点（飞坡后，靠近己方一侧）
+  uint32_t enemy_flying_slope_f : 1;      // bit 7：对方地形跨越增益点（飞坡前，靠近对方一侧）
+  uint32_t enemy_flying_slope_b : 1;      // bit 8：对方地形跨越增益点（飞坡后，靠近对方一侧）
+  uint32_t friendly_ch_down : 1;          // bit 9：己方地形跨越增益点（中央高地下方）
+  uint32_t friendly_ch_up : 1;            // bit 10：己方地形跨越增益点（中央高地上方）
+  uint32_t enemy_ch_down : 1;             // bit 11：对方地形跨越增益点（中央高地下方）
+  uint32_t enemy_ch_up : 1;               // bit 12：对方地形跨越增益点（中央高地上方）
+  uint32_t friendly_road_down : 1;        // bit 13：己方地形跨越增益点（公路下方）
+  uint32_t friendly_road_up : 1;          // bit 14：己方地形跨越增益点（公路上方）
+  uint32_t enemy_road_down : 1;           // bit 15：对方地形跨越增益点（公路下方）
+  uint32_t enemy_road_up : 1;             // bit 16：对方地形跨越增益点（公路上方）
+  uint32_t friendly_fort : 1;             // bit 17：己方堡垒增益点
+  uint32_t friendly_outpost : 1;          // bit 18：己方前哨站增益点
   uint32_t friendly_supply_no_trade : 1;  // bit 19：己方与兑换区不重叠的补给区 / RMUL 补给区
-  uint32_t friendly_supply_trade : 1;  // bit 20：己方与兑换区重叠的补给区
-  uint32_t friendly_big_resource : 1;  // bit 21：己方大资源岛增益点
-  uint32_t enemy_big_resource : 1;     // bit 22：对方大资源岛增益点
-  uint32_t center_point : 1;           // bit 23：中心增益点（仅 RMUL 适用）
-  uint32_t reserved : 8;               // bit 24-31：保留
+  uint32_t friendly_supply_trade : 1;     // bit 20：己方与兑换区重叠的补给区
+  uint32_t friendly_big_resource : 1;     // bit 21：己方大资源岛增益点
+  uint32_t enemy_big_resource : 1;        // bit 22：对方大资源岛增益点
+  uint32_t center_point : 1;              // bit 23：中心增益点（仅 RMUL 适用）
+  uint32_t reserved : 8;                  // bit 24-31：保留
 };
 
 // 0x020A 飞镖选手端指令数据
@@ -307,14 +307,14 @@ struct RadarMarkData
 struct SentryInfo
 {
   uint32_t allowed_fire_amount : 11;  // bits 0-10  : 除远程兑换外，哨兵机器人成功兑换的允许发弹量
-  uint32_t remote_exchange_fire_count : 4;  // bits 11-14 : 哨兵机器人成功远程兑换允许发弹量的次数
+  uint32_t remote_exchange_fire_count : 4;    // bits 11-14 : 哨兵机器人成功远程兑换允许发弹量的次数
   uint32_t remote_exchange_health_count : 4;  // bits 15-18 : 哨兵机器人成功远程兑换血量的次数
-  uint32_t can_confirm_free_resurrect : 1;  // bit 19     : 哨兵机器人当前是否可以确认免费复活
+  uint32_t can_confirm_free_resurrect : 1;    // bit 19     : 哨兵机器人当前是否可以确认免费复活
   uint32_t can_exchange_immediate_resurrect : 1;  // bit 20     : 哨兵机器人当前是否可以兑换立即复活
   uint32_t
     immediate_resurrect_cost : 10;  // bits 21-30 : 哨兵机器人当前若兑换立即复活需要花费的金币数
-  uint32_t reserved1 : 1;                       // bit 31     : 保留
-  uint16_t is_out_of_battle : 1;                // bit 0      : 哨兵当前是否处于脱战状态
+  uint32_t reserved1 : 1;           // bit 31     : 保留
+  uint16_t is_out_of_battle : 1;    // bit 0      : 哨兵当前是否处于脱战状态
   uint16_t team_17mm_remaining_exchanges : 11;  // bits 1-11  : 队伍 17mm 允许发弹量的剩余可兑换数
   uint16_t reserved2 : 4;                       // bits 12-15 : 保留
 };
@@ -326,7 +326,7 @@ struct RadarInfo
     double_vul_trigger_chance : 2;  // bits 0-1 : 雷达拥有触发双倍易伤的机会（0~2），开局为 0，最大可达 2
   uint8_t
     opponent_in_double_vulnerability : 1;  // bit 2 : 对方是否正在被触发双倍易伤 0：对方未被触发双倍易伤 1：对方正在被触发双倍易伤
-  uint8_t reserved : 5;                    // bits 3-7
+  uint8_t reserved : 5;  // bits 3-7
 };
 
 // 0x0301 机器人交互数据
@@ -356,7 +356,7 @@ struct RemoteControl
   int16_t mouse_z;
   int8_t left_button_down;   // 0: 未按下, 1: 按下
   int8_t right_button_down;  // 0: 未按下, 1: 按下
-  uint16_t keyboard_value;  // 每个bit对应一个按键, 详见《RoboMaster裁判系统串口协议附录.pdf》
+  uint16_t keyboard_value;   // 每个bit对应一个按键, 详见《RoboMaster裁判系统串口协议附录.pdf》
   uint16_t reserved;
 };
 
@@ -392,7 +392,7 @@ struct CustomClientData
 // 0x0307 选手端小地图接收哨兵数据
 struct MapData
 {
-  uint8_t intention;  // 1：到目标点攻击 2：到目标点防守 3：移动到目标点
+  uint8_t intention;          // 1：到目标点攻击 2：到目标点防守 3：移动到目标点
   uint16_t start_position_x;  // 路径起点 x 轴坐标，单位：dm
   uint16_t start_position_y;  // 路径起点 y 轴坐标，单位：dm
   int8_t delta_x[49];         // 路径点 x 轴坐标偏移，单位：dm
