@@ -53,6 +53,47 @@ enum class CMD_ID : uint16_t
   CUSTOM_CLIENT_DATA = 0x0306,  // 自定义控制器与选手端交互数据
 };
 
+enum class ROBOT_ID : uint8_t
+{
+  RED_HERO = 1,
+  RED_ENGINEER = 2,
+  RED_STANDARD_3 = 3,
+  RED_STANDARD_4 = 4,
+  RED_STANDARD_5 = 5,
+  RED_AERIAL = 6,
+  RED_SENTRY = 7,
+  RED_RADAR = 9,
+  RED_OUTPOST = 10,
+  RED_BASE = 11,
+  BLUE_HERO = 101,
+  BLUE_ENGINEER = 102,
+  BLUE_STANDARD_3 = 103,
+  BLUE_STANDARD_4 = 104,
+  BLUE_STANDARD_5 = 105,
+  BLUE_AERIAL = 106,
+  BLUE_SENTRY = 107,
+  BLUE_RADAR = 109,
+  BLUE_OUTPOST = 110,
+  BLUE_BASE = 111
+};
+
+enum class CLIENT_ID : uint16_t
+{
+  RED_HERO_CLIENT = 0x0101,
+  RED_ENGINEER_CLIENT = 0x0102,
+  RED_STANDARD_3_CLIENT = 0x0103,
+  RED_STANDARD_4_CLIENT = 0x0104,
+  RED_STANDARD_5_CLIENT = 0x0105,
+  RED_AERIAL_CLIENT = 0x0106,
+  BLUE_HERO_CLIENT = 0x0165,
+  BLUE_ENGINEER_CLIENT = 0x0166,
+  BLUE_STANDARD_3_CLIENT = 0x0167,
+  BLUE_STANDARD_4_CLIENT = 0x0168,
+  BLUE_STANDARD_5_CLIENT = 0x0169,
+  BLUE_AERIAL_CLIENT = 0x016A,
+  REFEREE_SERVER = 0x8080
+};
+
 // 0x0001 比赛状态数据
 struct __attribute__((packed)) GameStatus
 {
@@ -328,6 +369,20 @@ struct __attribute__((packed)) RadarInfo
 };
 
 // 0x0301 机器人交互数据
+enum class DATA_CMD_ID : uint16_t
+{
+  // 0x0200~0x02FF 机器人之间通信 TODO
+
+  INTERACTION_LAYER_DELETE = 0x0100,     // 选手端删除图层
+  INTERACTION_FIGURE = 0x0101,           // 选手端绘制一个图形
+  INTERACTION_FIGURE_2 = 0x0102,         // 选手端绘制两个图形
+  INTERACTION_FIGURE_5 = 0x0103,         // 选手端绘制五个图形
+  INTERACTION_FIGURE_7 = 0x0104,         // 选手端绘制七个图形
+  EXT_CLIENT_CUSTOM_CHARACTER = 0x0110,  // 选手端绘制字符图形
+  SENTRY_CMD = 0x0120,                   // 哨兵自主决策指令 TODO
+  RADAR_CMD = 0x0121,                    // 雷达自主决策指令 TODO
+};
+
 struct __attribute__((packed)) RobotInteractionData
 {
   uint16_t data_cmd_id;
@@ -335,6 +390,75 @@ struct __attribute__((packed)) RobotInteractionData
   uint16_t receiver_id;
   uint8_t user_data[112];  // 最大为112
 };
+
+// 0x0301 0x0100 选手端删除图层
+struct __attribute__((packed)) InteractionLayerDelete
+{
+  uint8_t delete_type;  // 0：空操作 1：删除图层 2：删除所有
+  uint8_t layer;        // 图层数：0~9
+};
+
+// 0x0301 0x0101 选手端绘制一个图形
+struct __attribute__((packed)) InteractionFigure
+{
+  uint8_t figure_name[3];  // 在图形删除、修改等操作中，作为索引
+
+  // bit 0-2：图形操作 0：空操作 1：增加 2：修改 3：删除
+  uint32_t operate_tpye : 3;
+  // bit 3-5：图形类型 0：直线 1：矩形 2：正圆 3：椭圆 4：圆弧 5：浮点数 6：整型数 7：字符
+  uint32_t figure_tpye : 3;
+  // bit 6-9：图层数（0~9）
+  uint32_t layer : 4;
+  // bit 10-13：颜色 0：红/蓝（己方颜色） 1：黄色 2：绿色 3：橙色 4：紫红色 5：粉色 6：青色 7：黑色 8：白色
+  uint32_t color : 4;
+  // bit 14-22：根据绘制的图形不同，含义不同
+  uint32_t details_a : 9;
+  // bit 23-31：根据绘制的图形不同，含义不同
+  uint32_t details_b : 9;
+
+  // bit 0-9：线宽，建议字体大小与线宽比例为 10：1
+  uint32_t width : 10;
+  // bit 10-20：起点/圆心 x 坐标
+  uint32_t start_x : 11;
+  // bit 21-31：起点/圆心 y 坐标
+  uint32_t start_y : 11;
+
+  // bit 0-9：根据绘制的图形不同，含义不同
+  uint32_t details_c : 10;
+  // bit 10-20：根据绘制的图形不同，含义不同
+  uint32_t details_d : 11;
+  // bit 21-31：根据绘制的图形不同，含义不同
+  uint32_t details_e : 11;
+};
+
+// 0x0301 0x0102 选手端绘制两个图形
+struct __attribute__((packed)) InteractionFigure2
+{
+  InteractionFigure interaction_figures[2];
+};
+
+// 0x0301 0x0103 选手端绘制五个图形
+struct __attribute__((packed)) InteractionFigure5
+{
+  InteractionFigure interaction_figures[5];
+};
+
+// 0x0301 0x0104 选手端绘制七个图形
+struct __attribute__((packed)) InteractionFigure7
+{
+  InteractionFigure interaction_figures[7];
+};
+
+// 0x0301 0x0110 选手端绘制字符图形
+struct __attribute__((packed)) ExtClientCustomCharacter
+{
+  InteractionFigure interaction_figure;
+  uint8_t data[30];
+};
+
+// 0x0301 0x0120 哨兵自主决策指令 TODO
+
+// 0x0301 0x0121 雷达自主决策指令 TODO
 
 // 0x0302 自定义控制器与机器人交互数据
 struct __attribute__((packed)) CustomRobotData
