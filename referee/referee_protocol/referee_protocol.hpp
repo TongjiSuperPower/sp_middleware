@@ -13,7 +13,7 @@ constexpr size_t CMD_ID_LEN = 2;
 constexpr size_t TAIL_LEN = 2;
 constexpr size_t DATA_START = HEAD_LEN + CMD_ID_LEN;
 
-enum class CMD_ID : uint16_t
+enum class CmdID : uint16_t
 {
   GAME_STATUS = 0x0001,    // 比赛状态数据
   GAME_RESULT = 0x0002,    // 比赛结果数据
@@ -53,7 +53,7 @@ enum class CMD_ID : uint16_t
   CUSTOM_CLIENT_DATA = 0x0306,  // 自定义控制器与选手端交互数据
 };
 
-enum class ROBOT_ID : uint8_t
+enum class RobotID : uint8_t
 {
   RED_HERO = 1,
   RED_ENGINEER = 2,
@@ -77,7 +77,7 @@ enum class ROBOT_ID : uint8_t
   BLUE_BASE = 111
 };
 
-enum class CLIENT_ID : uint16_t
+enum class ClientID : uint16_t
 {
   RED_HERO_CLIENT = 0x0101,
   RED_ENGINEER_CLIENT = 0x0102,
@@ -369,7 +369,7 @@ struct __attribute__((packed)) RadarInfo
 };
 
 // 0x0301 机器人交互数据
-enum class DATA_CMD_ID : uint16_t
+enum class DataCmdID : uint16_t
 {
   // 0x0200~0x02FF 机器人之间通信 TODO
 

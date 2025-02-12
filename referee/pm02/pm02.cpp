@@ -37,95 +37,95 @@ void PM02::update(uint8_t * frame_start, uint16_t size)
   if (size < frame_len) return;
   if (!check_crc16(frame_start, frame_len)) return;
 
-  auto cmd_id = referee::CMD_ID((frame_start[6] << 8) | frame_start[5]);
+  auto cmd_id = referee::CmdID((frame_start[6] << 8) | frame_start[5]);
 
   switch (cmd_id) {
     // 0x0001 比赛状态数据
-    case referee::CMD_ID::GAME_STATUS:
+    case referee::CmdID::GAME_STATUS:
       std::memcpy(&(this->game_status), frame_start + referee::DATA_START, data_len);
       break;
     // 0x0002 比赛结果数据
-    case referee::CMD_ID::GAME_RESULT:
+    case referee::CmdID::GAME_RESULT:
       std::memcpy(&(this->game_result), frame_start + referee::DATA_START, data_len);
       break;
     // 0x0003 比赛机器人血量数据
-    case referee::CMD_ID::GAME_ROBOT_HP:
+    case referee::CmdID::GAME_ROBOT_HP:
       std::memcpy(&(this->game_robot_hp), frame_start + referee::DATA_START, data_len);
       break;
 
     // 0x0101 机器人事件数据
-    case referee::CMD_ID::EVENT_DATA:
+    case referee::CmdID::EVENT_DATA:
       std::memcpy(&(this->event), frame_start + referee::DATA_START, data_len);
       break;
     // 0x0104 裁判警告数据
-    case referee::CMD_ID::REFEREE_WARNING:
+    case referee::CmdID::REFEREE_WARNING:
       std::memcpy(&(this->referee_warning), frame_start + referee::DATA_START, data_len);
       break;
     // 0x0105 飞镖发射相关数据
-    case referee::CMD_ID::DRAT_INFO:
+    case referee::CmdID::DRAT_INFO:
       std::memcpy(&(this->dart_info), frame_start + referee::DATA_START, data_len);
       break;
 
     // 0x0201 机器人性能体系数据
-    case referee::CMD_ID::ROBOT_STATUS:
+    case referee::CmdID::ROBOT_STATUS:
       std::memcpy(&(this->robot_status), frame_start + referee::DATA_START, data_len);
       break;
     // 0x0202 实时底盘缓冲能量和射击热量数据
-    case referee::CMD_ID::POWER_HEAT_DATA:
+    case referee::CmdID::POWER_HEAT_DATA:
       std::memcpy(&(this->power_heat), frame_start + referee::DATA_START, data_len);
       break;
     // 0x0203 机器人位置数据
-    case referee::CMD_ID::ROBOT_POS:
+    case referee::CmdID::ROBOT_POS:
       std::memcpy(&(this->robot_pos), frame_start + referee::DATA_START, data_len);
       break;
     // 0x0204 机器人增益数据
-    case referee::CMD_ID::BUFF:
+    case referee::CmdID::BUFF:
       std::memcpy(&(this->buff), frame_start + referee::DATA_START, data_len);
       break;
     // 没有0x0205
     // 0x0206 伤害状态数据
-    case referee::CMD_ID::HURT_DATA:
+    case referee::CmdID::HURT_DATA:
       std::memcpy(&(this->hurt), frame_start + referee::DATA_START, data_len);
       break;
     // 0x0207 实时射击数据
-    case referee::CMD_ID::SHOOT_DATA:
+    case referee::CmdID::SHOOT_DATA:
       std::memcpy(&(this->shoot), frame_start + referee::DATA_START, data_len);
       break;
     // 0x0208 允许发弹量
-    case referee::CMD_ID::PROJECTILE_ALLOWANCE:
+    case referee::CmdID::PROJECTILE_ALLOWANCE:
       std::memcpy(&(this->projectile_allowance), frame_start + referee::DATA_START, data_len);
       break;
     // 0x0209 机器人RFID模块状态
-    case referee::CMD_ID::RFID_STATUS:
+    case referee::CmdID::RFID_STATUS:
       std::memcpy(&(this->rfid_status), frame_start + referee::DATA_START, data_len);
       break;
     // 0x020A 飞镖选手端指令数据
-    case referee::CMD_ID::DART_CLIENT_CMD:
+    case referee::CmdID::DART_CLIENT_CMD:
       std::memcpy(&(this->dart_client_cmd), frame_start + referee::DATA_START, data_len);
       break;
     // 0x020B 地面机器人位置数据
-    case referee::CMD_ID::GROUND_ROBOT_POSITION:
+    case referee::CmdID::GROUND_ROBOT_POSITION:
       std::memcpy(&(this->ground_robot_pos), frame_start + referee::DATA_START, data_len);
       break;
     // 0x020C 雷达标记进度数据
-    case referee::CMD_ID::RADAR_MARK_DATA:
+    case referee::CmdID::RADAR_MARK_DATA:
       std::memcpy(&(this->radar_mark), frame_start + referee::DATA_START, data_len);
       break;
     // 0x020D 哨兵自主决策信息同步
-    case referee::CMD_ID::SENTRY_INFO:
+    case referee::CmdID::SENTRY_INFO:
       std::memcpy(&(this->sentry_info), frame_start + referee::DATA_START, data_len);
       break;
     // 0x020E 雷达自主决策信息同步
-    case referee::CMD_ID::RADAR_INFO:
+    case referee::CmdID::RADAR_INFO:
       std::memcpy(&(this->radar_info), frame_start + referee::DATA_START, data_len);
       break;
 
     // 0x0302 自定义控制器与机器人交互数据
-    case referee::CMD_ID::CUSTOM_ROBOT_DATA:
+    case referee::CmdID::CUSTOM_ROBOT_DATA:
       std::memcpy(&(this->custom_robot), frame_start + referee::DATA_START, data_len);
       break;
     // 0x0303 选手端小地图交互数据
-    case referee::CMD_ID::MAP_COMMAND:
+    case referee::CmdID::MAP_COMMAND:
       std::memcpy(&(this->map_command), frame_start + referee::DATA_START, data_len);
       break;
 
