@@ -6,20 +6,20 @@
 
 namespace sp
 {
-PM02::PM02(UART_HandleTypeDef * huart, bool use_dma) : huart_(huart), use_dma_(use_dma) {}
+PM02::PM02(UART_HandleTypeDef * huart, bool use_dma) : huart(huart), use_dma_(use_dma) {}
 
 void PM02::request()
 {
   if (use_dma_) {
     // dismiss return
-    HAL_UARTEx_ReceiveToIdle_DMA(huart_, buff_, PM02_BUFF_SIZE);
+    HAL_UARTEx_ReceiveToIdle_DMA(this->huart, buff_, PM02_BUFF_SIZE);
 
     // ref: https://github.com/HNUYueLuRM/basic_framework/blob/master/bsp/usart/bsp_usart.c
-    __HAL_DMA_DISABLE_IT(huart_->hdmarx, DMA_IT_HT);
+    __HAL_DMA_DISABLE_IT(this->huart->hdmarx, DMA_IT_HT);
   }
   else {
     // dismiss return
-    HAL_UARTEx_ReceiveToIdle_IT(huart_, buff_, PM02_BUFF_SIZE);
+    HAL_UARTEx_ReceiveToIdle_IT(this->huart, buff_, PM02_BUFF_SIZE);
   }
 }
 
@@ -135,6 +135,16 @@ void PM02::update(uint8_t * frame_start, uint16_t size)
 
   // 递归解析, 因为缓冲区中可能包含多帧裁判系统的数据
   update(frame_start + frame_len, size - frame_len);
+}
+
+void PM02::send(const uint8_t * data, size_t size)
+{
+  if (use_dma_) {
+    HAL_UART_Transmit_DMA(this->huart, data, size);
+  }
+  else {
+    HAL_UART_Transmit(this->huart, data, size, 0xFF);
+  }
 }
 
 }  // namespace sp

@@ -14,6 +14,8 @@ class PM02
 public:
   PM02(UART_HandleTypeDef * huart, bool use_dma = true);
 
+  UART_HandleTypeDef * huart;  // 只读!
+
   referee::GameStatus game_status;     // 只读! 0x0001 比赛状态数据
   referee::GameResult game_result;     // 只读! 0x0002 比赛结果数据
   referee::GameRobotHP game_robot_hp;  // 只读! 0x0003 比赛机器人血量数据
@@ -49,12 +51,12 @@ public:
 
   void request();
   void update(uint16_t size);
+  void send(const uint8_t * data, size_t size);
 
   // TODO UI
 
 private:
-  UART_HandleTypeDef * huart_;
-  bool use_dma_;
+  const bool use_dma_;
 
   uint8_t buff_[PM02_BUFF_SIZE];
   void update(uint8_t * frame_start, uint16_t size);

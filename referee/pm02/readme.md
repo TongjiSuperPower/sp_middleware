@@ -23,7 +23,7 @@ extern "C" void uart_task()
 
 extern "C" void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef * huart, uint16_t Size)
 {
-  if (huart == &huart6) {
+  if (huart == pm02.huart) {
     pm02.update(Size);
     pm02.request();
   }
@@ -31,7 +31,7 @@ extern "C" void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef * huart, uint16_t 
 
 extern "C" void HAL_UART_ErrorCallback(UART_HandleTypeDef * huart)
 {
-  if (huart == &huart6) {
+  if (huart == pm02.huart) {
     pm02.request();
   }
 }
