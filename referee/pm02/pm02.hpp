@@ -32,16 +32,16 @@ public:
   referee::HurtData hurt;                             // 只读! 0x0206 伤害状态数据
   referee::ShootData shoot;                           // 只读! 0x0207 实时射击数据
   referee::ProjectileAllowance projectile_allowance;  // 只读! 0x0208 允许发弹量
-  referee::RFIDStatus rfid_status;                    // 只读! 0x0209 机器人RFID模块状态
+  referee::RFID_Status rfid_status;                   // 只读! 0x0209 机器人RFID模块状态
   referee::DartClientCmd dart_client_cmd;             // 只读! 0x020A 飞镖选手端指令数据
   referee::GroundRobotPosition ground_robot_pos;      // 只读! 0x020B 地面机器人位置数据
   referee::RadarMarkData radar_mark;                  // 只读! 0x020C 雷达标记进度数据
   referee::SentryInfo sentry_info;                    // 只读! 0x020D 哨兵自主决策信息同步
   referee::RadarInfo radar_info;                      // 只读! 0x020E 雷达自主决策信息同步
 
-  // 0x0301 机器人交互数据 ToDo
-  referee::CustomRobotData custom_robot;  // 只读! 0x0302 自定义控制器与机器人交互数据
-  referee::MapCommand map_command;        // 只读! 0x0303 选手端小地图交互数据
+  // 0x0301 机器人交互数据 TODO
+  // 0x0302 自定义控制器与机器人交互数据 图传链路
+  referee::MapCommand map_command;  // 只读! 0x0303 选手端小地图交互数据
   // 0x0304 键鼠遥控数据 图传链路
   // 0x0305 选手端小地图接收雷达数据 选手端接收
   // 0x0306 自定义控制器与选手端交互数据 选手端接收

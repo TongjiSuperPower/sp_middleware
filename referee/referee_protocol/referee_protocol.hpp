@@ -4,6 +4,96 @@
 #include <cstddef>
 #include <cstdint>
 
+namespace sp::referee::robot_id
+{
+constexpr uint8_t RED_HERO = 1;
+constexpr uint8_t RED_ENGINEER = 2;
+constexpr uint8_t RED_STANDARD_3 = 3;
+constexpr uint8_t RED_STANDARD_4 = 4;
+constexpr uint8_t RED_STANDARD_5 = 5;
+constexpr uint8_t RED_AERIAL = 6;
+constexpr uint8_t RED_SENTRY = 7;
+constexpr uint8_t RED_RADAR = 9;
+constexpr uint8_t RED_OUTPOST = 10;
+constexpr uint8_t RED_BASE = 11;
+constexpr uint8_t BLUE_HERO = 101;
+constexpr uint8_t BLUE_ENGINEER = 102;
+constexpr uint8_t BLUE_STANDARD_3 = 103;
+constexpr uint8_t BLUE_STANDARD_4 = 104;
+constexpr uint8_t BLUE_STANDARD_5 = 105;
+constexpr uint8_t BLUE_AERIAL = 106;
+constexpr uint8_t BLUE_SENTRY = 107;
+constexpr uint8_t BLUE_RADAR = 109;
+constexpr uint8_t BLUE_OUTPOST = 110;
+constexpr uint8_t BLUE_BASE = 111;
+}  // namespace sp::referee::robot_id
+
+namespace sp::referee::client_id
+{
+constexpr uint16_t RED_HERO_CLIENT = 0x0101;
+constexpr uint16_t RED_ENGINEER_CLIENT = 0x0102;
+constexpr uint16_t RED_STANDARD_3_CLIENT = 0x0103;
+constexpr uint16_t RED_STANDARD_4_CLIENT = 0x0104;
+constexpr uint16_t RED_STANDARD_5_CLIENT = 0x0105;
+constexpr uint16_t RED_AERIAL_CLIENT = 0x0106;
+constexpr uint16_t BLUE_HERO_CLIENT = 0x0165;
+constexpr uint16_t BLUE_ENGINEER_CLIENT = 0x0166;
+constexpr uint16_t BLUE_STANDARD_3_CLIENT = 0x0167;
+constexpr uint16_t BLUE_STANDARD_4_CLIENT = 0x0168;
+constexpr uint16_t BLUE_STANDARD_5_CLIENT = 0x0169;
+constexpr uint16_t BLUE_AERIAL_CLIENT = 0x016A;
+constexpr uint16_t REFEREE_SERVER = 0x8080;
+}  // namespace sp::referee::client_id
+
+namespace sp::referee::cmd_id
+{
+constexpr uint16_t GAME_STATUS = 0x0001;    // 比赛状态数据
+constexpr uint16_t GAME_RESULT = 0x0002;    // 比赛结果数据
+constexpr uint16_t GAME_ROBOT_HP = 0x0003;  // 比赛机器人血量数据
+
+constexpr uint16_t EVENT_DATA = 0x0101;       // 场地事件数据
+constexpr uint16_t REFEREE_WARNING = 0x0104;  // 裁判警告数据
+constexpr uint16_t DART_INFO = 0x0105;        // 飞镖发射相关数据
+
+constexpr uint16_t ROBOT_STATUS = 0x0201;           // 机器人性能体系数据
+constexpr uint16_t POWER_HEAT_DATA = 0x0202;        // 实时底盘缓冲能量和射击热量数据
+constexpr uint16_t ROBOT_POS = 0x0203;              // 机器人位置数据
+constexpr uint16_t BUFF = 0x0204;                   // 机器人增益数据
+                                                    // 没有0x0205
+constexpr uint16_t HURT_DATA = 0x0206;              // 伤害状态数据
+constexpr uint16_t SHOOT_DATA = 0x0207;             // 实时射击数据
+constexpr uint16_t PROJECTILE_ALLOWANCE = 0x0208;   // 允许发弹量
+constexpr uint16_t RFID_STATUS = 0x0209;            // 机器人RFID模块状态
+constexpr uint16_t DART_CLIENT_CMD = 0x020A;        // 飞镖选手端指令数据
+constexpr uint16_t GROUND_ROBOT_POSITION = 0x020B;  // 地面机器人位置数据
+constexpr uint16_t RADAR_MARK_DATA = 0x020C;        // 雷达标记进度数据
+constexpr uint16_t SENTRY_INFO = 0x020D;            // 哨兵自主决策信息同步
+constexpr uint16_t RADAR_INFO = 0x020E;             // 雷达自主决策信息同步
+
+constexpr uint16_t ROBOT_INTERACTION_DATA = 0x0301;  // 机器人交互数据
+constexpr uint16_t CUSTOM_ROBOT_DATA = 0x0302;       // 自定义控制器与机器人交互数据 图传链路
+constexpr uint16_t MAP_COMMAND = 0x0303;             // 选手端小地图交互数据
+constexpr uint16_t REMOTE_CONTROL = 0x0304;          // 键鼠遥控数据 图传链路
+constexpr uint16_t MAP_ROBOT_DATA = 0x0305;          // 选手端小地图接收雷达数据
+constexpr uint16_t CUSTOM_CLIENT_DATA = 0x0306;      // 自定义控制器与选手端交互数据
+constexpr uint16_t MAP_DATA = 0x0307;                // 选手端小地图接收哨兵数据
+constexpr uint16_t CUSTOM_INFO = 0x0308;             // 选手端小地图接收机器人数据
+constexpr uint16_t ROBOT_CUSTOM_DATA = 0x0309;       // 自定义控制器接收机器人数据 图传链路
+}  // namespace sp::referee::cmd_id
+
+namespace sp::referee::data_cmd_id
+{
+// 0x0200~0x02FF 机器人之间通信 TODO
+constexpr uint16_t INTERACTION_LAYER_DELETE = 0x0100;     // 选手端删除图层
+constexpr uint16_t INTERACTION_FIGURE = 0x0101;           // 选手端绘制一个图形
+constexpr uint16_t INTERACTION_FIGURE_2 = 0x0102;         // 选手端绘制两个图形
+constexpr uint16_t INTERACTION_FIGURE_5 = 0x0103;         // 选手端绘制五个图形
+constexpr uint16_t INTERACTION_FIGURE_7 = 0x0104;         // 选手端绘制七个图形
+constexpr uint16_t EXT_CLIENT_CUSTOM_CHARACTER = 0x0110;  // 选手端绘制字符图形
+constexpr uint16_t SENTRY_CMD = 0x0120;                   // 哨兵自主决策指令 TODO
+constexpr uint16_t RADAR_CMD = 0x0121;                    // 雷达自主决策指令 TODO
+}  // namespace sp::referee::data_cmd_id
+
 namespace sp::referee
 {
 constexpr uint8_t SOF = 0xA5;
@@ -12,87 +102,6 @@ constexpr size_t HEAD_LEN = 5;
 constexpr size_t CMD_ID_LEN = 2;
 constexpr size_t TAIL_LEN = 2;
 constexpr size_t DATA_START = HEAD_LEN + CMD_ID_LEN;
-
-enum class CmdID : uint16_t
-{
-  GAME_STATUS = 0x0001,    // 比赛状态数据
-  GAME_RESULT = 0x0002,    // 比赛结果数据
-  GAME_ROBOT_HP = 0x0003,  // 比赛机器人血量数据
-
-  EVENT_DATA = 0x0101,       // 场地事件数据
-  REFEREE_WARNING = 0x0104,  // 裁判警告数据
-  DRAT_INFO = 0x0105,        // 飞镖发射相关数据
-
-  ROBOT_STATUS = 0x0201,           // 机器人性能体系数据
-  POWER_HEAT_DATA = 0x0202,        // 实时底盘缓冲能量和射击热量数据
-  ROBOT_POS = 0x0203,              // 机器人位置数据
-  BUFF = 0x0204,                   // 机器人增益数据
-                                   // 没有0x0205
-  HURT_DATA = 0x0206,              // 伤害状态数据
-  SHOOT_DATA = 0x0207,             // 实时射击数据
-  PROJECTILE_ALLOWANCE = 0x0208,   // 允许发弹量
-  RFID_STATUS = 0x0209,            // 机器人RFID模块状态
-  DART_CLIENT_CMD = 0x020A,        // 飞镖选手端指令数据
-  GROUND_ROBOT_POSITION = 0x020B,  // 地面机器人位置数据
-  RADAR_MARK_DATA = 0x020C,        // 雷达标记进度数据
-  SENTRY_INFO = 0x020D,            // 哨兵自主决策信息同步
-  RADAR_INFO = 0x020E,             // 雷达自主决策信息同步
-
-  STUDENT_INTERACTIVE = 0x0301,  // 机器人交互数据
-
-  MAP_COMMAND = 0x0303,     // 选手端小地图交互数据
-  MAP_ROBOT_DATA = 0x0305,  // 选手端小地图接收雷达数据
-  MAP_DATA = 0x0307,        // 选手端小地图接收哨兵数据
-  CUSTOM_INFO = 0x0308,     // 选手端小地图接收机器人数据
-
-  CUSTOM_ROBOT_DATA = 0x0302,  // 自定义控制器与机器人交互数据
-  ROBOT_CUSTOM_DATA = 0x0309,  // 自定义控制器接收机器人数据
-
-  REMOTE_CONTROL = 0x0304,  // 键鼠遥控数据
-
-  CUSTOM_CLIENT_DATA = 0x0306,  // 自定义控制器与选手端交互数据
-};
-
-enum class RobotID : uint8_t
-{
-  RED_HERO = 1,
-  RED_ENGINEER = 2,
-  RED_STANDARD_3 = 3,
-  RED_STANDARD_4 = 4,
-  RED_STANDARD_5 = 5,
-  RED_AERIAL = 6,
-  RED_SENTRY = 7,
-  RED_RADAR = 9,
-  RED_OUTPOST = 10,
-  RED_BASE = 11,
-  BLUE_HERO = 101,
-  BLUE_ENGINEER = 102,
-  BLUE_STANDARD_3 = 103,
-  BLUE_STANDARD_4 = 104,
-  BLUE_STANDARD_5 = 105,
-  BLUE_AERIAL = 106,
-  BLUE_SENTRY = 107,
-  BLUE_RADAR = 109,
-  BLUE_OUTPOST = 110,
-  BLUE_BASE = 111
-};
-
-enum class ClientID : uint16_t
-{
-  RED_HERO_CLIENT = 0x0101,
-  RED_ENGINEER_CLIENT = 0x0102,
-  RED_STANDARD_3_CLIENT = 0x0103,
-  RED_STANDARD_4_CLIENT = 0x0104,
-  RED_STANDARD_5_CLIENT = 0x0105,
-  RED_AERIAL_CLIENT = 0x0106,
-  BLUE_HERO_CLIENT = 0x0165,
-  BLUE_ENGINEER_CLIENT = 0x0166,
-  BLUE_STANDARD_3_CLIENT = 0x0167,
-  BLUE_STANDARD_4_CLIENT = 0x0168,
-  BLUE_STANDARD_5_CLIENT = 0x0169,
-  BLUE_AERIAL_CLIENT = 0x016A,
-  REFEREE_SERVER = 0x8080
-};
 
 // 0x0001 比赛状态数据
 struct __attribute__((packed)) GameStatus
@@ -171,7 +180,7 @@ struct __attribute__((packed)) EventData
   // 保留
 };
 
-//// 0x0104 裁判警告数据
+// 0x0104 裁判警告数据
 struct __attribute__((packed)) RefereeWarning
 {
   uint8_t level;
@@ -275,7 +284,7 @@ struct __attribute__((packed)) ProjectileAllowance
 };
 
 // 0x0209 机器人RFID模块状态
-struct __attribute__((packed)) RFIDStatus
+struct __attribute__((packed)) RFID_Status
 {
   uint32_t friendly_base : 1;             // bit 0：己方基地增益点
   uint32_t friendly_central : 1;          // bit 1：己方中央高地增益点
@@ -369,20 +378,6 @@ struct __attribute__((packed)) RadarInfo
 };
 
 // 0x0301 机器人交互数据
-enum class DataCmdID : uint16_t
-{
-  // 0x0200~0x02FF 机器人之间通信 TODO
-
-  INTERACTION_LAYER_DELETE = 0x0100,     // 选手端删除图层
-  INTERACTION_FIGURE = 0x0101,           // 选手端绘制一个图形
-  INTERACTION_FIGURE_2 = 0x0102,         // 选手端绘制两个图形
-  INTERACTION_FIGURE_5 = 0x0103,         // 选手端绘制五个图形
-  INTERACTION_FIGURE_7 = 0x0104,         // 选手端绘制七个图形
-  EXT_CLIENT_CUSTOM_CHARACTER = 0x0110,  // 选手端绘制字符图形
-  SENTRY_CMD = 0x0120,                   // 哨兵自主决策指令 TODO
-  RADAR_CMD = 0x0121,                    // 雷达自主决策指令 TODO
-};
-
 struct __attribute__((packed)) RobotInteractionData
 {
   uint16_t data_cmd_id;
