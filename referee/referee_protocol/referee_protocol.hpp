@@ -53,10 +53,8 @@ enum class CMD_ID : uint16_t
   CUSTOM_CLIENT_DATA = 0x0306,  // 自定义控制器与选手端交互数据
 };
 
-#pragma pack(1)
-
 // 0x0001 比赛状态数据
-struct GameStatus
+struct __attribute__((packed)) GameStatus
 {
   uint8_t game_type : 4;
   // bit 0-3: 比赛类型
@@ -78,13 +76,13 @@ struct GameStatus
 };
 
 // 0x0002 比赛结果数据
-struct GameResult
+struct __attribute__((packed)) GameResult
 {
   uint8_t winner;  // 0: 平局, 1: 红方胜利, 2: 蓝方胜利
 };
 
 // 0x0003 比赛机器人血量数据
-struct GameRobotHP
+struct __attribute__((packed)) GameRobotHP
 {
   uint16_t red_1_robot_hp;  // 红 1 英雄机器人血量。若该机器人未上场或者被罚下，则血量为 0
   uint16_t red_2_robot_hp;  // 红 2 工程机器人血量
@@ -106,7 +104,7 @@ struct GameRobotHP
 };
 
 // 0x0101 机器人事件数据
-struct EventData
+struct __attribute__((packed)) EventData
 {
   // 0:未占领/未激活
   // 1:已占领/已激活
@@ -133,7 +131,7 @@ struct EventData
 };
 
 //// 0x0104 裁判警告数据
-struct RefereeWarning
+struct __attribute__((packed)) RefereeWarning
 {
   uint8_t level;
   uint8_t offefending_robot_id;
@@ -141,14 +139,14 @@ struct RefereeWarning
 };
 
 // 0x0105 飞镖发射相关数据
-struct DartInfo
+struct __attribute__((packed)) DartInfo
 {
   uint8_t dart_remaining_time;
   uint16_t dart_info;
 };
 
 // 0x0201 机器人状态数据
-struct RobotStatus
+struct __attribute__((packed)) RobotStatus
 {
   uint8_t robot_id;                             // 机器人ID
   uint8_t robot_level;                          // 机器人等级
@@ -163,7 +161,7 @@ struct RobotStatus
 };
 
 // 0x0202 实时底盘缓冲能量和射击热量数据
-struct PowerHeatData
+struct __attribute__((packed)) PowerHeatData
 {
   uint16_t reserved_1;
   uint16_t reserved_2;
@@ -175,7 +173,7 @@ struct PowerHeatData
 };
 
 // 0x0203 机器人位置数据
-struct RobotPos
+struct __attribute__((packed)) RobotPos
 {
   float x;      // 本机器人位置 x 坐标，单位：m
   float y;      // 本机器人位置 y 坐标，单位：m
@@ -183,7 +181,7 @@ struct RobotPos
 };
 
 // 0x0204 机器人增益数据
-struct Buff
+struct __attribute__((packed)) Buff
 {
   uint8_t recovery_y_buff;     // 机器人回血增益（百分比，值为 10 表示每秒恢复血量上限的 10%）
   uint8_t cooling_buff;        // 机器人射击热量冷却倍率（直接值，值为 5 表示 5 倍冷却）
@@ -202,7 +200,7 @@ struct Buff
 };
 
 // 0x0206 伤害状态数据
-struct HurtData
+struct __attribute__((packed)) HurtData
 {
   uint8_t armor_id : 4;
   // bit 0-3：当扣血原因为装甲模块被弹丸攻击、受撞击、离线或测速模块离线时，
@@ -219,7 +217,7 @@ struct HurtData
 };
 
 // 0x0207 实时射击数据
-struct ShootData
+struct __attribute__((packed)) ShootData
 {
   uint8_t bullet_type;          // 1: 17mm弹丸, 2: 42mm弹丸
   uint8_t shooter_number;       // 1: 第1个17mm发射机构, 2: 第2个17mm发射机构, 3: 42mm发射机构
@@ -228,7 +226,7 @@ struct ShootData
 };
 
 // 0x0208 允许发弹量
-struct ProjectileAllowance
+struct __attribute__((packed)) ProjectileAllowance
 {
   uint16_t projectile_allowance_17mm;  // 17mm 弹丸允许发弹量
   uint16_t projectile_allowance_42mm;  // 42mm 弹丸允许发弹量
@@ -236,7 +234,7 @@ struct ProjectileAllowance
 };
 
 // 0x0209 机器人RFID模块状态
-struct RFIDStatus
+struct __attribute__((packed)) RFIDStatus
 {
   uint32_t friendly_base : 1;             // bit 0：己方基地增益点
   uint32_t friendly_central : 1;          // bit 1：己方中央高地增益点
@@ -266,7 +264,7 @@ struct RFIDStatus
 };
 
 // 0x020A 飞镖选手端指令数据
-struct DartClientCmd
+struct __attribute__((packed)) DartClientCmd
 {
   uint8_t
     dart_launch_opening_status;  // 当前飞镖发射站的状态： 1：关闭 2：正在开启或者关闭中 0：已经开启
@@ -277,7 +275,7 @@ struct DartClientCmd
 };
 
 // 0x020B 地面机器人位置数据
-struct GroundRobotPosition
+struct __attribute__((packed)) GroundRobotPosition
 {
   float hero_x;        // 己方英雄机器人位置 x 轴坐标，单位：m
   float hero_y;        // 己方英雄机器人位置 y 轴坐标，单位：m
@@ -292,7 +290,7 @@ struct GroundRobotPosition
 };
 
 // 0x020C 雷达标记进度数据
-struct RadarMarkData
+struct __attribute__((packed)) RadarMarkData
 {
   // 在对应机器人被标记进度≥100 时发送 1，被标记进度<100 时发送 0。
   uint8_t enemy_hero_1_vulnerable : 1;      // bit 0: 对方 1号英雄机器人易伤情况
@@ -304,7 +302,7 @@ struct RadarMarkData
 };
 
 // 0x020D 哨兵自主决策信息同步
-struct SentryInfo
+struct __attribute__((packed)) SentryInfo
 {
   uint32_t allowed_fire_amount : 11;  // bits 0-10  : 除远程兑换外，哨兵机器人成功兑换的允许发弹量
   uint32_t remote_exchange_fire_count : 4;    // bits 11-14 : 哨兵机器人成功远程兑换允许发弹量的次数
@@ -320,7 +318,7 @@ struct SentryInfo
 };
 
 // 0x020E 雷达自主决策信息同步
-struct RadarInfo
+struct __attribute__((packed)) RadarInfo
 {
   uint8_t
     double_vul_trigger_chance : 2;  // bits 0-1 : 雷达拥有触发双倍易伤的机会（0~2），开局为 0，最大可达 2
@@ -330,16 +328,22 @@ struct RadarInfo
 };
 
 // 0x0301 机器人交互数据
-// ToDo, 子内容太多，还没想好怎么写
+struct __attribute__((packed)) RobotInteractionData
+{
+  uint16_t data_cmd_id;
+  uint16_t sender_id;
+  uint16_t receiver_id;
+  uint8_t user_data[112];  // 最大为112
+};
 
 // 0x0302 自定义控制器与机器人交互数据
-struct CustomRobotData
+struct __attribute__((packed)) CustomRobotData
 {
   uint8_t data[30];
 };
 
 // 0x0303 选手端小地图交互数据
-struct MapCommand
+struct __attribute__((packed)) MapCommand
 {
   float target_position_x;  // 目标位置 x 轴坐标，单位：m
   float target_position_y;  // 目标位置 y 轴坐标，单位：m
@@ -349,7 +353,7 @@ struct MapCommand
 };
 
 // 0x0304 键鼠遥控数据 图传链路
-struct RemoteControl
+struct __attribute__((packed)) RemoteControl
 {
   int16_t mouse_x;
   int16_t mouse_y;
@@ -361,7 +365,7 @@ struct RemoteControl
 };
 
 // 0x0305 选手端小地图接收雷达数据
-struct MapRobotData
+struct __attribute__((packed)) MapRobotData
 {
   uint16_t hero_position_x;        // 英雄机器人 x 位置坐标，单位：cm
   uint16_t hero_position_y;        // 英雄机器人 y 位置坐标，单位：cm
@@ -378,7 +382,7 @@ struct MapRobotData
 };
 
 // 0x0306 自定义控制器与选手端交互数据
-struct CustomClientData
+struct __attribute__((packed)) CustomClientData
 {
   uint16_t key_value_1 : 8;  // bit 0-7：按键 1 键值
   uint16_t key_value_2 : 8;  // bit 8-15：按键 2 键值
@@ -390,7 +394,7 @@ struct CustomClientData
 };
 
 // 0x0307 选手端小地图接收哨兵数据
-struct MapData
+struct __attribute__((packed)) MapData
 {
   uint8_t intention;          // 1：到目标点攻击 2：到目标点防守 3：移动到目标点
   uint16_t start_position_x;  // 路径起点 x 轴坐标，单位：dm
@@ -401,7 +405,7 @@ struct MapData
 };
 
 // 0x0308 选手端小地图接收机器人数据
-struct CustomInfo
+struct __attribute__((packed)) CustomInfo
 {
   uint16_t sender_id;     // 发送者的 ID
   uint16_t receiver_id;   // 接收者的 ID
@@ -409,12 +413,10 @@ struct CustomInfo
 };
 
 // 0x0309 自定义控制器接收机器人数据 图传链路
-struct RobotCustomData
+struct __attribute__((packed)) RobotCustomData
 {
   uint8_t data[30];
 };
-
-#pragma pack()
 
 }  // namespace sp::referee
 

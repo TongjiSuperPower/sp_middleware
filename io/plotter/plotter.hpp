@@ -7,14 +7,12 @@ namespace sp
 {
 constexpr size_t PLOTTER_FLOAT_NUM = 10;
 
-#pragma pack(1)
-struct PlotFrame
+struct __attribute__((packed)) PlotFrame
 {
   uint8_t start[2] = {0xAA, 0xBB};
   uint8_t size;
   float data[PLOTTER_FLOAT_NUM];
 };
-#pragma pack()
 
 class Plotter
 {
