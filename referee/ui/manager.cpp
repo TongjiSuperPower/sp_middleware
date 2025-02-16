@@ -4,7 +4,10 @@
 
 namespace sp
 {
-constexpr size_t FIG_SIZE = sizeof(referee::InteractionFigure);
+constexpr size_t DATA_HEAD_LEN =
+  sizeof(referee::RobotInteractionData) - sizeof(referee::RobotInteractionData::user_data);
+constexpr size_t FIG_LEN = sizeof(referee::InteractionFigure);
+constexpr size_t STR_LEN = sizeof(referee::ExtClientCustomCharacter::data);
 
 uint16_t get_client_id(uint8_t robot_id)
 {
@@ -60,11 +63,7 @@ void UI_Manager::set_sender_id(uint8_t robot_id)
 
 void UI_Manager::pack(const ui::String * str)
 {
-  constexpr size_t STR_SIZE = sizeof(referee::ExtClientCustomCharacter::data);
-
-  frame_.head.data_len = sizeof(referee::RobotInteractionData) -
-                         sizeof(referee::RobotInteractionData::user_data) +
-                         sizeof(referee::ExtClientCustomCharacter);
+  frame_.head.data_len = DATA_HEAD_LEN + sizeof(referee::ExtClientCustomCharacter);
 
   apply_crc8();
 
@@ -72,19 +71,18 @@ void UI_Manager::pack(const ui::String * str)
 
   copy(str, 0);
 
-  std::fill(frame_.data.user_data + FIG_SIZE, frame_.data.user_data + FIG_SIZE + STR_SIZE, '\0');
+  std::fill(frame_.data.user_data + FIG_LEN, frame_.data.user_data + FIG_LEN + STR_LEN, '\0');
 
   std::copy(
-    str->str.data(), str->str.data() + std::min(str->str.size(), STR_SIZE),
-    frame_.data.user_data + FIG_SIZE);
+    str->str.data(), str->str.data() + std::min(str->str.size(), STR_LEN),
+    frame_.data.user_data + FIG_LEN);
 
   apply_crc16();
 }
 
 void UI_Manager::pack(const ui::Element * e1)
 {
-  frame_.head.data_len = sizeof(referee::RobotInteractionData) -
-                         sizeof(referee::RobotInteractionData::user_data) + FIG_SIZE;
+  frame_.head.data_len = DATA_HEAD_LEN + FIG_LEN;
 
   apply_crc8();
 
@@ -97,8 +95,7 @@ void UI_Manager::pack(const ui::Element * e1)
 
 void UI_Manager::pack(const ui::Element * e1, const ui::Element * e2)
 {
-  frame_.head.data_len = sizeof(referee::RobotInteractionData) -
-                         sizeof(referee::RobotInteractionData::user_data) + 2 * FIG_SIZE;
+  frame_.head.data_len = DATA_HEAD_LEN + 2 * FIG_LEN;
 
   apply_crc8();
 
@@ -114,8 +111,7 @@ void UI_Manager::pack(
   const ui::Element * e1, const ui::Element * e2, const ui::Element * e3, const ui::Element * e4,
   const ui::Element * e5)
 {
-  frame_.head.data_len = sizeof(referee::RobotInteractionData) -
-                         sizeof(referee::RobotInteractionData::user_data) + 5 * FIG_SIZE;
+  frame_.head.data_len = DATA_HEAD_LEN + 5 * FIG_LEN;
 
   apply_crc8();
 
@@ -134,8 +130,7 @@ void UI_Manager::pack(
   const ui::Element * e1, const ui::Element * e2, const ui::Element * e3, const ui::Element * e4,
   const ui::Element * e5, const ui::Element * e6, const ui::Element * e7)
 {
-  frame_.head.data_len = sizeof(referee::RobotInteractionData) -
-                         sizeof(referee::RobotInteractionData::user_data) + 7 * FIG_SIZE;
+  frame_.head.data_len = DATA_HEAD_LEN + 7 * FIG_LEN;
 
   apply_crc8();
 
@@ -157,12 +152,12 @@ void UI_Manager::copy(const ui::Element * e, size_t i)
   if (e == nullptr) {
     std::copy(
       reinterpret_cast<const uint8_t *>(&empty_),
-      reinterpret_cast<const uint8_t *>(&empty_) + FIG_SIZE, frame_.data.user_data + FIG_SIZE * i);
+      reinterpret_cast<const uint8_t *>(&empty_) + FIG_LEN, frame_.data.user_data + FIG_LEN * i);
   }
   else {
     std::copy(
       reinterpret_cast<const uint8_t *>(&e->data),
-      reinterpret_cast<const uint8_t *>(&e->data) + FIG_SIZE, frame_.data.user_data + FIG_SIZE * i);
+      reinterpret_cast<const uint8_t *>(&e->data) + FIG_LEN, frame_.data.user_data + FIG_LEN * i);
   }
 }
 
@@ -171,8 +166,8 @@ void UI_Manager::apply_crc8() { frame_.head.crc8 = get_crc8(data(), 4); }
 void UI_Manager::apply_crc16()
 {
   auto crc16 = get_crc16(data(), size() - referee::TAIL_LEN);
-  frame_.data.user_data[frame_.head.data_len] = crc16 & 0xff;
-  frame_.data.user_data[frame_.head.data_len + 1] = crc16 >> 8;
+  frame_.data.user_data[frame_.head.data_len - DATA_HEAD_LEN] = crc16 & 0xff;
+  frame_.data.user_data[frame_.head.data_len - DATA_HEAD_LEN + 1] = crc16 >> 8;
 }
 
 }  // namespace sp
