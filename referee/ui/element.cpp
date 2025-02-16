@@ -134,9 +134,8 @@ String::String(
 
 void String::set_value(const std::string & value)
 {
-  if (value.size() > sizeof(referee::ExtClientCustomCharacter::data)) return;
   str = value;
-  data.details_b = str.size();
+  data.details_b = std::min(str.size(), sizeof(referee::ExtClientCustomCharacter::data));
 }
 
 }  // namespace sp::ui

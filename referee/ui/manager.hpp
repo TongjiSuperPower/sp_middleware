@@ -6,14 +6,13 @@
 
 namespace sp
 {
-constexpr size_t UI_DATA_MAX_SIZE =
-  referee::HEAD_LEN + referee::TAIL_LEN + sizeof(referee::RobotInteractionData);
-
 class UI_Manager
 {
 public:
-  size_t size = UI_DATA_MAX_SIZE;
-  uint8_t data[UI_DATA_MAX_SIZE];
+  UI_Manager();
+
+  size_t size() const;
+  const uint8_t * data() const;
 
   void set_sender_id(uint8_t robot_id);
   void pack(const ui::String * str);
@@ -23,7 +22,15 @@ public:
     const ui::Element * e6 = nullptr, const ui::Element * e7 = nullptr);
 
 private:
-  uint16_t sender_id_;
+  struct __attribute__((packed))
+  {
+    referee::FrameHeader head;
+    uint16_t cmd_id;
+    referee::RobotInteractionData data;  // crc16在内部
+  } frame_;
+
+  void apply_crc8();
+  void apply_crc16();
 };
 
 }  // namespace sp
