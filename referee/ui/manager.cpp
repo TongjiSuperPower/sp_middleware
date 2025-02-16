@@ -70,9 +70,7 @@ void UI_Manager::pack(const ui::String * str)
 
   frame_.data.data_cmd_id = referee::data_cmd_id::EXT_CLIENT_CUSTOM_CHARACTER;
 
-  std::copy(
-    reinterpret_cast<const uint8_t *>(&str->data),
-    reinterpret_cast<const uint8_t *>(&str->data) + FIG_SIZE, frame_.data.user_data);
+  copy(str, 0);
 
   std::fill(frame_.data.user_data + FIG_SIZE, frame_.data.user_data + FIG_SIZE + STR_SIZE, '\0');
 
@@ -83,10 +81,89 @@ void UI_Manager::pack(const ui::String * str)
   apply_crc16();
 }
 
+void UI_Manager::pack(const ui::Element * e1)
+{
+  frame_.head.data_len = sizeof(referee::RobotInteractionData) -
+                         sizeof(referee::RobotInteractionData::user_data) + FIG_SIZE;
+
+  apply_crc8();
+
+  frame_.data.data_cmd_id = referee::data_cmd_id::INTERACTION_FIGURE;
+
+  copy(e1, 0);
+
+  apply_crc16();
+}
+
+void UI_Manager::pack(const ui::Element * e1, const ui::Element * e2)
+{
+  frame_.head.data_len = sizeof(referee::RobotInteractionData) -
+                         sizeof(referee::RobotInteractionData::user_data) + 2 * FIG_SIZE;
+
+  apply_crc8();
+
+  frame_.data.data_cmd_id = referee::data_cmd_id::INTERACTION_FIGURE_2;
+
+  copy(e1, 0);
+  copy(e2, 1);
+
+  apply_crc16();
+}
+
+void UI_Manager::pack(
+  const ui::Element * e1, const ui::Element * e2, const ui::Element * e3, const ui::Element * e4,
+  const ui::Element * e5)
+{
+  frame_.head.data_len = sizeof(referee::RobotInteractionData) -
+                         sizeof(referee::RobotInteractionData::user_data) + 5 * FIG_SIZE;
+
+  apply_crc8();
+
+  frame_.data.data_cmd_id = referee::data_cmd_id::INTERACTION_FIGURE_5;
+
+  copy(e1, 0);
+  copy(e2, 1);
+  copy(e3, 2);
+  copy(e4, 3);
+  copy(e5, 4);
+
+  apply_crc16();
+}
+
 void UI_Manager::pack(
   const ui::Element * e1, const ui::Element * e2, const ui::Element * e3, const ui::Element * e4,
   const ui::Element * e5, const ui::Element * e6, const ui::Element * e7)
 {
+  frame_.head.data_len = sizeof(referee::RobotInteractionData) -
+                         sizeof(referee::RobotInteractionData::user_data) + 7 * FIG_SIZE;
+
+  apply_crc8();
+
+  frame_.data.data_cmd_id = referee::data_cmd_id::INTERACTION_FIGURE_7;
+
+  copy(e1, 0);
+  copy(e2, 1);
+  copy(e3, 2);
+  copy(e4, 3);
+  copy(e5, 4);
+  copy(e6, 5);
+  copy(e7, 6);
+
+  apply_crc16();
+}
+
+void UI_Manager::copy(const ui::Element * e, size_t i)
+{
+  if (e == nullptr) {
+    std::copy(
+      reinterpret_cast<const uint8_t *>(&empty_),
+      reinterpret_cast<const uint8_t *>(&empty_) + FIG_SIZE, frame_.data.user_data + FIG_SIZE * i);
+  }
+  else {
+    std::copy(
+      reinterpret_cast<const uint8_t *>(&e->data),
+      reinterpret_cast<const uint8_t *>(&e->data) + FIG_SIZE, frame_.data.user_data + FIG_SIZE * i);
+  }
 }
 
 void UI_Manager::apply_crc8() { frame_.head.crc8 = get_crc8(data(), 4); }

@@ -16,10 +16,14 @@ public:
 
   void set_sender_id(uint8_t robot_id);
   void pack(const ui::String * str);
+  void pack(const ui::Element * e1);
+  void pack(const ui::Element * e1, const ui::Element * e2);
   void pack(
-    const ui::Element * e1, const ui::Element * e2 = nullptr, const ui::Element * e3 = nullptr,
-    const ui::Element * e4 = nullptr, const ui::Element * e5 = nullptr,
-    const ui::Element * e6 = nullptr, const ui::Element * e7 = nullptr);
+    const ui::Element * e1, const ui::Element * e2, const ui::Element * e3,
+    const ui::Element * e4 = nullptr, const ui::Element * e5 = nullptr);
+  void pack(
+    const ui::Element * e1, const ui::Element * e2, const ui::Element * e3, const ui::Element * e4,
+    const ui::Element * e5, const ui::Element * e6, const ui::Element * e7 = nullptr);
 
 private:
   struct __attribute__((packed))
@@ -29,6 +33,9 @@ private:
     referee::RobotInteractionData data;  // crc16在内部
   } frame_;
 
+  referee::InteractionFigure empty_;
+
+  void copy(const ui::Element * e, size_t i);
   void apply_crc8();
   void apply_crc16();
 };
