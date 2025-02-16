@@ -5,17 +5,19 @@ namespace sp::ui
 static void set_unique(referee::InteractionFigure * data)
 {
   static uint32_t id = 0;
-  data->figure_name[0] = id & 0xff;
-  data->figure_name[1] = (id >> 8) & 0xff;
-  data->figure_name[2] = (id >> 16) & 0xff;
+  // 南航模拟器是大端序:
+  // https://github.com/bismarckkk/RM-UI-Designer/blob/eea60c463dc24055c735d837c89401e633a2a7fb/src/utils/serial/msgView.ts#L123
+  data->figure_name[0] = id >> 16;
+  data->figure_name[1] = id >> 8;
+  data->figure_name[2] = id;
   id++;
 }
 
 static void set_int32(referee::InteractionFigure * data, int32_t value)
 {
-  data->details_c = value & 0x3FF;
-  data->details_d = (value >> 10) & 0x7FF;
-  data->details_e = (value >> 21) & 0x7FF;
+  data->details_c = value;
+  data->details_d = value >> 10;
+  data->details_e = value >> 21;
 }
 
 Element::Element(FigureType type, Layer layer, Color color, uint16_t width, uint16_t x, uint16_t y)
