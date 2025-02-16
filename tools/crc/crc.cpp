@@ -47,7 +47,7 @@ const uint16_t CRC16_TABLE[256] = {
 
 namespace sp
 {
-uint8_t get_crc8(uint8_t * data, uint16_t len)
+uint8_t get_crc8(const uint8_t * data, uint16_t len)
 {
   uint8_t crc8 = CRC8_INIT;
   uint8_t byte;
@@ -62,9 +62,12 @@ uint8_t get_crc8(uint8_t * data, uint16_t len)
   return crc8;
 }
 
-bool check_crc8(uint8_t * data, uint16_t len) { return get_crc8(data, len - 1) == data[len - 1]; }
+bool check_crc8(const uint8_t * data, uint16_t len)
+{
+  return get_crc8(data, len - 1) == data[len - 1];
+}
 
-uint16_t get_crc16(uint8_t * data, uint32_t len)
+uint16_t get_crc16(const uint8_t * data, uint32_t len)
 {
   uint16_t crc16 = CRC16_INIT;
   uint8_t byte;
@@ -79,7 +82,7 @@ uint16_t get_crc16(uint8_t * data, uint32_t len)
   return crc16;
 }
 
-bool check_crc16(uint8_t * data, uint32_t len)
+bool check_crc16(const uint8_t * data, uint32_t len)
 {
   uint16_t crc16 = (data[len - 1] << 8) | data[len - 2];
   return get_crc16(data, len - 2) == crc16;
