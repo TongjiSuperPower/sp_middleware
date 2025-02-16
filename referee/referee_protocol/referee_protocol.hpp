@@ -98,7 +98,15 @@ namespace sp::referee
 {
 constexpr uint8_t SOF = 0xA5;
 
-constexpr size_t HEAD_LEN = 5;
+struct __attribute__((packed)) FrameHeader
+{
+  uint8_t sof;
+  uint16_t data_len;
+  uint8_t seq;
+  uint8_t crc8;
+};
+
+constexpr size_t HEAD_LEN = sizeof(FrameHeader);
 constexpr size_t CMD_ID_LEN = 2;
 constexpr size_t TAIL_LEN = 2;
 constexpr size_t DATA_START = HEAD_LEN + CMD_ID_LEN;
