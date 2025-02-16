@@ -7,7 +7,7 @@ namespace sp
 constexpr size_t DATA_HEAD_LEN =
   sizeof(referee::RobotInteractionData) - sizeof(referee::RobotInteractionData::user_data);
 constexpr size_t FIG_LEN = sizeof(referee::InteractionFigure);
-constexpr size_t STR_LEN = sizeof(referee::ExtClientCustomCharacter::data);
+constexpr size_t MAX_STR_LEN = sizeof(referee::ExtClientCustomCharacter::data);
 
 uint16_t get_client_id(uint8_t robot_id)
 {
@@ -46,6 +46,7 @@ UI_Manager::UI_Manager()
   frame_.head.sof = referee::SOF;
   frame_.head.seq = 0;
   frame_.cmd_id = referee::cmd_id::ROBOT_INTERACTION_DATA;
+  empty_.operate_type = static_cast<uint8_t>(ui::OperateType::EMPTY);
 }
 
 size_t UI_Manager::size() const
@@ -64,46 +65,33 @@ void UI_Manager::set_sender_id(uint8_t robot_id)
 void UI_Manager::pack(const ui::String * str)
 {
   frame_.head.data_len = DATA_HEAD_LEN + sizeof(referee::ExtClientCustomCharacter);
-
-  apply_crc8();
-
   frame_.data.data_cmd_id = referee::data_cmd_id::EXT_CLIENT_CUSTOM_CHARACTER;
 
+  auto data = str->str.data();
+  auto str_len = std::min(str->str.size(), MAX_STR_LEN);
+  std::copy(data, data + str_len, frame_.data.user_data + FIG_LEN);
+
   copy(str, 0);
-
-  std::fill(frame_.data.user_data + FIG_LEN, frame_.data.user_data + FIG_LEN + STR_LEN, '\0');
-
-  std::copy(
-    str->str.data(), str->str.data() + std::min(str->str.size(), STR_LEN),
-    frame_.data.user_data + FIG_LEN);
-
+  apply_crc8();
   apply_crc16();
 }
 
 void UI_Manager::pack(const ui::Element * e1)
 {
   frame_.head.data_len = DATA_HEAD_LEN + FIG_LEN;
-
-  apply_crc8();
-
   frame_.data.data_cmd_id = referee::data_cmd_id::INTERACTION_FIGURE;
-
   copy(e1, 0);
-
+  apply_crc8();
   apply_crc16();
 }
 
 void UI_Manager::pack(const ui::Element * e1, const ui::Element * e2)
 {
-  frame_.head.data_len = DATA_HEAD_LEN + 2 * FIG_LEN;
-
-  apply_crc8();
-
+  frame_.head.data_len = DATA_HEAD_LEN + FIG_LEN * 2;
   frame_.data.data_cmd_id = referee::data_cmd_id::INTERACTION_FIGURE_2;
-
   copy(e1, 0);
   copy(e2, 1);
-
+  apply_crc8();
   apply_crc16();
 }
 
@@ -111,18 +99,14 @@ void UI_Manager::pack(
   const ui::Element * e1, const ui::Element * e2, const ui::Element * e3, const ui::Element * e4,
   const ui::Element * e5)
 {
-  frame_.head.data_len = DATA_HEAD_LEN + 5 * FIG_LEN;
-
-  apply_crc8();
-
+  frame_.head.data_len = DATA_HEAD_LEN + FIG_LEN * 5;
   frame_.data.data_cmd_id = referee::data_cmd_id::INTERACTION_FIGURE_5;
-
   copy(e1, 0);
   copy(e2, 1);
   copy(e3, 2);
   copy(e4, 3);
   copy(e5, 4);
-
+  apply_crc8();
   apply_crc16();
 }
 
@@ -130,12 +114,8 @@ void UI_Manager::pack(
   const ui::Element * e1, const ui::Element * e2, const ui::Element * e3, const ui::Element * e4,
   const ui::Element * e5, const ui::Element * e6, const ui::Element * e7)
 {
-  frame_.head.data_len = DATA_HEAD_LEN + 7 * FIG_LEN;
-
-  apply_crc8();
-
+  frame_.head.data_len = DATA_HEAD_LEN + FIG_LEN * 7;
   frame_.data.data_cmd_id = referee::data_cmd_id::INTERACTION_FIGURE_7;
-
   copy(e1, 0);
   copy(e2, 1);
   copy(e3, 2);
@@ -143,31 +123,23 @@ void UI_Manager::pack(
   copy(e5, 4);
   copy(e6, 5);
   copy(e7, 6);
-
+  apply_crc8();
   apply_crc16();
 }
 
 void UI_Manager::copy(const ui::Element * e, size_t i)
 {
-  if (e == nullptr) {
-    std::copy(
-      reinterpret_cast<const uint8_t *>(&empty_),
-      reinterpret_cast<const uint8_t *>(&empty_) + FIG_LEN, frame_.data.user_data + FIG_LEN * i);
-  }
-  else {
-    std::copy(
-      reinterpret_cast<const uint8_t *>(&e->data),
-      reinterpret_cast<const uint8_t *>(&e->data) + FIG_LEN, frame_.data.user_data + FIG_LEN * i);
-  }
+  auto fig = reinterpret_cast<const uint8_t *>((e == nullptr) ? &empty_ : &e->data);
+  std::copy(fig, fig + FIG_LEN, frame_.data.user_data + FIG_LEN * i);
 }
 
 void UI_Manager::apply_crc8() { frame_.head.crc8 = get_crc8(data(), 4); }
 
 void UI_Manager::apply_crc16()
 {
-  auto crc16 = get_crc16(data(), size() - referee::TAIL_LEN);
-  frame_.data.user_data[frame_.head.data_len - DATA_HEAD_LEN] = crc16 & 0xff;
-  frame_.data.user_data[frame_.head.data_len - DATA_HEAD_LEN + 1] = crc16 >> 8;
+  auto tail = reinterpret_cast<uint8_t *>(&frame_.data) + frame_.head.data_len;
+  auto crc16 = reinterpret_cast<uint16_t *>(tail);
+  *crc16 = get_crc16(data(), size() - referee::TAIL_LEN);
 }
 
 }  // namespace sp
