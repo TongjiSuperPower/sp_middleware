@@ -15,6 +15,10 @@ public:
   const uint8_t * data() const;
 
   void set_sender_id(uint8_t robot_id);
+
+  void delete_all();
+  void delete_layer(ui::Layer layer);
+
   void pack(const ui::String * str);
   void pack(const ui::Element * e1);
   void pack(const ui::Element * e1, const ui::Element * e2);
@@ -36,8 +40,7 @@ private:
   referee::InteractionFigure empty_;
 
   void copy(const ui::Element * e, size_t i);
-  void apply_crc8();
-  void apply_crc16();
+  void apply_crc();
 };
 
 }  // namespace sp

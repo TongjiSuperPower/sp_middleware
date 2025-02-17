@@ -62,6 +62,23 @@ void UI_Manager::set_sender_id(uint8_t robot_id)
   frame_.data.receiver_id = get_client_id(robot_id);
 }
 
+void UI_Manager::delete_all()
+{
+  frame_.head.data_len = DATA_HEAD_LEN + sizeof(referee::InteractionLayerDelete);
+  frame_.data.data_cmd_id = referee::data_cmd_id::INTERACTION_LAYER_DELETE;
+  frame_.data.user_data[0] = 2;
+  apply_crc();
+}
+
+void UI_Manager::delete_layer(ui::Layer layer)
+{
+  frame_.head.data_len = DATA_HEAD_LEN + sizeof(referee::InteractionLayerDelete);
+  frame_.data.data_cmd_id = referee::data_cmd_id::INTERACTION_LAYER_DELETE;
+  frame_.data.user_data[0] = 1;
+  frame_.data.user_data[1] = static_cast<uint8_t>(layer);
+  apply_crc();
+}
+
 void UI_Manager::pack(const ui::String * str)
 {
   frame_.head.data_len = DATA_HEAD_LEN + sizeof(referee::ExtClientCustomCharacter);
@@ -72,8 +89,7 @@ void UI_Manager::pack(const ui::String * str)
   std::copy(data, data + str_len, frame_.data.user_data + FIG_LEN);
 
   copy(str, 0);
-  apply_crc8();
-  apply_crc16();
+  apply_crc();
 }
 
 void UI_Manager::pack(const ui::Element * e1)
@@ -81,8 +97,7 @@ void UI_Manager::pack(const ui::Element * e1)
   frame_.head.data_len = DATA_HEAD_LEN + FIG_LEN;
   frame_.data.data_cmd_id = referee::data_cmd_id::INTERACTION_FIGURE;
   copy(e1, 0);
-  apply_crc8();
-  apply_crc16();
+  apply_crc();
 }
 
 void UI_Manager::pack(const ui::Element * e1, const ui::Element * e2)
@@ -91,8 +106,7 @@ void UI_Manager::pack(const ui::Element * e1, const ui::Element * e2)
   frame_.data.data_cmd_id = referee::data_cmd_id::INTERACTION_FIGURE_2;
   copy(e1, 0);
   copy(e2, 1);
-  apply_crc8();
-  apply_crc16();
+  apply_crc();
 }
 
 void UI_Manager::pack(
@@ -106,8 +120,7 @@ void UI_Manager::pack(
   copy(e3, 2);
   copy(e4, 3);
   copy(e5, 4);
-  apply_crc8();
-  apply_crc16();
+  apply_crc();
 }
 
 void UI_Manager::pack(
@@ -123,8 +136,7 @@ void UI_Manager::pack(
   copy(e5, 4);
   copy(e6, 5);
   copy(e7, 6);
-  apply_crc8();
-  apply_crc16();
+  apply_crc();
 }
 
 void UI_Manager::copy(const ui::Element * e, size_t i)
@@ -133,10 +145,12 @@ void UI_Manager::copy(const ui::Element * e, size_t i)
   std::copy(fig, fig + FIG_LEN, frame_.data.user_data + FIG_LEN * i);
 }
 
-void UI_Manager::apply_crc8() { frame_.head.crc8 = get_crc8(data(), 4); }
-
-void UI_Manager::apply_crc16()
+void UI_Manager::apply_crc()
 {
+  // 先计算crc8
+  frame_.head.crc8 = get_crc8(data(), 4);
+
+  // 再计算crc16
   auto tail = reinterpret_cast<uint8_t *>(&frame_.data) + frame_.head.data_len;
   auto crc16 = reinterpret_cast<uint16_t *>(tail);
   *crc16 = get_crc16(data(), size() - referee::TAIL_LEN);
