@@ -2,7 +2,7 @@
 
 南航UI设计器（用于模拟UI绘制）：https://github.com/bismarckkk/RM-UI-Designer
 
-![Image](https://github.com/user-attachments/assets/6bc909ca-a681-4b92-b6c2-1e8f68b4ccee)
+![Image](https://github.com/user-attachments/assets/47958de8-eedc-4c69-95b9-b8032b03e88f)
 
 新建applications/uart_task.cpp
 
@@ -17,14 +17,14 @@ sp::PM02 pm02(&huart6);
 sp::UI_Manager ui_manager;
 
 using namespace sp::ui;
-Line line(Layer::LAYER_0, Color::RED_BLUE, 1, 0, 0, 100, 100);
-Rectangle rect(Layer::LAYER_1, Color::YELLOW, 2, 100, 100, 200, 200);
-Circle circle(Layer::LAYER_2, Color::GREEN, 3, 100, 100, 50);
-Ellipse ellipse(Layer::LAYER_3, Color::ORANGE, 4, 100, 100, 50, 25);
-Arc arc(Layer::LAYER_4, Color::PURPLE, 5, 200, 200, 0, 180, 25, 50);
-Float float_num(Layer::LAYER_5, Color::PINK, 6, 300, 300, 60, 3.14);
-Integer int_num(Layer::LAYER_6, Color::CYAN, 7, 300, 400, 70, 42);
-String str(Layer::LAYER_7, Color::BLACK, 8, 300, 500, 80, "Hello, World!");
+Line line(Layer::LAYER_0, Color::RED_BLUE, 1, 500, 500, 600, 600);
+Rectangle rect(Layer::LAYER_1, Color::YELLOW, 2, 1000, 550, 1100, 650);
+Circle circle(Layer::LAYER_2, Color::GREEN, 3, 800, 600, 50);
+Ellipse ellipse(Layer::LAYER_3, Color::ORANGE, 4, 700, 600, 50, 25);
+Arc arc(Layer::LAYER_4, Color::PURPLE, 5, 600, 600, 0, 180, 25, 50);
+Float float_num(Layer::LAYER_5, Color::PINK, 6, 500, 300, 60, 3.14);
+Integer int_num(Layer::LAYER_6, Color::CYAN, 7, 500, 400, 70, 42);
+String str(Layer::LAYER_7, Color::WHITE, 8, 500, 800, 80, "Hello, World!");
 
 int int_num_value = 0;
 
