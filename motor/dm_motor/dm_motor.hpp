@@ -33,6 +33,7 @@ public:
   void read(uint8_t * data, uint32_t stamp_ms);
   void write(uint8_t * data) const;
   void write_enable(uint8_t * data) const;
+  void write_clear_error(uint8_t * data) const;
 
   // MIT力控模式, 单位: N·m
   void cmd(float torque);

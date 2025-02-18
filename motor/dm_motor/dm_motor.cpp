@@ -49,6 +49,18 @@ void DM_Motor::write_enable(uint8_t * data) const
   data[7] = 0xFC;
 }
 
+void DM_Motor::write_clear_error(uint8_t * data) const
+{
+  data[0] = 0xFF;
+  data[1] = 0xFF;
+  data[2] = 0xFF;
+  data[3] = 0xFF;
+  data[4] = 0xFF;
+  data[5] = 0xFF;
+  data[6] = 0xFF;
+  data[7] = 0xFB;
+}
+
 void DM_Motor::cmd(float torque) { cmd_torque_ = limit_max(torque, tmax_); }
 
 }  // namespace sp
