@@ -86,6 +86,7 @@ void UI_Manager::pack(const ui::String * str)
 
   auto data = str->str.data();
   auto str_len = std::min(str->str.size(), MAX_STR_LEN);
+  std::fill(frame_.data.user_data + FIG_LEN, frame_.data.user_data + FIG_LEN + MAX_STR_LEN, 0);
   std::copy(data, data + str_len, frame_.data.user_data + FIG_LEN);
 
   copy(str, 0);
