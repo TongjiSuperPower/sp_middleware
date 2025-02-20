@@ -108,7 +108,7 @@ Float::Float(
 
 void Float::set_font_size(uint16_t font_size) { data.details_a = font_size; }
 
-void Float::set_value(float value) { set_int32(&data, value * 1e3); }
+void Float::set_value(float value) { set_int32(&data, value * 1e3f); }
 
 Integer::Integer(
   Layer layer, Color color, uint16_t width, uint16_t x, uint16_t y, uint16_t font_size, int value)
