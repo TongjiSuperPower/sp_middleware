@@ -20,8 +20,8 @@ constexpr float BMI088_GYRO_INT_TO_DPS = 2000.0f / (BMI088_GYRO_RANGE_SET + 1) /
 constexpr float BMI088_GYRO_INT_TO_RPS = BMI088_GYRO_INT_TO_DPS / 180 * sp::PI;
 
 // ref: datasheet 5.3.7
-constexpr float BMI088_temp_FACTOR = 0.125f;
-constexpr float BMI088_temp_OFFSET = 23.0f;
+constexpr float BMI088_TEMP_FACTOR = 0.125f;
+constexpr float BMI088_TEMP_OFFSET = 23.0f;
 
 constexpr size_t BMI088_ACC_INIT_TABLE_SIZE = 6;
 constexpr size_t BMI088_GYRO_INIT_TABLE_SIZE = 6;
@@ -123,7 +123,7 @@ uint8_t BMI088::acc_init()
 void BMI088::acc_update()
 {
   // 接收加速度计数据
-  acc_read(BMI088_ACC_DATA, BMI088_TEMP_LSB - BMI088_ACC_DATA + 1);
+  acc_read(BMI088_ACC_DATA, 2);
 
   // 前两个字节为无效数据
   int16_t acc_x_int = (rx_buff_[2 + 1] << 8) | rx_buff_[2 + 0];
@@ -134,15 +134,15 @@ void BMI088::acc_update()
   float acc_z = acc_z_int * BMI088_ACC_INT_TO_MPS2;
 
   // 前两个字节为无效数据
-  int16_t temp_int = (rx_buff_[2 + BMI088_TEMP_MSB - BMI088_ACC_DATA] << 3) |
-                     (rx_buff_[2 + BMI088_TEMP_LSB - BMI088_ACC_DATA] >> 5);
+  acc_read(BMI088_TEMP_DATA, 2);
+  int16_t temp_int = (rx_buff_[2 + 0] << 3) | (rx_buff_[2 + 1] >> 5);
   if (temp_int > 1023) temp_int -= 2048;  // ref: 5.3.7
 
   // 更新公开属性
   this->acc[0] = r_ab_[0][0] * acc_x + r_ab_[0][1] * acc_y + r_ab_[0][2] * acc_z;
   this->acc[1] = r_ab_[1][0] * acc_x + r_ab_[1][1] * acc_y + r_ab_[1][2] * acc_z;
   this->acc[2] = r_ab_[2][0] * acc_x + r_ab_[2][1] * acc_y + r_ab_[2][2] * acc_z;
-  this->temp = temp_int * BMI088_temp_FACTOR + BMI088_temp_OFFSET;
+  this->temp = temp_int * BMI088_TEMP_FACTOR + BMI088_TEMP_OFFSET;
 }
 
 void BMI088::acc_read(uint8_t reg, uint8_t len)
