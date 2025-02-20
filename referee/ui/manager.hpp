@@ -20,14 +20,17 @@ public:
   void delete_layer(ui::Layer layer);
 
   void pack(const ui::String * str);
-  void pack(const ui::Element * e1);
-  void pack(const ui::Element * e1, const ui::Element * e2);
+  void pack(const ui::ComposableElement * e1);
+  void pack(const ui::ComposableElement * e1, const ui::ComposableElement * e2);
   void pack(
-    const ui::Element * e1, const ui::Element * e2, const ui::Element * e3,
-    const ui::Element * e4 = nullptr, const ui::Element * e5 = nullptr);
+    const ui::ComposableElement * e1, const ui::ComposableElement * e2,
+    const ui::ComposableElement * e3, const ui::ComposableElement * e4 = nullptr,
+    const ui::ComposableElement * e5 = nullptr);
   void pack(
-    const ui::Element * e1, const ui::Element * e2, const ui::Element * e3, const ui::Element * e4,
-    const ui::Element * e5, const ui::Element * e6, const ui::Element * e7 = nullptr);
+    const ui::ComposableElement * e1, const ui::ComposableElement * e2,
+    const ui::ComposableElement * e3, const ui::ComposableElement * e4,
+    const ui::ComposableElement * e5, const ui::ComposableElement * e6,
+    const ui::ComposableElement * e7 = nullptr);
 
 private:
   struct __attribute__((packed))

@@ -67,7 +67,12 @@ struct Element
   void set_y(uint16_t y);
 };
 
-struct Line : public Element
+struct ComposableElement : public Element
+{
+  using Element::Element;
+};
+
+struct Line : public ComposableElement
 {
   Line(
     Layer layer, Color color, uint16_t width, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2);
@@ -75,7 +80,7 @@ struct Line : public Element
   void set_y2(uint16_t y2);
 };
 
-struct Rectangle : public Element
+struct Rectangle : public ComposableElement
 {
   Rectangle(
     Layer layer, Color color, uint16_t width, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2);
@@ -83,13 +88,13 @@ struct Rectangle : public Element
   void set_y2(uint16_t y2);
 };
 
-struct Circle : public Element
+struct Circle : public ComposableElement
 {
   Circle(Layer layer, Color color, uint16_t width, uint16_t x, uint16_t y, uint16_t radius);
   void set_radius(uint16_t radius);
 };
 
-struct Ellipse : public Element
+struct Ellipse : public ComposableElement
 {
   Ellipse(
     Layer layer, Color color, uint16_t width, uint16_t x, uint16_t y, uint16_t x_radius,
@@ -98,7 +103,7 @@ struct Ellipse : public Element
   void set_y_radius(uint16_t y_radius);
 };
 
-struct Arc : public Element
+struct Arc : public ComposableElement
 {
   Arc(
     Layer layer, Color color, uint16_t width, uint16_t x, uint16_t y, uint16_t start_angle,
@@ -109,36 +114,31 @@ struct Arc : public Element
   void set_y_radius(uint16_t y_radius);
 };
 
-struct Text : public Element
-{
-  Text(
-    FigureType type, Layer layer, Color color, uint16_t width, uint16_t x, uint16_t y,
-    uint16_t font_size);
-  void set_font_size(uint16_t font_size);
-};
-
-struct Float : public Text
+struct Float : public ComposableElement
 {
   Float(
     Layer layer, Color color, uint16_t width, uint16_t x, uint16_t y, uint16_t font_size,
     float value);
+  void set_font_size(uint16_t font_size);
   void set_value(float value);
 };
 
-struct Integer : public Text
+struct Integer : public ComposableElement
 {
   Integer(
     Layer layer, Color color, uint16_t width, uint16_t x, uint16_t y, uint16_t font_size,
     int value);
+  void set_font_size(uint16_t font_size);
   void set_value(int value);
 };
 
-struct String : public Text
+struct String : public Element
 {
   std::string str;
   String(
     Layer layer, Color color, uint16_t width, uint16_t x, uint16_t y, uint16_t font_size,
     const std::string & value);
+  void set_font_size(uint16_t font_size);
   void set_value(const std::string & value);
 };
 

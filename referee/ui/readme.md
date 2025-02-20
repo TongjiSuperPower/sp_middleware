@@ -39,7 +39,7 @@ extern "C" void uart_task()
   pm02.send(ui_manager.data(), ui_manager.size());
   osDelay(33);
 
-  ui_manager.pack(&str);
+  ui_manager.pack(&str); // String类型每次只能发一个!
   pm02.send(ui_manager.data(), ui_manager.size());
   osDelay(33);
 

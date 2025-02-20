@@ -93,7 +93,7 @@ void UI_Manager::pack(const ui::String * str)
   apply_crc();
 }
 
-void UI_Manager::pack(const ui::Element * e1)
+void UI_Manager::pack(const ui::ComposableElement * e1)
 {
   frame_.head.data_len = DATA_HEAD_LEN + FIG_LEN;
   frame_.data.data_cmd_id = referee::data_cmd_id::INTERACTION_FIGURE;
@@ -101,7 +101,7 @@ void UI_Manager::pack(const ui::Element * e1)
   apply_crc();
 }
 
-void UI_Manager::pack(const ui::Element * e1, const ui::Element * e2)
+void UI_Manager::pack(const ui::ComposableElement * e1, const ui::ComposableElement * e2)
 {
   frame_.head.data_len = DATA_HEAD_LEN + FIG_LEN * 2;
   frame_.data.data_cmd_id = referee::data_cmd_id::INTERACTION_FIGURE_2;
@@ -111,8 +111,9 @@ void UI_Manager::pack(const ui::Element * e1, const ui::Element * e2)
 }
 
 void UI_Manager::pack(
-  const ui::Element * e1, const ui::Element * e2, const ui::Element * e3, const ui::Element * e4,
-  const ui::Element * e5)
+  const ui::ComposableElement * e1, const ui::ComposableElement * e2,
+  const ui::ComposableElement * e3, const ui::ComposableElement * e4,
+  const ui::ComposableElement * e5)
 {
   frame_.head.data_len = DATA_HEAD_LEN + FIG_LEN * 5;
   frame_.data.data_cmd_id = referee::data_cmd_id::INTERACTION_FIGURE_5;
@@ -125,8 +126,10 @@ void UI_Manager::pack(
 }
 
 void UI_Manager::pack(
-  const ui::Element * e1, const ui::Element * e2, const ui::Element * e3, const ui::Element * e4,
-  const ui::Element * e5, const ui::Element * e6, const ui::Element * e7)
+  const ui::ComposableElement * e1, const ui::ComposableElement * e2,
+  const ui::ComposableElement * e3, const ui::ComposableElement * e4,
+  const ui::ComposableElement * e5, const ui::ComposableElement * e6,
+  const ui::ComposableElement * e7)
 {
   frame_.head.data_len = DATA_HEAD_LEN + FIG_LEN * 7;
   frame_.data.data_cmd_id = referee::data_cmd_id::INTERACTION_FIGURE_7;
