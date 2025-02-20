@@ -1,11 +1,14 @@
 #ifndef SP__BMI088_HPP
 #define SP__BMI088_HPP
 
+#include "bmi088_defs.h"
 #include "gpio.h"
 #include "spi.h"
 
 namespace sp
 {
+constexpr size_t BMI088_BUFF_SIZE = 2 + BMI088_TEMP_LSB - BMI088_ACC_DATA;
+
 class BMI088
 {
 public:
@@ -16,9 +19,9 @@ public:
     SPI_HandleTypeDef * hspi, GPIO_TypeDef * csb1_port, uint16_t csb1_pin, GPIO_TypeDef * csb2_port,
     uint16_t csb2_pin, const float r_ab[3][3]);
 
-  float acc[3];       // 只读! 单位: m/s^2
-  float gyro[3];      // 只读! 单位: rad/s
-  float temperature;  // 只读! 单位: celsius
+  float acc[3];   // 只读! 单位: m/s^2
+  float gyro[3];  // 只读! 单位: rad/s
+  float temp;     // 只读! 单位: celsius
 
   void init();
   void update();
@@ -31,8 +34,8 @@ private:
   uint16_t csb2_pin_;
   const float r_ab_[3][3];
 
-  uint8_t rx_buff_[8];
-  uint8_t tx_buff_[8];
+  uint8_t rx_buff_[BMI088_BUFF_SIZE];
+  uint8_t tx_buff_[BMI088_BUFF_SIZE];
 
   uint8_t acc_init();
   void acc_update();
