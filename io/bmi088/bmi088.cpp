@@ -123,7 +123,7 @@ uint8_t BMI088::acc_init()
 void BMI088::acc_update()
 {
   // 接收加速度计数据
-  acc_read(BMI088_ACC_DATA, 2);
+  acc_read(BMI088_ACC_DATA, 6);
 
   // 前两个字节为无效数据
   int16_t acc_x_int = (rx_buff_[2 + 1] << 8) | rx_buff_[2 + 0];
