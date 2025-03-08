@@ -7,7 +7,7 @@ namespace sp
 {
 constexpr size_t VT02_BUFF_SIZE = 50;
 
-struct RefereeCustomData
+struct __attribute__((packed)) RefereeCustomData
 {
   float yaw;
   float roll;
@@ -17,6 +17,7 @@ struct RefereeCustomData
   float y;
   float z;
   bool button;
+  uint8_t reserved;  //保留位
 };
 
 struct RefereeMouseData
@@ -66,7 +67,6 @@ private:
 
   uint8_t buff_[VT02_BUFF_SIZE];
 
-  void update_custom();
   void update_mouse_and_keys();
 };
 
