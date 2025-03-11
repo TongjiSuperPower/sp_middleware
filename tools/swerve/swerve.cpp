@@ -37,17 +37,21 @@ void Swerve::convert(const float v[2], float yaw, float yaw_offset, float & angl
 {
   // ref: https://github.com/rm-controls/rm_controllers/blob/master/rm_chassis_controllers/src/swerve.cpp
 
+  if (v[0] == 0.0f && v[1] == 0.0f) {
+    angle = yaw;
+    speed = 0.0f;
+    return;
+  }
+
   float v_angle = std::atan2(v[1], v[0]);
   float v_angle_flipped = limit_angle(v_angle + PI);
   float pivot_angle = sign_ * limit_angle(yaw - yaw_offset);
 
   float a = limit_angle(v_angle - pivot_angle);
   float b = limit_angle(v_angle_flipped - pivot_angle);
-
   float pivot_angle_set = (std::abs(a) < std::abs(b)) ? v_angle : v_angle_flipped;
 
   angle = limit_angle(sign_ * pivot_angle_set + yaw_offset);
-
   speed = std::sqrt(v[0] * v[0] + v[1] * v[1]) / r_ * std::cos(a);
 }
 
