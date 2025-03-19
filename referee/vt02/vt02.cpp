@@ -1,5 +1,7 @@
 #include "vt02.hpp"
 
+#include <cstring>
+
 #include "referee_def.h"
 #include "tools/crc/crc.hpp"
 
@@ -34,7 +36,7 @@ void VT02::update()
   uint16_t cmd_id = (buff_[6] << 8) | buff_[5];
   switch (cmd_id) {
     case REFEREE_CUSTOM_CMD_ID:
-      update_custom();
+      std::memcpy(&(this->custom), buff_ + REFEREE_DATA_START, sizeof(RefereeCustomData));
       break;
     case REFEREE_MOUSE_AND_KEYS_CMD_ID:
       update_mouse_and_keys();
@@ -42,28 +44,6 @@ void VT02::update()
     default:
       break;
   }
-}
-
-void VT02::update_custom()
-{
-  // 数据解析
-  int16_t yaw_int = (buff_[REFEREE_DATA_START + 0] << 8) | buff_[REFEREE_DATA_START + 1];
-  int16_t roll_int = (buff_[REFEREE_DATA_START + 2] << 8) | buff_[REFEREE_DATA_START + 3];
-  int16_t pitch_int = (buff_[REFEREE_DATA_START + 4] << 8) | buff_[REFEREE_DATA_START + 5];
-  int16_t roll2_int = (buff_[REFEREE_DATA_START + 6] << 8) | buff_[REFEREE_DATA_START + 7];
-  int16_t x_int = (buff_[REFEREE_DATA_START + 8] << 8) | buff_[REFEREE_DATA_START + 9];
-  int16_t y_int = (buff_[REFEREE_DATA_START + 10] << 8) | buff_[REFEREE_DATA_START + 11];
-  int16_t z_int = (buff_[REFEREE_DATA_START + 12] << 8) | buff_[REFEREE_DATA_START + 13];
-
-  // 更新公有属性
-  this->custom.yaw = float(yaw_int) / 1e3f;
-  this->custom.roll = float(roll_int) / 1e3f;
-  this->custom.pitch = float(pitch_int) / 1e3f;
-  this->custom.roll2 = float(roll2_int) / 1e3f;
-  this->custom.x = float(x_int) / 1e4f;
-  this->custom.y = float(y_int) / 1e4f;
-  this->custom.z = float(z_int) / 1e4f;
-  this->custom.button = (buff_[REFEREE_DATA_START + 14] == 1);
 }
 
 void VT02::update_mouse_and_keys()
