@@ -112,7 +112,7 @@ void Float::set_value(float value) { set_int32(&data, value * 1e3f); }
 
 Integer::Integer(
   Layer layer, Color color, uint16_t width, uint16_t x, uint16_t y, uint16_t font_size, int value)
-: ComposableElement(FigureType::FLOAT, layer, color, width, x, y)
+: ComposableElement(FigureType::INTEGER, layer, color, width, x, y)
 {
   set_font_size(font_size);
   set_value(value);

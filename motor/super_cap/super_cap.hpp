@@ -21,8 +21,8 @@ public:
   const uint16_t rx_id = 0x301;  // 电容反馈帧ID
   const uint16_t tx_id = 0x300;  // 电容控制帧ID
 
-  float power_in;   // 电容输入功率
-  float power_out;  // 电容充放电功率
+  float power_in;   // 电管输出
+  float power_out;  // 电容组充电功率
   float voltage;    // 电容电压（放到3V，然后3v->6V后可再次放电）
 
   float cap_energy;
