@@ -98,7 +98,7 @@ void imu_temp_control(float temp)
       imu_temp_pid.out = 0.0f;
     }
     tempPWM = (uint16_t)imu_temp_pid.out;
-    __HAL_TIM_SetCompare(&htim10, TIM_CHANNEL_1, tempPWM);
+    __HAL_TIM_SET_COMPARE(&htim10, TIM_CHANNEL_1, tempPWM);
   }
   else {
     //在没有达到设置的温度，一直最大功率加热
@@ -109,7 +109,7 @@ void imu_temp_control(float temp)
         first_temperate = 1;
       }
     }
-    __HAL_TIM_SetCompare(&htim10, TIM_CHANNEL_1, 4999);
+    __HAL_TIM_SET_COMPARE(&htim10, TIM_CHANNEL_1, 4999);
   }
 }
 
