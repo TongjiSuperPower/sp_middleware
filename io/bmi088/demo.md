@@ -1,3 +1,8 @@
+# BMI088 Demo
+
+新建applications/imu_task.cpp
+```c++
+
 #include "cmsis_os.h"
 #include "io/bmi088/bmi088.hpp"
 #include "tim.h"
