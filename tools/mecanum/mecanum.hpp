@@ -24,11 +24,22 @@ public:
   float speed_rf;  // 只读! calc()计算结果, right-front转速, 单位: rad/s
   float speed_rr;  // 只读! calc()计算结果, right-rear转速, 单位: rad/s
 
+  float vx;  // 只读! update()计算结果, 底盘x方向速度, 单位: m/s
+  float vy;  // 只读! update()计算结果, 底盘y方向速度, 单位: m/s
+  float wz;  // 只读! update()计算结果, 底盘z方向角速度, 单位: rad/s
+
   // 底盘速度 -> 各轮转速
   // vx: 前进速度, 单位: m/s
   // vy: 左移速度, 单位: m/s
   // wz: 大拇指朝上，右手螺旋方向转速, 单位: rad/s
   void calc(float vx, float vy, float wz);
+
+  // 各轮转速 -> 底盘速度
+  // speed_lf: left-front转速, 单位: rad/s
+  // speed_lr: left-rear转速, 单位: rad/s
+  // speed_rf: right-front转速, 单位: rad/s
+  // speed_rr: right-rear转速, 单位: rad/s
+  void update(float speed_lf, float speed_lr, float speed_rf, float speed_rr);
 
 private:
   const float r_;

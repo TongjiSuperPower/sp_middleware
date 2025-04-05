@@ -28,4 +28,16 @@ void Mecanum::calc(float vx, float vy, float wz)
   this->speed_rr = sign_rr_ * (vx - vy + (l_ + w_) * wz) / r_;
 }
 
+void Mecanum::update(float speed_lf, float speed_lr, float speed_rf, float speed_rr)
+{
+  float sign_speed_lf = speed_lf / sign_lf_;
+  float sign_speed_lr = speed_lr / sign_lr_;
+  float sign_speed_rf = speed_rf / sign_rf_;
+  float sign_speed_rr = speed_rr / sign_rr_;
+
+  this->vx = (sign_speed_lf + sign_speed_lr + sign_speed_rf + sign_speed_rr) / 4 * r_;
+  this->vy = (-sign_speed_lf + sign_speed_lr + sign_speed_rf - sign_speed_rr) / 4 * r_;
+  this->wz = (-sign_speed_lf - sign_speed_lr + sign_speed_rf + sign_speed_rr) / 4 * r_ / (l_ + w_);
+}
+
 }  // namespace sp
