@@ -56,7 +56,7 @@ inline static constexpr float membership_params_[7][3] = {
   {0.666, 1.0, 1.0}};      // PB
 
 FuzzyPID::FuzzyPID(
-  float dt, float kp0, float ki0, float kd0, float max_out, float max_iout, float error_scale,
+  float dt, float kp0, float ki0, float kd0, float max_out, float max_iout, float error_scale,float error_rate_scale,
   float alpha, bool angular)
 : dt_(dt),
   kp_(kp0),
@@ -65,7 +65,7 @@ FuzzyPID::FuzzyPID(
   max_out_(max_out),
   max_iout_(max_iout),
   error_scale_(error_scale),
-  error_rate_scale_(error_scale * 2 / dt_),
+  error_rate_scale_(error_rate_scale_),
   alpha_(alpha),
   angular_(angular)
 {

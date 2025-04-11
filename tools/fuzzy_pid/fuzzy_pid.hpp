@@ -33,7 +33,7 @@ public:
   using RuleTable = std::array<std::array<int, 7>, 7>;
 
   FuzzyPID(
-    float dt, float kp0, float ki0, float kd0, float max_out, float max_iout, float error_scale,
+    float dt, float kp0, float ki0, float kd0, float max_out, float max_iout, float error_scale, float error_rate_scale,
     float alpha = 1, bool angular = false);
 
   FuzzyData data;  // PIDÊý¾Ý
