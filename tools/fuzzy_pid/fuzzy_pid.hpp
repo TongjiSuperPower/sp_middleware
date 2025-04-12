@@ -2,7 +2,6 @@
 #define SP__FUZZY_PID_HPP
 
 #include <array>
-
 #include "tools/math_tools/math_tools.hpp"
 
 namespace sp
@@ -11,7 +10,6 @@ struct FuzzyData
 {
   float set = 0;  // 设定值
   float fdb = 0;  // 反馈值(feedback)
-
 
   float pout = 0;  // P项输出值
   float iout = 0;  // I项输出值
@@ -57,7 +55,9 @@ private:
   float delta_ki_ = 0;  // I项系数模糊量
   float delta_kd_ = 0;  // D项系数模糊量
 
+  // 模糊推理+解模糊
   float fuzzy_inference(float error, float error_rate, const RuleTable & rules) const;
+  // 隶属度计算
   float membership_calc(float x, int set) const;
 };
 

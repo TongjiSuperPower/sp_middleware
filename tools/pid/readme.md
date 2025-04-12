@@ -14,7 +14,7 @@ target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
 
 ### 初始化
 ```cpp
-sp::PID motor_pid((dt,kp,ki,kd,max_out,max_iout,alpha,angular,dynamic);
+sp::PID motor_pid(dt,kp,ki,kd,max_out,max_iout,alpha,angular,dynamic);
 ```
 `dt`: 循环周期，单位为s
 
