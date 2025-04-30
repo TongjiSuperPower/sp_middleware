@@ -7,6 +7,18 @@
 
 namespace sp
 {
+struct __attribute__((packed)) RefereeCustomData
+{
+  float yaw;
+  float roll;
+  float pitch;
+  float roll2;
+  float x;
+  float y;
+  float z;
+  bool button;
+  uint8_t reserved;  //保留位
+};
 
 struct __attribute__((packed)) VT03RemoteData
 {
@@ -40,17 +52,16 @@ enum class VT03Mode
   S
 };
 
-struct VT03MouseData
+struct RefereeMouseData
 {
   float vx;  // 取值范围: [-1, 1]
   float vy;  // 取值范围: [-1, 1]
   float vs;  // 取值范围: [-1, 1], 鼠标滚轮, s代表scroll
   bool left;
   bool right;
-  bool middle;
 };
 
-struct VT03KeysData
+struct RefereeKeysData
 {
   bool w;
   bool s;
@@ -76,19 +87,20 @@ public:
   VT03(UART_HandleTypeDef * huart, bool use_dma = true);
   UART_HandleTypeDef * huart;
 
-  float ch_rh;   // 只读! 右水平摇杆, 取值范围: [-1, 1], 右正左负
-  float ch_rv;   // 只读! 右垂直摇杆, 取值范围: [-1, 1], 上正下负
-  float ch_lh;   // 只读! 左水平摇杆, 取值范围: [-1, 1], 右正左负
-  float ch_lv;   // 只读! 左垂直摇杆, 取值范围: [-1, 1], 上正下负
-  float ch_lu;   // 只读! 左上方拨轮, 取值范围: [-1, 1], 左正右负
-  bool fn_l;     // 只读! 左自定义按键
-  bool fn_r;     // 只读! 右自定义按键
-  bool pause;    // 只读! 暂停按键
-  bool trigger;  // 只读! 扳机按键
+  VT03Mode mode;  // 只读! 档位切换开关
+  float ch_rh;    // 只读! 右水平摇杆, 取值范围: [-1, 1], 右正左负
+  float ch_rv;    // 只读! 右垂直摇杆, 取值范围: [-1, 1], 上正下负
+  float ch_lh;    // 只读! 左水平摇杆, 取值范围: [-1, 1], 右正左负
+  float ch_lv;    // 只读! 左垂直摇杆, 取值范围: [-1, 1], 上正下负
+  float ch_lu;    // 只读! 左上方拨轮, 取值范围: [-1, 1], 左正右负
+  bool fn_l;      // 只读! 左自定义按键
+  bool fn_r;      // 只读! 右自定义按键
+  bool pause;     // 只读! 暂停按键
+  bool trigger;   // 只读! 扳机按键
 
-  VT03Mode mode;        // 只读! 档位切换开关
-  VT03MouseData mouse;  // 只读! 鼠标数据
-  VT03KeysData keys;    // 只读! 键盘数据
+  RefereeCustomData custom;  // 只读! 自定义控制器数据
+  RefereeMouseData mouse;    // 只读! 鼠标数据
+  RefereeKeysData keys;      // 只读! 键盘数据
 
   void request();
   void update(uint16_t size);
