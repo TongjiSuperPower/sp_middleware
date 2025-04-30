@@ -3,6 +3,7 @@
 
 #include <array>
 
+#include "referee/referee_protocol/referee_protocol.hpp"
 #include "usart.h"
 
 namespace sp
@@ -19,6 +20,8 @@ struct __attribute__((packed)) RefereeCustomData
   bool button;
   uint8_t reserved;  //保留位
 };
+
+static_assert(sizeof(RefereeCustomData) == sizeof(referee::CustomRobotData));
 
 struct __attribute__((packed)) VT03RemoteData
 {
@@ -92,7 +95,7 @@ public:
   float ch_rv;    // 只读! 右垂直摇杆, 取值范围: [-1, 1], 上正下负
   float ch_lh;    // 只读! 左水平摇杆, 取值范围: [-1, 1], 右正左负
   float ch_lv;    // 只读! 左垂直摇杆, 取值范围: [-1, 1], 上正下负
-  float ch_lu;    // 只读! 左上方拨轮, 取值范围: [-1, 1], 左正右负
+  float wheel;    // 只读! 左上方拨轮, 取值范围: [-1, 1], 右正左负
   bool fn_l;      // 只读! 左自定义按键
   bool fn_r;      // 只读! 右自定义按键
   bool pause;     // 只读! 暂停按键
@@ -107,11 +110,11 @@ public:
 
 private:
   const bool use_dma_;
+  std::array<uint8_t, 255> buff_;
 
-  VT03RemoteData remote_data_;
-  std::array<uint8_t, sizeof(VT03RemoteData)> buff_;  // TODO 0x0302 size
-
-  void update_remote();
+  void update(uint8_t * frame_start, uint16_t size);
+  void update_remote(const VT03RemoteData * data);
+  void update_mouse_and_keys(const referee::RemoteControl * data);
 };
 
 }  // namespace sp
