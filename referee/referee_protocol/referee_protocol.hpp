@@ -242,7 +242,7 @@ struct __attribute__((packed)) RobotPos
 struct __attribute__((packed)) Buff
 {
   uint8_t recovery_y_buff;     // 机器人回血增益（百分比，值为 10 表示每秒恢复血量上限的 10%）
-  uint8_t cooling_buff;        // 机器人射击热量冷却倍率（直接值，值为 5 表示 5 倍冷却）
+  uint8_t cooling_buff;        // 机器人射击热量冷却倍率（直接值，值为 5 表示 5 倍冷却;堡垒增益点提供的固定热量冷却增益暂不适用）
   uint8_t defence_buff;        // 机器人防御增益（百分比，值为 50 表示 50%防御增益）
   uint8_t vulnerability_buff;  // 机器人负防御增益（百分比，值为 30 表示-30%防御增益）
   uint16_t attack_buff;        // 机器人攻击增益（百分比，值为 50 表示 50%攻击增益）
@@ -526,8 +526,8 @@ struct __attribute__((packed)) MapData
   uint8_t intention;          // 1：到目标点攻击 2：到目标点防守 3：移动到目标点
   uint16_t start_position_x;  // 路径起点 x 轴坐标，单位：dm
   uint16_t start_position_y;  // 路径起点 y 轴坐标，单位：dm
-  int8_t delta_x[49];         // 路径点 x 轴坐标偏移，单位：dm
-  int8_t delta_y[49];         // 路径点 y 轴坐标偏移，单位：dm
+  int8_t delta_x[49];         // 路径点 x 轴增量数组，单位：dm
+  int8_t delta_y[49];         // 路径点 y 轴增量数组，单位：dm
   uint16_t sender_id;         // 发送方 ID
 };
 
