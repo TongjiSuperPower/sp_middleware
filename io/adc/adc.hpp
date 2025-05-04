@@ -5,23 +5,31 @@
 
 namespace sp
 {
-constexpr uint32_t ADC_12BIT_MAX = 4096;
-constexpr uint32_t ADC_VREF = 3.3;
-constexpr float VOLTAGE_DIVIDER = (222.0 / 22.0);
-constexpr float ADC12_TO_V_COEF = (ADC_VREF * VOLTAGE_DIVIDER / ADC_12BIT_MAX);
-class adc
+class Adc
 {
 public:
-  adc(ADC_HandleTypeDef * adc);
+  Adc(
+    ADC_HandleTypeDef * adc, uint32_t channel_sqr, float verf, float voltage_divider,
+    float voltage_offset);
   void init();
-  //更新电池电压值
+  //更新得到的电压值
   void update();
   //测量得到的电压值
   float voltage;
 
 private:
+  //adc口
   ADC_HandleTypeDef * adc_;
-  uint32_t buff_;
+  //ADC转换位数的平方，如12位则2^12(4096)
+  uint32_t channel_sqr_;
+  //ADC参考电压
+  float verf_;
+  //电压分压比
+  float voltage_divider_;
+  //ADC转换值到电压的系数
+  float adc12_to_v_coef_;
+  //电压偏移值
+  float voltage_offset_;
 };
 }  // namespace sp
 
