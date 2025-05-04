@@ -1,7 +1,7 @@
 # ADC Demo
 
-_CubeMX：_
-_PF10 使能ADC3_IN8_
+* CubeMX:
+* PF10 使能ADC3_IN8
 
 新建applications/voltage_detect.cpp
 ```cpp
@@ -30,7 +30,7 @@ extern "C" void voltage_detect()
 编辑CMakeLists.txt
 ```cmake
 target_sources(${CMAKE_PROJECT_NAME} PRIVATE
-    applications/adc_task.cpp # <- 添加这一行
+    applications/voltage_detect.cpp # <- 添加这一行
     sp_middleware/io/adc/adc.cpp # <- 添加这一行
 )
 
