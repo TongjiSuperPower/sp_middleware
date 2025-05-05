@@ -10,7 +10,7 @@
 
 //C板
 sp::Adc battery(
-  &hadc3, 4096, 3.3f, (222.0f / 22.0f), 1.0f);  // ADC1, 12位, 3.3V, 分压比222:22 ，偏移1V
+  &hadc3, 4096, 3.3f, (222.0f / 22.0f), 1.0f);  // ADC3, 12位, 3.3V, 分压比222:22 ，偏移1V
 float voltage = 0.0f;                           // 电压值
 extern "C" void voltage_detect()
 {
