@@ -14,13 +14,17 @@ target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
 
 ### 初始化
 ```cpp
-sp::YawFeedward yaw_feedward(dt,inertia,k_ff);
+sp::YawFeedward yaw_feedward(dt,inertia,k_ff,damping,damping_out_max);
 ```
 `dt`: 循环周期，单位为s
 
 `inertia`: 转动惯量
 
 `k_ff`: 前馈增益,默认值为1.0，需根据系统的实际动态响应，逐步调整
+
+`damping`: 阻尼系数，默认值为0.0，需根据系统的实际动态响应，逐步调整
+
+`damping_out_max`: 输出阻尼最大值，默认值为0.0，需根据系统的实际动态响应，逐步调整
 
 ### 调用
 
