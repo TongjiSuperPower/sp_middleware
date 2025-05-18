@@ -241,8 +241,9 @@ struct __attribute__((packed)) RobotPos
 // 0x0204 机器人增益数据
 struct __attribute__((packed)) Buff
 {
-  uint8_t recovery_y_buff;     // 机器人回血增益（百分比，值为 10 表示每秒恢复血量上限的 10%）
-  uint8_t cooling_buff;        // 机器人射击热量冷却倍率（直接值，值为 5 表示 5 倍冷却;堡垒增益点提供的固定热量冷却增益暂不适用）
+  uint8_t recovery_y_buff;  // 机器人回血增益（百分比，值为 10 表示每秒恢复血量上限的 10%）
+  uint8_t
+    cooling_buff;  // 机器人射击热量冷却倍率（直接值，值为 5 表示 5 倍冷却;堡垒增益点提供的固定热量冷却增益暂不适用）
   uint8_t defence_buff;        // 机器人防御增益（百分比，值为 50 表示 50%防御增益）
   uint8_t vulnerability_buff;  // 机器人负防御增益（百分比，值为 30 表示-30%防御增益）
   uint16_t attack_buff;        // 机器人攻击增益（百分比，值为 50 表示 50%攻击增益）
@@ -460,8 +461,23 @@ struct __attribute__((packed)) ExtClientCustomCharacter
 };
 
 // 0x0301 0x0120 哨兵自主决策指令 TODO
+struct __attribute__((packed)) SentryCmd
+{
+  uint32_t resurrect : 1;             // bit 0：是否确认复活 0：否 1：是
+  uint32_t immediate_resurrect : 1;   // bit 1：是否消耗金币兑换立即复活  0：否 1：是
+  uint32_t exchange_17mm_value : 11;  // bit 2-12：发弹量兑换值（递增有效）
+  uint32_t
+    remote_exchange_17mm_count : 4;  // bit 13-16：远程兑换发弹量次数，开局为0，单调递增，每次加1
+  uint32_t
+    remote_exchange_blood_count : 4;  // bit 17-20：远程兑换血量次数，开局为0，单调递增，每次加1
+  uint32_t reserved : 11;             // bit 21-31：保留
+};
 
 // 0x0301 0x0121 雷达自主决策指令 TODO
+struct __attribute__((packed)) RadarCmd
+{
+  uint8_t radar_cmd;  // 触发双倍易伤次数， 开局为0，单调递增，每次加1，最大为2
+};
 
 // 0x0302 自定义控制器与机器人交互数据 图传链路
 struct __attribute__((packed)) CustomRobotData
