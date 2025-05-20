@@ -37,7 +37,8 @@ private:
   {
     referee::FrameHeader head;
     uint16_t cmd_id;
-    referee::RobotInteractionData data;  // crc16在内部
+    referee::RobotInteractionData data;
+    // 绘制UI所需的user_data最大长度为105, 而其定义长度为112, 有剩余, 因此帧尾的crc16在data内部
   } frame_;
 
   referee::InteractionFigure empty_;
