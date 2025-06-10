@@ -8,10 +8,13 @@ class Mahony
 public:
   Mahony(float dt, float kp = 0.5f, float ki = 0.0f);
 
-  float q[4];   // 只读! 四元数顺序为wxyz
-  float yaw;    // 只读! 单位: rad
-  float pitch;  // 只读! 单位: rad
-  float roll;   // 只读! 单位: rad
+  float q[4];    // 只读! 四元数顺序为wxyz
+  float yaw;     // 只读! 单位: rad
+  float pitch;   // 只读! 单位: rad
+  float roll;    // 只读! 单位: rad
+  float vyaw;    // 只读! 单位: rad/s
+  float vpitch;  // 只读! 单位: rad/s
+  float vroll;   // 只读! 单位: rad/s
 
   void update(const float acc[3], const float gyro[3]);
   void update(float ax, float ay, float az, float wx, float wy, float wz);

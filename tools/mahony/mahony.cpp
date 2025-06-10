@@ -28,6 +28,10 @@ void Mahony::update(float ax, float ay, float az, float wx, float wy, float wz)
     return;
   }
 
+  float gx = wx;
+  float gy = wy;
+  float gz = wz;
+
   // Normalise accelerometer measurement
   float norm = 1.0f / std::sqrt(ax * ax + ay * ay + az * az);
   ax *= norm;
@@ -89,10 +93,15 @@ void Mahony::update(float ax, float ay, float az, float wx, float wy, float wz)
   this->yaw = std::atan2(
     2.0f * (this->q[0] * this->q[3] + this->q[1] * this->q[2]),
     2.0f * (this->q[0] * this->q[0] + this->q[1] * this->q[1]) - 1.0f);
-  this->pitch = std::asin(-2.0f * (this->q[1] * this->q[3] - this->q[0] * this->q[2]));
+  this->pitch = std::asin(2.0f * (this->q[0] * this->q[2] - this->q[1] * this->q[3]));
   this->roll = std::atan2(
     2.0f * (this->q[0] * this->q[1] + this->q[2] * this->q[3]),
     2.0f * (this->q[0] * this->q[0] + this->q[3] * this->q[3]) - 1.0f);
+
+  this->vyaw = -gx * std::sin(this->pitch) + gy * std::cos(this->pitch) * std::sin(this->roll) +
+               gz * std::cos(this->pitch) * std::cos(this->roll);
+  this->vpitch = gy * std::cos(this->roll) - gz * std::sin(this->roll);
+  this->vroll = gx;
 }
 
 void Mahony::init(float ax, float ay, float az)

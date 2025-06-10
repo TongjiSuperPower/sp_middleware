@@ -3,11 +3,9 @@
 新建applications/vision_task.cpp
 ```c++
 #include "cmsis_os.h"
-#include "io/bmi088/bmi088.hpp"
 #include "io/vision/vision.hpp"
 #include "tools/mahony/mahony.hpp"
 
-extern sp::BMI088 bmi088;
 extern sp::Mahony imu;
 
 sp::Vision vis(false, false);
@@ -15,8 +13,8 @@ sp::Vision vis(false, false);
 extern "C" void vision_task()
 {
   while (true) {
-    // 发送(推荐实际使用时放在imu_task)
-    vis.send(0, imu.q, imu.yaw, bmi088.gyro[2], imu.pitch, bmi088.gyro[1], 10.0f);
+    // 推荐实际使用时放在imu_task
+    vis.send(0, imu.q, imu.yaw, imu.vyaw, imu.pitch, imu.vpitch, 10.0f);
 
     // 使用调试(f5)查看vis.rx_data_内部变量的变化
 
