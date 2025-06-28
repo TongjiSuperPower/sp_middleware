@@ -49,4 +49,23 @@ void PID::calc(float set, float fdb)
   this->out = limit_max(this->data.pout + this->data.iout + this->data.dout, max_out_);
 }
 
+void PID::calc(float set, float fdb, float set_dot, float fdb_dot)
+{
+  this->data.err[2] = this->data.err[1];
+  this->data.err[1] = this->data.err[0];
+  this->data.err[0] = angular_ ? limit_angle(set - fdb) : (set - fdb);
+
+  // Kp
+  this->data.pout = kp_ * this->data.err[0];
+
+  // Ki
+  this->data.trapezoid = (this->data.err[0] + this->data.err[1]) / 2 * dt_;  // 梯形积分
+  this->data.iout = limit_max(ki_ * this->data.trapezoid + this->data.iout, max_iout_);
+
+  // Kd
+  this->data.dout = kd_ * (set_dot - fdb_dot);
+
+  this->out = limit_max(this->data.pout + this->data.iout + this->data.dout, max_out_);
+}
+
 }  // namespace sp

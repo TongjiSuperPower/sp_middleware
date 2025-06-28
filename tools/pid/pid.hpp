@@ -43,6 +43,8 @@ public:
   // fdb: 反馈值(feedback)
   void calc(float set, float fdb);
 
+  void calc(float set, float fdb, float set_dot, float fdb_dot);
+
 private:
   const float dt_;
   const float kp_, ki_, kd_;
