@@ -14,9 +14,9 @@ extern "C" void vision_task()
 {
   while (true) {
     // 推荐实际使用时放在imu_task
-    vis.send(0, imu.q, imu.yaw, imu.vyaw, imu.pitch, imu.vpitch, 10.0f);
+    vis.send(0, imu.q, imu.yaw, imu.vyaw, imu.pitch, imu.vpitch, 24.0f, 0);
 
-    // 使用调试(f5)查看vis.rx_data_内部变量的变化
+    // 使用调试(f5)查看vis内部变量的变化
 
     osDelay(2); // 500Hz
   }
