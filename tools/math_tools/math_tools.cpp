@@ -38,9 +38,9 @@ uint32_t float_to_uint(float input, float min, float max, size_t bits)
   return norm * ((1 << bits) - 1);
 }
 
-int8_t signum(float input, float epsilon)
+float signum(float input, float epsilon)
 {
-  return (input > epsilon) ? 1 : ((input < -epsilon) ? -1 : 0);
+  return (input > epsilon) ? 1.0f : ((input < -epsilon) ? -1.0f : (input / epsilon));
 }
 
 

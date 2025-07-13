@@ -30,7 +30,7 @@ float uint_to_float(uint32_t input, float min, float max, size_t bits);
 uint32_t float_to_uint(float input, float min, float max, size_t bits);
 
 // sgn
-int8_t signum(float input, float epsilon = 1e-4f);
+float signum(float input, float epsilon = 1e-4f);
 
 }  // namespace sp
 
