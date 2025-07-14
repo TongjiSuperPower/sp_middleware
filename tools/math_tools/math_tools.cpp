@@ -38,11 +38,6 @@ uint32_t float_to_uint(float input, float min, float max, size_t bits)
   return norm * ((1 << bits) - 1);
 }
 
-float signum(float input, float epsilon)
-{
-  return (input > epsilon) ? 1.0f : ((input < -epsilon) ? -1.0f : (input / epsilon));
-}
-
-
+int8_t sgn(float input) { return (input > 0) - (input < 0); }
 
 }  // namespace sp
