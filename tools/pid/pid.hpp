@@ -43,6 +43,8 @@ public:
   // fdb: 反馈值(feedback)
   void calc(float set, float fdb);
 
+  void calc(float set, float fdb, float integral_pause_threshold);
+
   void calc(float set, float fdb, float set_dot, float fdb_dot);
 
 private:
