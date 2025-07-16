@@ -59,6 +59,13 @@ void VT03::update(uint8_t * frame_start, uint16_t size)
         reinterpret_cast<referee::RemoteControl *>(frame_start + referee::DATA_START));
       break;
 
+    // 0x0309 自定义控制器与机器人交互数据
+    case referee::cmd_id::ROBOT_CUSTOM_DATA:
+      std::copy(
+        frame_start + referee::DATA_START, frame_start + referee::DATA_START + data_len,
+        reinterpret_cast<uint8_t *>(&this->robot));
+      break;
+
     default:
       break;
   }

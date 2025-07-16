@@ -21,6 +21,18 @@ struct __attribute__((packed)) RefereeCustomData
   uint8_t reserved;  //保留位
 };
 
+struct __attribute__((packed)) RefereeRobotData
+{
+  float yaw_torque;
+  float roll_torque;
+  float pitch_torque;
+  float roll2_torque;
+  float x_force;
+  float y_force;
+  float z_force;
+  uint8_t reserved[2];  //保留位 2位
+};
+
 static_assert(sizeof(RefereeCustomData) == sizeof(referee::CustomRobotData));
 
 struct __attribute__((packed)) VT03RemoteData
@@ -102,6 +114,7 @@ public:
   bool trigger;   // 只读! 扳机按键
 
   RefereeCustomData custom;  // 只读! 自定义控制器数据
+  RefereeRobotData robot;    // 只读！机器人向自定义控制器发送数据
   RefereeMouseData mouse;    // 只读! 鼠标数据
   RefereeKeysData keys;      // 只读! 键盘数据
 
