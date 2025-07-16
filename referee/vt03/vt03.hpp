@@ -23,14 +23,14 @@ struct __attribute__((packed)) RefereeCustomData
 
 struct __attribute__((packed)) RefereeRobotData
 {
-  float yaw_torque;
-  float roll_torque;
-  float pitch_torque;
-  float roll2_torque;
-  float x_force;
-  float y_force;
-  float z_force;
-  uint8_t reserved[2];  //保留位 2位
+  bool yaw_fdb_on;
+  bool roll_fdb_on;
+  bool pitch_fdb_on;
+  bool roll2_fdb_on;
+  bool x_fdb_on;
+  bool y_fdb_on;
+  bool z_fdb_on;
+  uint8_t reserved[23];  //保留位 23位
 };
 
 static_assert(sizeof(RefereeCustomData) == sizeof(referee::CustomRobotData));
