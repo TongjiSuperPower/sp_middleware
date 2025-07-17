@@ -18,6 +18,7 @@ void FDCAN::start()
 {
   HAL_FDCAN_Start(hfdcan_);                                                   // dismiss return
   HAL_FDCAN_ActivateNotification(hfdcan_, FDCAN_IT_RX_FIFO0_NEW_MESSAGE, 0);  // dismiss return
+  HAL_FDCAN_ActivateNotification(hfdcan_, FDCAN_IT_BUS_OFF, 0);               // dismiss return
 }
 
 void FDCAN::recv()
