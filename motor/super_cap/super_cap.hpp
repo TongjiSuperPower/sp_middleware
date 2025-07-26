@@ -13,7 +13,7 @@ enum class SuperCapMode
   DISCHARGE_DISOUTPUT  // 不充不放
 };
 
-constexpr float CAPACITANCE = 4.5454f;  // 电容容量
+constexpr float CAPACITANCE = 5.0f;  // 电容容量
 
 class SuperCap
 {
