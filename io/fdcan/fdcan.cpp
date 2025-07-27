@@ -18,7 +18,9 @@ void FDCAN::start()
 {
   HAL_FDCAN_Start(hfdcan_);                                                   // dismiss return
   HAL_FDCAN_ActivateNotification(hfdcan_, FDCAN_IT_RX_FIFO0_NEW_MESSAGE, 0);  // dismiss return
-  HAL_FDCAN_ActivateNotification(hfdcan_, FDCAN_IT_BUS_OFF, 0);               // dismiss return
+  HAL_FDCAN_ActivateNotification(
+    hfdcan_, FDCAN_IT_BUS_OFF,
+    0);  // dismiss return ref: https://community.st.com/t5/stm32-mcus-products/stm32h7-fdcan-has-lost-the-automatic-bus-off-recovery-mechanism/td-p/187400?utm_source=chatgpt.com
 }
 
 void FDCAN::recv()
