@@ -17,7 +17,7 @@ constexpr float BMI088_ACC_INT_TO_MPS2 = BMI088_ACC_INT_TO_G * G_TO_MPS2;
 
 // ref: datasheet 5.5.2
 constexpr float BMI088_GYRO_INT_TO_DPS = 2000.0f / (BMI088_GYRO_RANGE_SET + 1) / 32767;
-constexpr float BMI088_GYRO_INT_TO_RPS = BMI088_GYRO_INT_TO_DPS / 180 * sp::PI;
+constexpr float BMI088_GYRO_INT_TO_RPS = BMI088_GYRO_INT_TO_DPS / 180 * sp::SP_PI;
 
 // ref: datasheet 5.3.7
 constexpr float BMI088_TEMP_FACTOR = 0.125f;
