@@ -5,13 +5,14 @@
 
 namespace sp
 {
-constexpr float MF9025_TORQUE_CONST = 0.32f;  // N·m/A
+constexpr float MG4005i10_TORQUE_CONST = 0.06f;  // N·m/A
+constexpr float MG4005i10_P10 = 10.0f;           // 减速比
 
 class LK_Motor
 {
 public:
   // 仅实现了多电机模式!
-  LK_Motor(uint8_t motor_id, float torque_const = MF9025_TORQUE_CONST);
+  LK_Motor(uint8_t motor_id, float ratio = MG4005i10_P10, float torque_const = MG4005i10_TORQUE_CONST);
 
   const uint16_t rx_id;  // 电机反馈帧ID
   const uint16_t tx_id;  // 电机控制帧ID
@@ -28,8 +29,13 @@ public:
 
 private:
   const uint8_t motor_id_;
+  const float ratio_;
   const float torque_const_;
+  bool has_read_;
   int16_t cmd_raw_ = 0;
+
+  int32_t step_;
+  uint16_t last_ecd_;
 };
 
 }  // namespace sp
