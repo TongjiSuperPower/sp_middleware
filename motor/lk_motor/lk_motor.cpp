@@ -162,7 +162,7 @@ void LK_Motor::cmd_angle(int32_t angle) { cmd_angle_ = angle * 1000; }
 
 void LK_Motor::cmd_torque(float value)
 {
-  float raw = value / torque_const_ / (33.0f / 2048.f) / ratio_;  // TODO MG等系列
+  float raw = value / torque_const_ / (33.0f / 2048.f) / ratio_;
   cmd_raw_ = sp::limit_max(raw, 2048.0f);
 }
 
