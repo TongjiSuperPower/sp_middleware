@@ -6,7 +6,7 @@
 #include "referee/vt03/vt03.hpp"
 
 // C板
-sp::vt03 vt03(&huart6);
+sp::VT03 vt03(&huart6);
 
 // 达妙
 // sp::vt03 vt03(&huart1, false);

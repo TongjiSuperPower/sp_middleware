@@ -22,6 +22,20 @@ public:
   float angle_rf;  // 只读! calc()计算结果, 右前舵角度, 单位: rad
   float angle_rr;  // 只读! calc()计算结果, 右后舵角度, 单位: rad
 
+  float vx;  // 只读! update()计算结果, 底盘x方向速度, 单位: m/s
+  float vy;  // 只读! update()计算结果, 底盘y方向速度, 单位: m/s
+  float wz;  // 只读! update()计算结果, 底盘z方向角速度, 单位: rad/s
+
+  float v_lf_x, v_lf_y; //轮子线速度在底盘坐标系x轴、y轴分量
+  float v_lr_x, v_lr_y;
+  float v_rf_x, v_rf_y;
+  float v_rr_x, v_rr_y;
+
+  float wz_lf ; //轮子对底盘角速度的分量
+  float wz_lr ;
+  float wz_rf ;
+  float wz_rr;
+
   // yaw_lf/lr/rf/rr: 各舵电机的初始角度, 注意此时各轮电机输出轴朝向要相同, 而不是相对! 单位: rad
   void init(float yaw_lf, float yaw_lr, float yaw_rf, float yaw_rr);
 
@@ -31,6 +45,11 @@ public:
   // wz: 单位: rad/s, 正方向: 大拇指朝上右手螺旋方向
   // yaw_lf/lr/rf/rr: 各舵当前角度, 单位: rad
   void calc(float vx, float vy, float wz, float yaw_lf, float yaw_lr, float yaw_rf, float yaw_rr);
+
+  void update(
+    float speed_lf, float speed_lr, float speed_rf, float speed_rr, float angle_lf, float angle_lr,
+    float angle_rf, float angle_rr);
+
 
 private:
   const float r_;
