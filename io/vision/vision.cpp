@@ -1,5 +1,6 @@
 #include "vision.hpp"
 
+#include "cmsis_os.h"
 #include "memory"
 #include "tools/crc/crc.hpp"
 #include "tools/math_tools/math_tools.hpp"
@@ -24,6 +25,7 @@ void Vision::update(uint8_t * buf, uint32_t len)
   this->pitch = rx_data_.pitch;
   this->pitch_vel = rx_data_.pitch_vel;
   this->pitch_acc = rx_data_.pitch_acc;
+  this->autoaim_last_read_ms_ = osKernelSysTick();
 }
 
 void Vision::send(

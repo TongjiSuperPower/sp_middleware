@@ -47,6 +47,8 @@ public:
   float pitch_vel = 0;
   float pitch_acc = 0;
 
+  bool autoaim_alive = false;
+  uint32_t autoaim_last_read_ms_ = 0;
   void update(uint8_t * buf, uint32_t len);
   void send(
     uint8_t mode, float q[4], float yaw, float yaw_vel, float pitch, float pitch_vel,
