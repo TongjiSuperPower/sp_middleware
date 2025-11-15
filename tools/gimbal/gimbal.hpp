@@ -1,7 +1,7 @@
 #ifndef SP__GIMBAL_HPP
 #define SP__GIMBAL_HPP
 
-#include "mahony.hpp"
+#include "tools\mahony\mahony.hpp"
 
 namespace sp
 {
