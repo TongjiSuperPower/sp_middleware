@@ -16,7 +16,7 @@ void DiffDrive::calc(float v_set, float w_set)
 void DiffDrive::update(float motor_speed_l, float motor_speed_r)
 {
   this->v = (sign_l_ * motor_speed_l + sign_r_ * motor_speed_r) * r_ / 2;
-  this->w = (sign_l_ * motor_speed_l - sign_r_ * motor_speed_r) * r_ / (2 * w_);
+  this->w = (sign_l_ * motor_speed_r - sign_r_ * motor_speed_l) * r_ / (2 * w_);
 }
 
 }  // namespace sp
