@@ -118,15 +118,15 @@ void Gimbal::update(
 void Gimbal::calc(float yaw_set_in_world, float pitch_set_in_world)
 {
   yaw_set_in_joint = atan2f(
-    R_base2world_[0][0] * cosf(pitch_set_in_world) * cosf(yaw_set_in_world) +
-      R_base2world_[0][1] * sinf(yaw_set_in_world) * cosf(pitch_set_in_world) +
-      R_base2world_[0][2] * sinf(pitch_set_in_world),
-    R_base2world_[1][0] * cosf(pitch_set_in_world) * cosf(yaw_set_in_world) +
+    R_base2world_[0][1] * cosf(pitch_set_in_world) * cosf(yaw_set_in_world) +
       R_base2world_[1][1] * sinf(yaw_set_in_world) * cosf(pitch_set_in_world) +
-      R_base2world_[1][2] * sinf(pitch_set_in_world));
+      R_base2world_[2][1] * sinf(pitch_set_in_world),
+    R_base2world_[0][0] * cosf(pitch_set_in_world) * cosf(yaw_set_in_world) +
+      R_base2world_[1][0] * sinf(yaw_set_in_world) * cosf(pitch_set_in_world) +
+      R_base2world_[2][0] * sinf(pitch_set_in_world));
   pitch_set_in_joint = asinf(
-    R_base2world_[2][0] * cosf(pitch_set_in_world) * cosf(yaw_set_in_world) +
-    R_base2world_[2][1] * sinf(yaw_set_in_world) * cosf(pitch_set_in_world) +
+    R_base2world_[0][2] * cosf(pitch_set_in_world) * cosf(yaw_set_in_world) +
+    R_base2world_[1][2] * sinf(yaw_set_in_world) * cosf(pitch_set_in_world) +
     R_base2world_[2][2] * sinf(pitch_set_in_world));
 }
 
