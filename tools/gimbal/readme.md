@@ -1,3 +1,7 @@
+# TODO
+双IMU版本（重载）  
+双IMU下的速度解算
+
 # 使用方法
 
 ### 编辑`CMakeLists.txt`
@@ -50,11 +54,12 @@ gimbal.calc(yaw_set_in_world, pitch_set_in_world);
 ### 查询结果
 
 ```cpp
-float yaw_target = gimbal.yaw_set_in_joint;      // 云台yaw轴相对于joint系的设定角度
-float pitch_target = gimbal.pitch_set_in_joint;  // 云台pitch轴相对于joint系的设定角度
-float yaw_feedback = gimbal.yaw_fdb_in_joint;    // 云台yaw轴相对于joint系的反馈角度
-float pitch_feedback = gimbal.pitch_fdb_in_joint;// 云台pitch轴相对于joint系的反馈角度
+float yaw_target = gimbal.yaw_set_in_joint;      //只读！ 云台yaw轴相对于joint系的设定角度
+float pitch_target = gimbal.pitch_set_in_joint;  //只读！ 云台pitch轴相对于joint系的设定角度
+float yaw_feedback = gimbal.yaw_fdb_in_joint;    //只读！ 云台yaw轴相对于joint系的反馈角度
+float pitch_feedback = gimbal.pitch_fdb_in_joint;//只读！ 云台pitch轴相对于joint系的反馈角度
 ```
+> 单IMU时joint系下的速度反馈直接使用电机反馈值
 
-# 原理
+# 原理与推导
 见飞书云文档
