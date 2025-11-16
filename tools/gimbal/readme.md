@@ -29,7 +29,7 @@ sp::Gimbal gimbal(yaw0, pitch0, reverse_yaw, reverse_yaw0, reverse_pitch, revers
 
 ### 调用
 
-#### 更新云台状态
+#### 更新云台状态(更新joint系下yaw和pitch的位置)
 ```cpp
 gimbal.update(gimbal_imu, yaw_angle, pitch_angle);
 ```
@@ -39,7 +39,7 @@ gimbal.update(gimbal_imu, yaw_angle, pitch_angle);
 
 `pitch_angle`: pitch轴编码器读数，单位为rad
 
-#### 计算关节空间设定值
+#### 计算关节空间设定值（根据世界系的目标值解算出joint系下的值）
 ```cpp
 gimbal.calc(yaw_set_in_world, pitch_set_in_world);
 ```
@@ -50,10 +50,10 @@ gimbal.calc(yaw_set_in_world, pitch_set_in_world);
 ### 查询结果
 
 ```cpp
-float yaw_target = gimbal.yaw_set_in_joint;      // 云台yaw轴相对于码盘的设定角度
-float pitch_target = gimbal.pitch_set_in_joint;  // 云台pitch轴相对于码盘的设定角度
-float yaw_feedback = gimbal.yaw_fdb_in_joint;    // 云台yaw轴相对于码盘的反馈角度
-float pitch_feedback = gimbal.pitch_fdb_in_joint;// 云台pitch轴相对于码盘的反馈角度
+float yaw_target = gimbal.yaw_set_in_joint;      // 云台yaw轴相对于joint系的设定角度
+float pitch_target = gimbal.pitch_set_in_joint;  // 云台pitch轴相对于joint系的设定角度
+float yaw_feedback = gimbal.yaw_fdb_in_joint;    // 云台yaw轴相对于joint系的反馈角度
+float pitch_feedback = gimbal.pitch_fdb_in_joint;// 云台pitch轴相对于joint系的反馈角度
 ```
 
 # 原理

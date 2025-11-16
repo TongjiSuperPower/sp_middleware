@@ -9,8 +9,8 @@ class Gimbal
 {
 public:
   Gimbal(
-    float yaw0, float pitch0, bool reverse_yaw, bool reverse_yaw0, bool reverse_pitch,
-    bool reverse_pitch0);
+    float yaw0, float pitch0, bool reverse_yaw = false, bool reverse_yaw0 = false,
+    bool reverse_pitch = false, bool reverse_pitch0 = false);
 
   void update(const sp::Mahony & gimbal_imu, const float & yaw_angle, const float & pitch_angle);
 
@@ -24,10 +24,10 @@ public:
 private:
   float yaw0_;    //云台yaw轴码盘零点位置，单位：rad
   float pitch0_;  //云台pitch轴码盘零点位置，单位：rad
-  bool sign_yaw_;
-  bool sign_yaw0_;
-  bool sign_pitch_;
-  bool sign_pitch0_;
+  float sign_yaw_;
+  float sign_yaw0_;
+  float sign_pitch_;
+  float sign_pitch0_;
 
   float R_base2world_[3][3];  //底盘系相对于地面系的旋转矩阵
 };

@@ -34,7 +34,7 @@ void Gimbal::update(
   float pitch_realative_angle = sign_pitch_ * pitch_angle + sign_pitch0_ * pitch0_;
 
   //化简后结果，详细推导见readme
-  yaw_fdb_in_joint = atan2(
+  yaw_fdb_in_joint = atan2f(
     -2 * sinf(gimbal_imu.pitch) * sinf(gimbal_imu.pitch) * sinf(yaw_realative_angle) *
         cosf(pitch_realative_angle) +
       2 * sinf(gimbal_imu.pitch) * sinf(gimbal_imu.roll) * cosf(gimbal_imu.pitch) *
@@ -73,12 +73,13 @@ void Gimbal::update(
                           sinf(pitch_realative_angle) * sinf(yaw_realative_angle) +
                         sinf(yaw_realative_angle) * cosf(gimbal_imu.pitch) * cosf(gimbal_imu.yaw) *
                           cosf(pitch_realative_angle);
+  R_base2world_[0][1] = -R_base2world_[0][1];
   R_base2world_[0][2] = (sinf(gimbal_imu.pitch) * cosf(gimbal_imu.roll) * cosf(gimbal_imu.yaw) +
                          sinf(gimbal_imu.roll) * sinf(gimbal_imu.yaw)) *
                           cosf(pitch_realative_angle) -
                         sinf(pitch_realative_angle) * cosf(gimbal_imu.pitch) * cosf(gimbal_imu.yaw);
-  R_base2world_[1][0] = -(sinf(gimbal_imu.pitch) * sinf(gimbal_imu.roll) * sinf(gimbal_imu.yaw) +
-                          cosf(gimbal_imu.roll) * cosf(gimbal_imu.yaw)) *
+  R_base2world_[1][0] = (sinf(gimbal_imu.pitch) * sinf(gimbal_imu.roll) * sinf(gimbal_imu.yaw) +
+                         cosf(gimbal_imu.roll) * cosf(gimbal_imu.yaw)) *
                           sinf(yaw_realative_angle) +
                         (sinf(gimbal_imu.pitch) * sinf(gimbal_imu.yaw) * cosf(gimbal_imu.roll) -
                          sinf(gimbal_imu.roll) * cosf(gimbal_imu.yaw)) *
@@ -97,6 +98,7 @@ void Gimbal::update(
                          sinf(gimbal_imu.roll) * cosf(gimbal_imu.yaw)) *
                           cosf(pitch_realative_angle) -
                         sinf(gimbal_imu.yaw) * sinf(pitch_realative_angle) * cosf(gimbal_imu.pitch);
+  R_base2world_[1][2] = -R_base2world_[1][2];
   R_base2world_[2][0] =
     -sinf(gimbal_imu.pitch) * cosf(pitch_realative_angle) * cosf(yaw_realative_angle) -
     sinf(gimbal_imu.roll) * sinf(yaw_realative_angle) * cosf(gimbal_imu.pitch) +
@@ -107,6 +109,7 @@ void Gimbal::update(
     sinf(gimbal_imu.roll) * cosf(gimbal_imu.pitch) * cosf(yaw_realative_angle) +
     sinf(pitch_realative_angle) * sinf(yaw_realative_angle) * cosf(gimbal_imu.pitch) *
       cosf(gimbal_imu.roll);
+  R_base2world_[2][1] = -R_base2world_[2][1];
   R_base2world_[2][2] =
     sinf(gimbal_imu.pitch) * sinf(pitch_realative_angle) +
     cosf(gimbal_imu.pitch) * cosf(gimbal_imu.roll) * cosf(pitch_realative_angle);
@@ -114,14 +117,14 @@ void Gimbal::update(
 
 void Gimbal::calc(float yaw_set_in_world, float pitch_set_in_world)
 {
-  yaw_fdb_in_joint = atan2f(
+  yaw_set_in_joint = atan2f(
     R_base2world_[0][0] * cosf(pitch_set_in_world) * cosf(yaw_set_in_world) +
       R_base2world_[0][1] * sinf(yaw_set_in_world) * cosf(pitch_set_in_world) +
       R_base2world_[0][2] * sinf(pitch_set_in_world),
     R_base2world_[1][0] * cosf(pitch_set_in_world) * cosf(yaw_set_in_world) +
       R_base2world_[1][1] * sinf(yaw_set_in_world) * cosf(pitch_set_in_world) +
       R_base2world_[1][2] * sinf(pitch_set_in_world));
-  pitch_fdb_in_joint = asinf(
+  pitch_set_in_joint = asinf(
     R_base2world_[2][0] * cosf(pitch_set_in_world) * cosf(yaw_set_in_world) +
     R_base2world_[2][1] * sinf(yaw_set_in_world) * cosf(pitch_set_in_world) +
     R_base2world_[2][2] * sinf(pitch_set_in_world));
