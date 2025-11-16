@@ -25,9 +25,7 @@ private:
   float yaw0_;    //云台yaw轴码盘零点位置，单位：rad
   float pitch0_;  //云台pitch轴码盘零点位置，单位：rad
   float sign_yaw_;
-  float sign_yaw0_;
   float sign_pitch_;
-  float sign_pitch0_;
 
   float R_base2world_[3][3];  //底盘系相对于地面系的旋转矩阵
 };

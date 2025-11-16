@@ -11,9 +11,7 @@ Gimbal::Gimbal(
 : yaw0_(yaw0),
   pitch0_(pitch0),
   sign_yaw_((reverse_yaw) ? -1.0f : 1.0f),
-  sign_yaw0_((reverse_yaw0) ? -1.0f : 1.0f),
-  sign_pitch_((reverse_pitch) ? -1.0f : 1.0f),
-  sign_pitch0_((reverse_pitch0) ? -1.0f : 1.0f)
+  sign_pitch_((reverse_pitch) ? -1.0f : 1.0f)
 {
   this->yaw_fdb_in_joint = 0.0f;
   this->pitch_fdb_in_joint = 0.0f;
@@ -30,8 +28,8 @@ void Gimbal::update(
   const sp::Mahony & gimbal_imu, const float & yaw_angle, const float & pitch_angle)
 {
   //云台相对码盘值计算（正方向使用云台系右手定则）
-  float yaw_realative_angle = sign_yaw_ * yaw_angle + sign_yaw0_ * yaw0_;
-  float pitch_realative_angle = sign_pitch_ * pitch_angle + sign_pitch0_ * pitch0_;
+  float yaw_realative_angle = sign_yaw_ * (yaw_angle - yaw0_);
+  float pitch_realative_angle = sign_pitch_ * (pitch_angle - pitch0_);
 
   //化简后结果，详细推导见readme
   yaw_fdb_in_joint = atan2f(
