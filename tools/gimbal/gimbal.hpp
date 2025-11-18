@@ -27,7 +27,9 @@ private:
   float sign_yaw_;
   float sign_pitch_;
 
-  float R_base2world_[3][3];  //底盘系相对于地面系的旋转矩阵
+  float R_base2world_[3]
+                     [3];  //底盘系相对于地面系的旋转矩阵,已经考虑了上电瞬间世界系由云台x轴投影定义
+  //后续会把旋转矩阵转换成四元数作为一个private变量并且用来计算底盘运动角速度
 };
 
 }  // namespace sp
