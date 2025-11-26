@@ -81,12 +81,12 @@ void LK_Motor::read_state2(const uint8_t * data)
     step_++;
   last_ecd_ = encoder;
 
-  float angle_rad = float(encoder - 65535/2) / 65535 * 2 * PI / ratio_;
+  float angle_rad = float(encoder - 65535/2) / 65535 * 2 * sp::SP_PI / ratio_;
 
   this->temp = data[1];
   this->torque = iq * ( 66.0f / 4096.0f ) * torque_const_ * ratio_;
-  this->speed = speed / 180.0f * sp::PI / ratio_;
-  this->angle = sp::limit_angle(angle_rad + step_ * 2 * PI / ratio_);
+  this->speed = speed / 180.0f * sp::SP_PI / ratio_;
+  this->angle = sp::limit_angle(angle_rad + step_ * 2 * sp::SP_PI / ratio_);
 }
 
 void LK_Motor::write_turn_off(uint8_t * data) const
