@@ -14,7 +14,8 @@ public:
   // 仅实现了MG系列单电机模式!
   // motor_type: 电机型号， 取值见LK_Motors`
   // ratio: 减速比
-  LK_Motor(uint8_t motor_id, float ratio = MG4005i10_P10, float torque_const = MG4005i10_TORQUE_CONST);
+  LK_Motor(
+    uint8_t motor_id, float ratio = MG4005i10_P10, float torque_const = MG4005i10_TORQUE_CONST);
 
   const uint16_t rx_id;  // 电机反馈帧ID
   const uint16_t tx_id;  // 电机控制帧ID
@@ -22,10 +23,11 @@ public:
   uint8_t motorState = 0x10;
   uint8_t errorState = 0;
 
-  float angle = 0;   // 只读! 单位: rad
-  float speed = 0;   // 只读! 单位: rad/s
-  float torque = 0;  // 只读! 单位: N·m
-  int8_t temp = 0;   // 只读! 单位: 摄氏度
+  float angle = 0;             // 只读! 单位: rad
+  float multicycle_angle = 0;  // 只读! 单位: rad
+  float speed = 0;             // 只读! 单位: rad/s
+  float torque = 0;            // 只读! 单位: N·m
+  int8_t temp = 0;             // 只读! 单位: 摄氏度
 
   // 该命令读取当前电机的温度、电压和错误状态标志
   void write_state1(uint8_t * data) const;
@@ -64,14 +66,13 @@ private:
 
   int32_t cmd_angle_;
   int16_t cmd_raw_ = 0;
-  
+
   bool has_read_;
   int32_t step_;
   uint16_t last_ecd_;
 
   uint32_t cmd_position_;
   uint8_t spin_direction_;
-
 };
 
 }  // namespace sp
