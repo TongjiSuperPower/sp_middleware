@@ -48,7 +48,7 @@ public:
   void culculate_yaw_pitch_roll_rates(
     float wx, float wy, float wz, float roll, float pitch, float yaw);
   //用于计算物体相对于某一个系的欧拉角微分,注意要带入相对于该系的欧拉角值
-
+  //后续会改成一个静态函数不用单独定义一个类
 private:
   const float dt_;
   const float two_kp_;

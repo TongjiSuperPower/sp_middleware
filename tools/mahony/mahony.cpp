@@ -101,6 +101,7 @@ void Mahony::update(float ax, float ay, float az, float wx, float wy, float wz)
   //只是用到了1=q[0]^2+q[1]^2+q[2]^2+q[3]^2这个关系简化了一些计算
   //以后的同学在用ai理解mahony算法的时候会更容易,形式更加相同
 
+  //要加万向锁保护  ,我的理想是加根据历史记录进行保护
   this->yaw = std::atan2(
     2.0f * (this->q[0] * this->q[3] + this->q[1] * this->q[2]),
     1.0f - 2.0f * (this->q[2] * this->q[2] + this->q[3] * this->q[3]));
