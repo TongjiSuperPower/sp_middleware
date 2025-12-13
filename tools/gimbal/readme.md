@@ -31,9 +31,10 @@ sp::Gimbal gimbal(yaw0, pitch0, reverse_yaw, reverse_yaw0, reverse_pitch, revers
 请确保该计算公式中`yaw_relative_angle`和`pitch_relative_angle`符合正方向定义（右手定则）
 每个机器人的安装方式不同,不太清楚正负号就把所有四种可能都实验完,
 最后保证逆时针转电机是yaw_relative增加和 低头是pitch_relative增加
-``` 
-  float yaw_relative_angle = sign_yaw_ * yaw_angle + sign_yaw0_ * yaw0_;
-  float pitch_relative_angle = sign_pitch_ * pitch_angle + sign_pitch0_ * pitch0_;
+```cpp
+  float yaw_relative_angle = sign_yaw_ * (yaw_angle - yaw0_);
+  float pitch_relative_angle = sign_pitch_ * (pitch_angle - pitch0_);
+
 ```
 
 ### 调用
