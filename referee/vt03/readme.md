@@ -23,8 +23,10 @@ extern "C" void uart_task()
 
 extern "C" void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef * huart, uint16_t Size)
 {
+  auto stamp_ms = osKernelSysTick();
+  
   if (huart == vt03.huart) {
-    vt03.update(Size);
+    vt03.update(Size, stamp_ms);
     vt03.request();
   }
 }
