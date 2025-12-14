@@ -2,6 +2,8 @@
 
 #include <cmath>
 
+#include "tools/gimbal/gimbal.hpp"
+
 namespace sp
 {
 Mahony::Mahony(float dt, float kp, float ki)
@@ -83,6 +85,11 @@ void Mahony::update(float ax, float ay, float az, float wx, float wy, float wz)
   float q2 = this->q[2] + (this->q[0] * wy - this->q[1] * wz + this->q[3] * wx);
   float q3 = this->q[3] + (this->q[0] * wz + this->q[1] * wy - this->q[2] * wx);
 
+  this->q_last[0] = this->q[0];
+  this->q_last[1] = this->q[1];
+  this->q_last[2] = this->q[2];
+  this->q_last[3] = this->q[3];
+
   // Normalise quaternion
   norm = 1.0f / std::sqrt(q0 * q0 + q1 * q1 + q2 * q2 + q3 * q3);
   this->q[0] = q0 * norm;
@@ -90,6 +97,13 @@ void Mahony::update(float ax, float ay, float az, float wx, float wy, float wz)
   this->q[2] = q2 * norm;
   this->q[3] = q3 * norm;
 
+  //现在下面这个dq 是等价于在载体系下的w
+  sp::Gimbal::quaternion_multiply(this->q_last, this->q, this->dq, true, false);
+  //这个dq一定不能归一化, 因为他就不是单位四元数
+  this->dq[0] *= 2000.0f;
+  this->dq[1] *= 2000.0f;
+  this->dq[2] *= 2000.0f;
+  this->dq[3] *= 2000.0f;
   //这个四元数是归一化之后的四元数,
   //而且我检验了,这个四元数Q_(W <- G )= {q[0],q[1],q[2],q[3]}是标量在前形式,后边虚部所表示的向量是旋转轴在地面系W下的坐标
   //这个四元数的意义是

@@ -7,10 +7,13 @@ class Mahony
 {
 public:
   Mahony(float dt, float kp = 0.5f, float ki = 0.0f);
+  float q_last[4];  // 只读! 上次更新后的四元数顺序为wxyz
 
-  float q[4];    // 只读! 四元数顺序为wxyz 该四元数的含义是表示某物体相对于地面的姿态
-                 //具体的作用是:将同一个向量从某一个系的坐标值转换到地面系
-                 //即 v_ground = q * v_body * q_conjugate
+  float q[4];   // 只读! 四元数顺序为wxyz 该四元数的含义是表示某物体相对于地面的姿态
+                //具体的作用是:将同一个向量从某一个系的坐标值转换到地面系
+                //即 v_ground = q * v_body * q_conjugate
+  float dq[4];  // 只读! 四元数增量 dq = q_last* ⊗ q，表示载体系下的角速度等效四元数
+
   float yaw;     // 只读! 单位: rad
   float pitch;   // 只读! 单位: rad
   float roll;    // 只读! 单位: rad

@@ -7,7 +7,7 @@ namespace sp
 
 Gimbal::Gimbal(
   float yaw0, float pitch0, bool reverse_yaw, bool reverse_yaw0, bool reverse_pitch,
-  bool reverse_pitch0)
+  bool reverse_pitch0, float dt)
 : yaw0_(yaw0),
   pitch0_(pitch0),
   sign_yaw_((reverse_yaw) ? -1.0f : 1.0f),
@@ -15,7 +15,8 @@ Gimbal::Gimbal(
   yaw_relative_angle_filter(0.1f),
   pitch_relative_angle_filter(0.1f),
   yaw_relative_angle_filter0(0.1f),
-  pitch_relative_angle_filter0(0.1f)
+  pitch_relative_angle_filter0(0.1f),
+  dt_(dt)
 {
   this->yaw_fdb_in_joint = 0.0f;
   this->pitch_fdb_in_joint = 0.0f;
@@ -181,11 +182,18 @@ void Gimbal::update_q(
   /* ------------------------------------------------
    * Step 6: 输出（底盘 → 世界）
    * ------------------------------------------------ */
+  q_last_chassis2world[0] = q_chassis2world[0];
+  q_last_chassis2world[1] = q_chassis2world[1];
+  q_last_chassis2world[2] = q_chassis2world[2];
+  q_last_chassis2world[3] = q_chassis2world[3];
+
   q_chassis2world[0] = w_WC;
   q_chassis2world[1] = x_WC;
   q_chassis2world[2] = y_WC;
   q_chassis2world[3] = z_WC;
-  //quaternion_to_euler(q_chassis2world, euler_q);
+
+  //现在下面这个dq 是等价于在载体系下的w
+  //quaternion_multiply(q_last_chassis2world, q_chassis2world, dq,true,false);
 }
 
 void Gimbal::calc(float yaw_set_in_world, float pitch_set_in_world)
@@ -259,6 +267,69 @@ void Gimbal::rotation_matrix_to_euler(const float R[3][3], float euler[3])
     // Yaw (绕Z轴旋转)
     euler[2] = atan2f(R[1][0], R[0][0]);
   }
+}
+
+// 四元数乘法：q_result = q1 ⊗ q2
+// 输入/输出格式：q[4] = {w, x, y, z}
+// 物理意义：坐标系变换的复合，先应用 q2，再应用 q1
+// 例如：q_A_C = q_A_B ⊗ q_B_C（先从C到B，再从B到A）
+// conjugate_q1: 是否对 q1 取共轭 (q1* = [w, -x, -y, -z])
+// conjugate_q2: 是否对 q2 取共轭 (q2* = [w, -x, -y, -z])
+void Gimbal::quaternion_multiply(
+  const float q1[4], const float q2[4], float q_result[4], bool conjugate_q1, bool conjugate_q2)
+{
+  // 根据 conjugate 标志决定符号
+  float w1 = q1[0];
+  float x1 = conjugate_q1 ? -q1[1] : q1[1];
+  float y1 = conjugate_q1 ? -q1[2] : q1[2];
+  float z1 = conjugate_q1 ? -q1[3] : q1[3];
+
+  float w2 = q2[0];
+  float x2 = conjugate_q2 ? -q2[1] : q2[1];
+  float y2 = conjugate_q2 ? -q2[2] : q2[2];
+  float z2 = conjugate_q2 ? -q2[3] : q2[3];
+
+  // Hamilton 四元数乘法公式
+  q_result[0] = w1 * w2 - x1 * x2 - y1 * y2 - z1 * z2;  // w
+  q_result[1] = w1 * x2 + x1 * w2 + y1 * z2 - z1 * y2;  // x
+  q_result[2] = w1 * y2 - x1 * z2 + y1 * w2 + z1 * x2;  // y
+  q_result[3] = w1 * z2 + x1 * y2 - y1 * x2 + z1 * w2;  // z
+}
+
+// 四元数坐标变换：v_out = q ⊗ v_in ⊗ q*
+// 输入：q[4] = {w, x, y, z} 表示从坐标系A到坐标系B的旋转
+//      v_in[3] = {x, y, z} 在坐标系B中的同一个向量的坐标
+// 输出：v_out[3] = {x, y, z} 在坐标系A中的同一个向量的坐标向量
+// conjugate_q: 是否对 q 取共轭（true 时使用 q* 而不是 q，相当于反向旋转）
+// 注意：这是 passive rotation（坐标系变换），不是 active rotation（向量旋转）
+void Gimbal::quaternion_rotate_vector(
+  const float q[4], const float v_in[3], float v_out[3], bool conjugate_q)
+{
+  // 根据 conjugate 标志决定四元数的符号
+  float w = q[0];
+  float x = conjugate_q ? -q[1] : q[1];
+  float y = conjugate_q ? -q[2] : q[2];
+  float z = conjugate_q ? -q[3] : q[3];
+
+  float vx = v_in[0], vy = v_in[1], vz = v_in[2];
+
+  // 优化的四元数-向量旋转公式（避免构造完整四元数）
+  // v_out = v_in + 2 * cross(q_vec, cross(q_vec, v_in) + w * v_in)
+
+  // 第一步：t = cross(q_vec, v_in) = q_vec × v_in
+  float tx = y * vz - z * vy;
+  float ty = z * vx - x * vz;
+  float tz = x * vy - y * vx;
+
+  // 第二步：t = t + w * v_in
+  tx += w * vx;
+  ty += w * vy;
+  tz += w * vz;
+
+  // 第三步：v_out = v_in + 2 * cross(q_vec, t)
+  v_out[0] = vx + 2.0f * (y * tz - z * ty);
+  v_out[1] = vy + 2.0f * (z * tx - x * tz);
+  v_out[2] = vz + 2.0f * (x * ty - y * tx);
 }
 
 }  // namespace sp
