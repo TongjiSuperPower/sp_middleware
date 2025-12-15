@@ -44,6 +44,22 @@ public:
   static void quaternion_frame_transform(
     const float q[4], const float v_in[3], float v_out[3], bool conjugate_q = false);
 
+  // 载体系角速度转欧拉角速率
+  // 输入：omiga_in_body[3] = {wx, wy, wz} 载体系下的角速度,即imu测量到的角速度原始值
+  //      euler[3] = {roll, pitch, yaw} 当前欧拉角 相对于A系
+  // 输出：euler_rates[3] = {roll_rate, pitch_rate, yaw_rate} 欧拉角微分 相对于A系 相对于什么系就能得到相对于同一个系的欧拉角的微分
+  static void transform_omiga_in_body_2_euler_rates(
+    const float omiga_in_body[3], const float roll, const float pitch, const float yaw,
+    float & vroll, float & vpitch, float & vyaw);
+
+  // 欧拉角速率转载体系角速度（上述函数的逆变换）
+  // 输入：vroll, vpitch, vyaw 欧拉角微分
+  //      roll, pitch, yaw 当前欧拉角
+  // 输出：omiga_in_body[3] = {wx, wy, wz} 载体系下的角速度
+  static void transform_euler_rates_2_omiga_in_body(
+    const float vroll, const float vpitch, const float vyaw, const float roll, const float pitch,
+    const float yaw, float omiga_in_body[3]);
+
   float yaw_fdb_in_joint;    //只读！ 云台yaw轴相对于码盘的反馈角度，单位：rad
   float pitch_fdb_in_joint;  //只读！ 云台pitch轴相对于码盘的反馈角度，单位：rad
   float yaw_set_in_joint;    //只读！ 云台yaw轴相对于码盘的设定角度，单位：rad

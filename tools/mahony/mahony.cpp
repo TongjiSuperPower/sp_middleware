@@ -97,21 +97,6 @@ void Mahony::update(float ax, float ay, float az, float wx, float wy, float wz)
   this->q[2] = q2 * norm;
   this->q[3] = q3 * norm;
 
-  //现在下面这个dq 是等价于在world下的w
-  sp::Gimbal::quaternion_multiply(this->q, this->q_last, this->dq, false, true);
-
-  float dw[3];
-
-  dw[0] = this->dq[1];
-  dw[1] = this->dq[2];
-  dw[2] = this->dq[3];
-  //进行坐标系转换从world 系转换到载体系
-  sp::Gimbal::quaternion_frame_transform(this->q, dw, this->w, true);
-  //这个dq一定不能归一化, 因为他就不是单位四元数
-  this->w[0] *= 2000.0f;
-  this->w[1] *= 2000.0f;
-  this->w[2] *= 2000.0f;
-
   //这个四元数是归一化之后的四元数,
   //而且我检验了,这个四元数Q_(W <- G )= {q[0],q[1],q[2],q[3]}是标量在前形式,后边虚部所表示的向量是旋转轴在地面系W下的坐标
   //这个四元数的意义是
@@ -132,17 +117,19 @@ void Mahony::update(float ax, float ay, float az, float wx, float wy, float wz)
     2.0f * (this->q[0] * this->q[1] + this->q[2] * this->q[3]),
     1.0f - 2.0f * (this->q[1] * this->q[1] + this->q[2] * this->q[2]));
 
-  culculate_yaw_pitch_roll_rates(gx, gy, gz, this->roll, this->pitch, this->yaw);
-  //调用函数计算对应欧拉角的微分
+  float omega_in_body[3] = {gx, gy, gz};
+
+  sp::Gimbal::transform_omiga_in_body_2_euler_rates(
+    omega_in_body, this->roll, this->pitch, this->yaw, this->vroll, this->vpitch, this->vyaw);
 }
 
-void Mahony::culculate_yaw_pitch_roll_rates(
-  float wx, float wy, float wz, float roll, float pitch, float yaw)
-{
-  this->vroll = wx + wy * std::sin(roll) * std::tan(pitch) + wz * std::cos(roll) * std::tan(pitch);
-  this->vpitch = wy * std::cos(roll) - wz * std::sin(roll);
-  this->vyaw = wy * std::sin(roll) / std::cos(pitch) + wz * std::cos(roll) / std::cos(pitch);
-}
+// void Mahony::culculate_yaw_pitch_roll_rates(
+//   float wx, float wy, float wz, float roll, float pitch, float yaw)
+// {
+//   this->vroll = wx + wy * std::sin(roll) * std::tan(pitch) + wz * std::cos(roll) * std::tan(pitch);
+//   this->vpitch = wy * std::cos(roll) - wz * std::sin(roll);
+//   this->vyaw = wy * std::sin(roll) / std::cos(pitch) + wz * std::cos(roll) / std::cos(pitch);
+// }
 
 void Mahony::init(float ax, float ay, float az)
 {

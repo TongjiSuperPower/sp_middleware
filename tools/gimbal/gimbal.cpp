@@ -339,4 +339,30 @@ void Gimbal::quaternion_frame_transform(
   v_out[2] = vz + 2.0f * (x * ty - y * tx);
 }
 
+void Gimbal::transform_omiga_in_body_2_euler_rates(
+  const float omiga_in_body[3], const float roll, const float pitch, const float yaw, float & vroll,
+  float & vpitch, float & vyaw)
+{
+  vroll = omiga_in_body[0] + omiga_in_body[1] * std::sin(roll) * std::tan(pitch) +
+          omiga_in_body[2] * std::cos(roll) * std::tan(pitch);
+
+  vpitch = omiga_in_body[1] * std::cos(roll) - omiga_in_body[2] * std::sin(roll);
+
+  vyaw = omiga_in_body[1] * std::sin(roll) / std::cos(pitch) +
+         omiga_in_body[2] * std::cos(roll) / std::cos(pitch);
+}
+
+void Gimbal::transform_euler_rates_2_omiga_in_body(
+  const float vroll, const float vpitch, const float vyaw, const float roll, const float pitch,
+  const float yaw, float omiga_in_body[3])
+{
+  (void)yaw;  // yaw 在该变换中不参与，防止未使用警告
+
+  omiga_in_body[0] = vroll - vyaw * std::sin(pitch);
+
+  omiga_in_body[1] = vpitch * std::cos(roll) + vyaw * std::sin(roll) * std::cos(pitch);
+
+  omiga_in_body[2] = -vpitch * std::sin(roll) + vyaw * std::cos(roll) * std::cos(pitch);
+}
+
 }  // namespace sp

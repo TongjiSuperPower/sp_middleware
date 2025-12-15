@@ -15,7 +15,7 @@ public:
   float dq[4];  // 只读! 四元数增量 dq = q_last* ⊗ q，表示载体系下的角速度等效四元数
   float w[3];   // 只读! 单位: rad/s 物体相对于地面的角速度 在载体系下的表示
 
-    float yaw;     // 只读! 单位: rad
+  float yaw;     // 只读! 单位: rad
   float pitch;   // 只读! 单位: rad
   float roll;    // 只读! 单位: rad
   float vyaw;    // 只读! 单位: rad/s
@@ -49,10 +49,11 @@ public:
   void update(
     float ax, float ay, float az, float wx, float wy,
     float wz);  //用于更新物体相对于地面的姿态 四元数和欧拉角以及其微分
-  void culculate_yaw_pitch_roll_rates(
-    float wx, float wy, float wz, float roll, float pitch, float yaw);
-  //用于计算物体相对于某一个系的欧拉角微分,注意要带入相对于该系的欧拉角值
-  //后续会改成一个静态函数不用单独定义一个类
+
+  // void culculate_yaw_pitch_roll_rates(
+  //   float wx, float wy, float wz, float roll, float pitch, float yaw);
+  // //用于计算物体相对于某一个系的欧拉角微分,注意要带入相对于该系的欧拉角值
+  // //后续会改成一个静态函数不用单独定义一个类
 private:
   const float dt_;
   const float two_kp_;
