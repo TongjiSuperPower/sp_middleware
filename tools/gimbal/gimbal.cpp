@@ -192,8 +192,15 @@ void Gimbal::update_q(
   q_chassis2world[2] = y_WC;
   q_chassis2world[3] = z_WC;
 
+  quaternion_to_euler(q_chassis2world, euler_q);
+
   //现在下面这个dq 是等价于在载体系下的w
-  //quaternion_multiply(q_last_chassis2world, q_chassis2world, dq,true,false);
+  quaternion_multiply(q_last_chassis2world, q_chassis2world, dq, true, false);
+  //这个dq一定不能归一化, 因为他就不是单位四元数
+  this->dq[0] *= 2.0f / dt_;
+  this->dq[1] *= 2.0f / dt_;
+  this->dq[2] *= 2.0f / dt_;
+  this->dq[3] *= 2.0f / dt_;
 }
 
 void Gimbal::calc(float yaw_set_in_world, float pitch_set_in_world)
@@ -302,7 +309,7 @@ void Gimbal::quaternion_multiply(
 // 输出：v_out[3] = {x, y, z} 在坐标系A中的同一个向量的坐标向量
 // conjugate_q: 是否对 q 取共轭（true 时使用 q* 而不是 q，相当于反向旋转）
 // 注意：这是 passive rotation（坐标系变换），不是 active rotation（向量旋转）
-void Gimbal::quaternion_rotate_vector(
+void Gimbal::quaternion_frame_transform(
   const float q[4], const float v_in[3], float v_out[3], bool conjugate_q)
 {
   // 根据 conjugate 标志决定四元数的符号

@@ -41,7 +41,7 @@ public:
   //      v_in[3] = {x, y, z} 在坐标系A中的向量
   // 输出：v_out[3] = {x, y, z} 在坐标系B中的向量
   // conjugate_q: 是否对 q 取共轭（即使用 q* 而不是 q）
-  static void quaternion_rotate_vector(
+  static void quaternion_frame_transform(
     const float q[4], const float v_in[3], float v_out[3], bool conjugate_q = false);
 
   float yaw_fdb_in_joint;    //只读！ 云台yaw轴相对于码盘的反馈角度，单位：rad
@@ -53,7 +53,7 @@ public:
   float R_base2world_[3]
                      [3];  //底盘系相对于地面系的旋转矩阵,已经考虑了上电瞬间世界系由云台x轴投影定义
   //后续会把旋转矩阵转换成四元数作为一个private变量并且用来计算底盘运动角速度
-
+  float dq[4];  //只读！底盘系相对于地面系的四元数增量，表示载体系下的角速度等效四元数
 private:
   float yaw0_;    //云台yaw轴码盘零点位置，单位：rad
   float pitch0_;  //云台pitch轴码盘零点位置，单位：rad

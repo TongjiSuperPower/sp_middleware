@@ -13,8 +13,9 @@ public:
                 //具体的作用是:将同一个向量从某一个系的坐标值转换到地面系
                 //即 v_ground = q * v_body * q_conjugate
   float dq[4];  // 只读! 四元数增量 dq = q_last* ⊗ q，表示载体系下的角速度等效四元数
+  float w[3];   // 只读! 单位: rad/s 物体相对于地面的角速度 在载体系下的表示
 
-  float yaw;     // 只读! 单位: rad
+    float yaw;     // 只读! 单位: rad
   float pitch;   // 只读! 单位: rad
   float roll;    // 只读! 单位: rad
   float vyaw;    // 只读! 单位: rad/s
