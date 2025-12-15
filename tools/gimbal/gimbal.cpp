@@ -194,8 +194,8 @@ void Gimbal::update_q(
 
   quaternion_to_euler(q_chassis2world, euler_q);
 
-  //现在下面这个dq 是等价于在载体系下的w
-  quaternion_multiply(q_last_chassis2world, q_chassis2world, dq, true, false);
+  //现在下面这个dq 是等价于在地面系下的w
+  quaternion_multiply(q_chassis2world, q_last_chassis2world, dq, false, true);
   //这个dq一定不能归一化, 因为他就不是单位四元数
   this->dq[0] *= 2.0f / dt_;
   this->dq[1] *= 2.0f / dt_;
