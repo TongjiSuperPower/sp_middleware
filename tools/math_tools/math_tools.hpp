@@ -6,7 +6,7 @@
 
 namespace sp
 {
-constexpr float PI = M_PI;
+constexpr float SP_PI = M_PI;
 
 // (-PI, PI]
 float limit_angle(float angle);

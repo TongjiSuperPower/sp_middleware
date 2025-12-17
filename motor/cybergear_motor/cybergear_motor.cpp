@@ -71,7 +71,7 @@ void CyberGear_Motor::cmd(float torque)
 {
   communication_type = Communication_Type_MotionControl;
   tar_torque = float_to_uint(torque, -tmax_, tmax_, 16);
-  tar_position_ = float_to_uint(0, -4 * sp::PI, 4 * sp::PI, 16);
+  tar_position_ = float_to_uint(0, -4 * sp::SP_PI, 4 * sp::SP_PI, 16);
   tar_speed_ = float_to_uint(0, -30.0f, 30.0f, 16);
   Kp_ = float_to_uint(0, 0.0f, 500.0f, 16);
   Kd_ = float_to_uint(0, 0.0f, 5.0f, 16);
