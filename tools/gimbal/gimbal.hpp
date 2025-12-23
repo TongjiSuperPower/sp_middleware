@@ -83,7 +83,7 @@ private:
   sp::LowPassFilter yaw_relative_angle_filter;
   sp::LowPassFilter pitch_relative_angle_filter;
   sp::LowPassFilter yaw_relative_angle_filter0;
-  sp::LowPassFilter pitch_relative_angle_filter0;
+  sp::LowPassFilter pitch_relative_angle_filter0;  //这两个滤波器必须要请勿去掉
 };
 
 }  // namespace sp

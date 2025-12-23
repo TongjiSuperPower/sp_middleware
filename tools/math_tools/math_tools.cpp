@@ -9,6 +9,31 @@ float limit_angle(float angle)
   return angle;
 }
 
+float unwrap_angle(float raw)
+{
+  static float last_raw = 0.0f;
+  static float unwrapped = 0.0f;
+  static bool inited = false;
+
+  if (!inited) {
+    last_raw = raw;
+    unwrapped = raw;
+    inited = true;
+    return unwrapped;
+  }
+
+  float delta = raw - last_raw;
+
+  if (delta > SP_PI)
+    delta -= 2.0f * SP_PI;
+  else if (delta < -SP_PI)
+    delta += 2.0f * SP_PI;
+
+  unwrapped += delta;
+  last_raw = raw;
+  return unwrapped;
+}
+
 float limit_min_max(float input, float min, float max)
 {
   if (input > max)

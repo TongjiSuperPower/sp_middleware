@@ -110,8 +110,12 @@ void Gimbal::update_q(
   /* ------------------------------------------------
    * Step 0: 编码器角度 → 云台相对底盘欧拉角
    * ------------------------------------------------ */
-  float yaw_rel = sign_yaw_ * sp::limit_angle(yaw_angle - yaw0_);
-  float pitch_rel = sign_pitch_ * sp::limit_angle(pitch_angle - pitch0_);
+  float yaw_rel =
+    sign_yaw_ *
+    sp::unwrap_angle(
+      sp::limit_angle(yaw_angle - yaw0_));  //这里要展开limit_angle,否则带来的跳变会让w炸掉
+  float pitch_rel =
+    sign_pitch_ * sp::limit_angle(pitch_angle - pitch0_);  //限位原因无所谓不需要展开limit_angle
   float roll_rel = roll0_;
 
   // 角度低通滤波（只对可控轴）
@@ -192,11 +196,13 @@ void Gimbal::update_q(
   q_chassis2world[2] = y_WC;
   q_chassis2world[3] = z_WC;
 
-  quaternion_to_euler(q_chassis2world, euler_q);
+  //quaternion_to_euler(q_chassis2world, euler_q);
 
-  //现在下面这个dq 是等价于在地面系下的w
+  //现在下面这个dq 是等价于在地面系下的底盘w
   quaternion_multiply(q_chassis2world, q_last_chassis2world, dq, false, true);
   //这个dq一定不能归一化, 因为他就不是单位四元数
+
+  //使用泰勒展开近似四元数增量表示的角速度(必须保证他在1ms内是小量)
   this->dq[0] *= 2.0f / dt_;
   this->dq[1] *= 2.0f / dt_;
   this->dq[2] *= 2.0f / dt_;

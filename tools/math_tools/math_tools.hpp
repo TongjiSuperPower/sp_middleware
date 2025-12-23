@@ -10,7 +10,8 @@ constexpr float SP_PI = M_PI;
 
 // (-PI, PI]
 float limit_angle(float angle);
-
+//inverse of limit_angle
+float unwrap_angle(float raw);
 // [min, max]
 float limit_min_max(float input, float min, float max);
 
