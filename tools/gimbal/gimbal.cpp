@@ -33,8 +33,8 @@ void Gimbal::update(
   const sp::Mahony & gimbal_imu, const float & yaw_angle, const float & pitch_angle)
 {
   //云台相对码盘值计算（正方向使用云台系右手定则）
-  float yaw_relative_angle = sign_yaw_ * (yaw_angle - yaw0_);
-  float pitch_relative_angle = sign_pitch_ * (pitch_angle - pitch0_);
+  float yaw_relative_angle = sign_yaw_ * sp::limit_angle(yaw_angle - yaw0_);
+  float pitch_relative_angle = sign_pitch_ * sp::limit_angle(pitch_angle - pitch0_);
 
   // 使用低通滤波器对角度进行滤波
   yaw_relative_angle_filter0.update(yaw_relative_angle);
@@ -110,8 +110,8 @@ void Gimbal::update_q(
   /* ------------------------------------------------
    * Step 0: 编码器角度 → 云台相对底盘欧拉角
    * ------------------------------------------------ */
-  float yaw_rel = sign_yaw_ * (yaw_angle - yaw0_);
-  float pitch_rel = sign_pitch_ * (pitch_angle - pitch0_);
+  float yaw_rel = sign_yaw_ * sp::limit_angle(yaw_angle - yaw0_);
+  float pitch_rel = sign_pitch_ * sp::limit_angle(pitch_angle - pitch0_);
   float roll_rel = roll0_;
 
   // 角度低通滤波（只对可控轴）

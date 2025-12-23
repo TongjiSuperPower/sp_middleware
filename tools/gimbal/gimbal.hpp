@@ -3,6 +3,7 @@
 
 #include "tools\low_pass_filter\low_pass_filter.hpp"
 #include "tools\mahony\mahony.hpp"
+#include "tools\math_tools\math_tools.hpp"
 namespace sp
 {
 class Gimbal
