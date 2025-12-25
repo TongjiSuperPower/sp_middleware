@@ -45,6 +45,11 @@ public:
   static void quaternion_frame_transform(
     const float q[4], const float v_in[3], float v_out[3], bool conjugate_q = false);
 
+  // 向量叉乘：result = v1 × v2
+  // 输入：v1[3], v2[3] 两个三维向量
+  // 输出：result[3] 叉乘结果
+  static void cross_product(const float v1[3], const float v2[3], float result[3]);
+
   // 载体系角速度转欧拉角速率
   // 输入：omiga_in_body[3] = {wx, wy, wz} 载体系下的角速度,即imu测量到的角速度原始值
   //      euler[3] = {roll, pitch, yaw} 当前欧拉角 相对于A系
@@ -71,14 +76,13 @@ public:
                      [3];  //底盘系相对于地面系的旋转矩阵,已经考虑了上电瞬间世界系由云台x轴投影定义
   //后续会把旋转矩阵转换成四元数作为一个private变量并且用来计算底盘运动角速度
   float dq[4];  //只读！底盘系相对于地面系的四元数增量，表示载体系下的角速度等效四元数
-
 private:
   float yaw0_;    //云台yaw轴码盘零点位置，单位：rad
   float pitch0_;  //云台pitch轴码盘零点位置，单位：rad
   float sign_yaw_;
   float sign_pitch_;
   float dt_;
-  float q_chassis2world[4];       //底盘系相对于地面系的四元数表示
+  float q_chassis2world[4];       //底盘系相对于地面系的四元数表示 能将底盘系的向量转换到地面系
   float q_last_chassis2world[4];  //底盘系相对于地面系的上次四元数表示
   sp::LowPassFilter yaw_relative_angle_filter;
   sp::LowPassFilter pitch_relative_angle_filter;

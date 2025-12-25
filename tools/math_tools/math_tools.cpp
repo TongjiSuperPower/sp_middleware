@@ -65,4 +65,13 @@ uint32_t float_to_uint(float input, float min, float max, size_t bits)
 
 int8_t sgn(float input) { return (input > 0) - (input < 0); }
 
+void diff_vec3(const float v_next[3], const float v_prev[3], float result[3], float dt)
+{
+  // 数值微分：(v_next - v_prev) / dt
+  float inv_dt = 1.0f / dt;
+  result[0] = (v_next[0] - v_prev[0]) * inv_dt;
+  result[1] = (v_next[1] - v_prev[1]) * inv_dt;
+  result[2] = (v_next[2] - v_prev[2]) * inv_dt;
+}
+
 }  // namespace sp

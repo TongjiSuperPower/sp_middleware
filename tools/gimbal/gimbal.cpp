@@ -345,6 +345,17 @@ void Gimbal::quaternion_frame_transform(
   v_out[2] = vz + 2.0f * (x * ty - y * tx);
 }
 
+void Gimbal::cross_product(const float v1[3], const float v2[3], float result[3])
+{
+  // 向量叉乘公式：result = v1 × v2
+  // | i    j    k   |
+  // | v1x  v1y  v1z |
+  // | v2x  v2y  v2z |
+  result[0] = v1[1] * v2[2] - v1[2] * v2[1];
+  result[1] = v1[2] * v2[0] - v1[0] * v2[2];
+  result[2] = v1[0] * v2[1] - v1[1] * v2[0];
+}
+
 void Gimbal::transform_omiga_in_body_2_euler_rates(
   const float omiga_in_body[3], const float roll, const float pitch, const float yaw, float & vroll,
   float & vpitch, float & vyaw)
