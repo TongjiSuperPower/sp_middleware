@@ -97,6 +97,20 @@ void Mahony::update(float ax, float ay, float az, float wx, float wy, float wz)
   this->q[2] = q2 * norm;
   this->q[3] = q3 * norm;
 
+  //实验测试看用四元数微分出来的w怎么样  结果是非常好
+  // //得到云台系下的云台运动的
+  // sp::Gimbal::quaternion_multiply(this->q_last, this->q, dq, true, false);
+  // //这个dq一定不能归一化, 因为他就不是单位四元数
+
+  // //使用泰勒展开近似四元数增量表示的角速度(必须保证他在1ms内是小量)
+  // this->dq[0] *= 2.0f / dt_;
+  // this->dq[1] *= 2.0f / dt_;
+  // this->dq[2] *= 2.0f / dt_;
+  // this->dq[3] *= 2.0f / dt_;
+  // float w[3] = {dq[1], dq[2], dq[3]};
+  // sp::Gimbal::transform_omiga_in_body_2_euler_rates(
+  //   w, this->roll, this->pitch, this->yaw, this->vroll_test, this->vpitch_test, this->vyaw_test);
+
   //这个四元数是归一化之后的四元数,
   //而且我检验了,这个四元数Q_(W <- G )= {q[0],q[1],q[2],q[3]}是标量在前形式,后边虚部所表示的向量是旋转轴在地面系W下的坐标
   //这个四元数的意义是

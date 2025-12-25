@@ -12,10 +12,10 @@ Gimbal::Gimbal(
   pitch0_(pitch0),
   sign_yaw_((reverse_yaw) ? -1.0f : 1.0f),
   sign_pitch_((reverse_pitch) ? -1.0f : 1.0f),
-  yaw_relative_angle_filter(0.1f),
-  pitch_relative_angle_filter(0.1f),
-  yaw_relative_angle_filter0(0.1f),
-  pitch_relative_angle_filter0(0.1f),
+  yaw_relative_angle_filter(0.3f),
+  pitch_relative_angle_filter(0.3f),
+  yaw_relative_angle_filter0(1.0f),//弃用
+  pitch_relative_angle_filter0(1.0f),//弃用
   dt_(dt)
 {
   this->yaw_fdb_in_joint = 0.0f;
