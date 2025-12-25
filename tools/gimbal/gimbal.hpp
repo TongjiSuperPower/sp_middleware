@@ -66,6 +66,14 @@ public:
     const float vroll, const float vpitch, const float vyaw, const float roll, const float pitch,
     const float yaw, float omiga_in_body[3]);
 
+  // 变换矩阵速率乘以欧拉角速率  这个函数存在的原因是微分的性质:要对所有变量对t求导数
+  // 输入：roll, pitch, yaw 当前欧拉角
+  //      vroll, vpitch, vyaw 欧拉角速率
+  // 输出：result[3] 变换结果
+  static void Transform_matrix_rates_multipy_Euler_rates(
+    const float roll, const float pitch, const float yaw, const float vroll, const float vpitch,
+    const float vyaw, float result[3]);
+
   float yaw_fdb_in_joint;    //只读！ 云台yaw轴相对于码盘的反馈角度，单位：rad
   float pitch_fdb_in_joint;  //只读！ 云台pitch轴相对于码盘的反馈角度，单位：rad
   float yaw_set_in_joint;    //只读！ 云台yaw轴相对于码盘的设定角度，单位：rad

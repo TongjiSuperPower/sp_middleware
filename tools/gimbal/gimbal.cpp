@@ -14,8 +14,8 @@ Gimbal::Gimbal(
   sign_pitch_((reverse_pitch) ? -1.0f : 1.0f),
   yaw_relative_angle_filter(0.3f),
   pitch_relative_angle_filter(0.3f),
-  yaw_relative_angle_filter0(1.0f),//弃用
-  pitch_relative_angle_filter0(1.0f),//弃用
+  yaw_relative_angle_filter0(1.0f),    //弃用
+  pitch_relative_angle_filter0(1.0f),  //弃用
   dt_(dt)
 {
   this->yaw_fdb_in_joint = 0.0f;
@@ -380,6 +380,18 @@ void Gimbal::transform_euler_rates_2_omiga_in_body(
   omiga_in_body[1] = vpitch * std::cos(roll) + vyaw * std::sin(roll) * std::cos(pitch);
 
   omiga_in_body[2] = -vpitch * std::sin(roll) + vyaw * std::cos(roll) * std::cos(pitch);
+}
+
+void Gimbal::Transform_matrix_rates_multipy_Euler_rates(
+  const float roll, const float pitch, const float yaw, const float vroll, const float vpitch,
+  const float vyaw, float result[3])
+{
+  (void)yaw;  // yaw 在该变换中不参与，防止未使用警告
+  result[0] = -cosf(pitch) * vpitch * (vyaw);
+  result[1] = -sinf(roll) * vroll * (vpitch) +
+              (cosf(roll) * cosf(pitch) * vroll - sinf(roll) * sinf(pitch) * vpitch) * (vyaw);
+  result[2] = -cosf(roll) * vroll * (vpitch) +
+              (-cosf(roll) * sinf(pitch) * vpitch - sinf(roll) * cosf(pitch) * vroll) * (vyaw);
 }
 
 }  // namespace sp
