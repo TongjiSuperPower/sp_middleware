@@ -3,7 +3,7 @@
 #include <cmath>
 
 #include "tools/gimbal/gimbal.hpp"
-
+#include "tools/math_tools/math_tools.hpp"
 namespace sp
 {
 Mahony::Mahony(float dt, float kp, float ki)
@@ -132,9 +132,15 @@ void Mahony::update(float ax, float ay, float az, float wx, float wy, float wz)
     1.0f - 2.0f * (this->q[1] * this->q[1] + this->q[2] * this->q[2]));
 
   float omega_in_body[3] = {gx, gy, gz};
+  // 保存上一帧值
+  float euler_rates_last[3] = {this->vroll, this->vpitch, this->vyaw};
 
   sp::Gimbal::transform_omiga_in_body_2_euler_rates(
     omega_in_body, this->roll, this->pitch, this->yaw, this->vroll, this->vpitch, this->vyaw);
+
+  // 使用显式数组代替临时数组
+  float euler_rates_curr[3] = {this->vroll, this->vpitch, this->vyaw};
+  sp::diff_vec3(euler_rates_curr, euler_rates_last, acc_euler, dt_);
 }
 
 // void Mahony::culculate_yaw_pitch_roll_rates(

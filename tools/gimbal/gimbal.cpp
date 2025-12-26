@@ -12,8 +12,8 @@ Gimbal::Gimbal(
   pitch0_(pitch0),
   sign_yaw_((reverse_yaw) ? -1.0f : 1.0f),
   sign_pitch_((reverse_pitch) ? -1.0f : 1.0f),
-  yaw_relative_angle_filter(0.3f),
-  pitch_relative_angle_filter(0.3f),
+  yaw_relative_angle_filter(0.1f),
+  pitch_relative_angle_filter(0.1f),
   yaw_relative_angle_filter0(1.0f),    //弃用
   pitch_relative_angle_filter0(1.0f),  //弃用
   dt_(dt)
@@ -110,13 +110,12 @@ void Gimbal::update_q(
   /* ------------------------------------------------
    * Step 0: 编码器角度 → 云台相对底盘欧拉角
    * ------------------------------------------------ */
-  float yaw_rel =
-    sign_yaw_ *
-    sp::unwrap_angle(
-      sp::limit_angle(yaw_angle - yaw0_));  //这里要展开limit_angle,否则带来的跳变会让w炸掉
-  float pitch_rel =
+  yaw_rel = sign_yaw_ *
+            sp::unwrap_angle(
+              sp::limit_angle(yaw_angle - yaw0_));  //这里要展开limit_angle,否则带来的跳变会让w炸掉
+  pitch_rel =
     sign_pitch_ * sp::limit_angle(pitch_angle - pitch0_);  //限位原因无所谓不需要展开limit_angle
-  float roll_rel = roll0_;
+  roll_rel = roll0_;
 
   // 角度低通滤波（只对可控轴）
   yaw_relative_angle_filter.update(yaw_rel);
