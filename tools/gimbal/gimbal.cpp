@@ -111,7 +111,7 @@ void Gimbal::update_q(
    * Step 0: 编码器角度 → 云台相对底盘欧拉角
    * ------------------------------------------------ */
   yaw_rel = sign_yaw_ *
-            sp::unwrap_angle(
+            yaw_unwrapper_.update(
               sp::limit_angle(yaw_angle - yaw0_));  //这里要展开limit_angle,否则带来的跳变会让w炸掉
   pitch_rel =
     sign_pitch_ * sp::limit_angle(pitch_angle - pitch0_);  //限位原因无所谓不需要展开limit_angle

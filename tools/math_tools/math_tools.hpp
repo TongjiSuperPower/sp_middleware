@@ -10,8 +10,43 @@ constexpr float SP_PI = M_PI;
 
 // (-PI, PI]
 float limit_angle(float angle);
-//inverse of limit_angle
-float unwrap_angle(float raw);
+
+/**
+ * @brief 角度展开类（消除 ±π 跳变）
+ * @note  每个需要展开的角度应使用独立的实例
+ *
+ * 使用示例：
+ * @code
+ *   sp::AngleUnwrapper yaw_unwrapper;
+ *   sp::AngleUnwrapper pitch_unwrapper;
+ *   float yaw_unwrapped = yaw_unwrapper.update(yaw_raw);
+ *   float pitch_unwrapped = pitch_unwrapper.update(pitch_raw);
+ * @endcode
+ */
+class AngleUnwrapper
+{
+public:
+  AngleUnwrapper() = default;
+
+  /**
+   * @brief 更新角度并返回展开后的值
+   * @param raw 原始角度（应在 -π 到 π 范围内）
+   * @return 展开后的角度（累积值，无跳变）
+   */
+  float update(float raw);
+
+  /**
+   * @brief 重置状态
+   */
+  void reset();
+
+  float out = 0.0f;  ///< 展开后的角度输出
+
+private:
+  float last_raw_ = 0.0f;
+  bool inited_ = false;
+};
+
 // [min, max]
 float limit_min_max(float input, float min, float max);
 
