@@ -100,7 +100,7 @@ void Gimbal::update(
   R_base2world_[2][2] = sinf(gimbal_imu.pitch) * sinf(pitch_relative_angle) +
                         cosf(gimbal_imu.pitch) * cosf(gimbal_imu.roll) * cosf(pitch_relative_angle);
 
-  //rotation_matrix_to_euler(R_base2world_, euler_r);
+  rotation_matrix_to_euler(R_base2world_, euler_r);
 };
 
 void Gimbal::update_q(

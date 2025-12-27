@@ -98,21 +98,21 @@ float now = sp::Timer::now_us();  // 从系统启动开始的微秒数
 
 ## API 参考
 
-| 方法 | 说明 |
-|------|------|
-| `Timer(bool auto_init = true)` | 构造函数 |
-| `static bool init()` | 初始化 DWT（全局只需一次） |
-| `void start()` | 开始计时 |
-| `void stop()` | 停止计时 |
-| `float delta_us()` | 获取时间间隔（微秒） |
-| `float delta_ms()` | 获取时间间隔（毫秒） |
-| `float delta_s()` | 获取时间间隔（秒） |
-| `uint32_t delta_tick()` | 获取原始 tick 差值 |
-| `static float now_us()` | 获取当前时刻（微秒） |
-| `float min_us()` | 最小耗时统计 |
-| `float max_us()` | 最大耗时统计 |
-| `uint32_t count()` | 测量次数统计 |
-| `void reset_stats()` | 重置统计数据 |
+| 方法                           | 说明                       |
+| ------------------------------ | -------------------------- |
+| `Timer(bool auto_init = true)` | 构造函数                   |
+| `static bool init()`           | 初始化 DWT（全局只需一次） |
+| `void start()`                 | 开始计时                   |
+| `void stop()`                  | 停止计时                   |
+| `float delta_us()`             | 获取时间间隔（微秒）       |
+| `float delta_ms()`             | 获取时间间隔（毫秒）       |
+| `float delta_s()`              | 获取时间间隔（秒）         |
+| `uint32_t delta_tick()`        | 获取原始 tick 差值         |
+| `static float now_us()`        | 获取当前时刻（微秒）       |
+| `float min_us()`               | 最小耗时统计               |
+| `float max_us()`               | 最大耗时统计               |
+| `uint32_t count()`             | 测量次数统计               |
+| `void reset_stats()`           | 重置统计数据               |
 
 ## 原理
 

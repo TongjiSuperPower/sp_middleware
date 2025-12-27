@@ -50,7 +50,7 @@ public:
   // 输出：result[3] 叉乘结果
   static void cross_product(const float v1[3], const float v2[3], float result[3]);
 
-  // 载体系角速度转欧拉角速率
+  // 载体系角速度转欧拉角速率  对应T逆
   // 输入：omiga_in_body[3] = {wx, wy, wz} 载体系下的角速度,即imu测量到的角速度原始值
   //      euler[3] = {roll, pitch, yaw} 当前欧拉角 相对于A系
   // 输出：euler_rates[3] = {roll_rate, pitch_rate, yaw_rate} 欧拉角微分 相对于A系 相对于什么系就能得到相对于同一个系的欧拉角的微分
@@ -58,7 +58,7 @@ public:
     const float omiga_in_body[3], const float roll, const float pitch, const float yaw,
     float & vroll, float & vpitch, float & vyaw);
 
-  // 欧拉角速率转载体系角速度（上述函数的逆变换）
+  // 欧拉角速率转载体系角速度 对应T (or Jacobian)
   // 输入：vroll, vpitch, vyaw 欧拉角微分
   //      roll, pitch, yaw 当前欧拉角
   // 输出：omiga_in_body[3] = {wx, wy, wz} 载体系下的角速度
@@ -88,14 +88,13 @@ public:
   float yaw_rel;
   float pitch_rel;
   float roll_rel;
-
+  float q_chassis2world[4];  //底盘系相对于地面系的四元数表示 能将底盘系的向量转换到地面系
 private:
   float yaw0_;    //云台yaw轴码盘零点位置，单位：rad
   float pitch0_;  //云台pitch轴码盘零点位置，单位：rad
   float sign_yaw_;
   float sign_pitch_;
   float dt_;
-  float q_chassis2world[4];       //底盘系相对于地面系的四元数表示 能将底盘系的向量转换到地面系
   float q_last_chassis2world[4];  //底盘系相对于地面系的上次四元数表示
   sp::LowPassFilter yaw_relative_angle_filter;
   sp::LowPassFilter pitch_relative_angle_filter;
