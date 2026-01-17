@@ -23,6 +23,9 @@ bool scope_min_max(float input, float min, float max);
 // [-max, max]
 bool scope_max(float input, float max);
 
+// [in_min, in_max] -> [out_min, out_max]
+float map(float x, float in_min, float in_max, float out_min, float out_max);
+
 // [min, max]
 float uint_to_float(uint32_t input, float min, float max, size_t bits);
 
