@@ -20,8 +20,8 @@ void LK_Motor::read(const uint8_t * data)
 
   this->temp = data[1];
   this->torque = torque_int * MF_RAW_TO_CURRENT * torque_const_;  // TODO MG等系列
-  this->speed = speed_int / 180.0f * sp::PI;
-  this->angle = sp::limit_angle(angle_int / 65535.0f * 2 * sp::PI);  // TODO 编码器不同, 系数不同
+  this->speed = speed_int / 180.0f * sp::SP_PI;
+  this->angle = sp::limit_angle(angle_int / 65535.0f * 2 * sp::SP_PI);  // TODO 编码器不同, 系数不同
 }
 
 void LK_Motor::write(uint8_t * data) const
