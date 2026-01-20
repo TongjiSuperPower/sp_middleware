@@ -21,9 +21,9 @@ void DDT_Motor::read(const uint8_t * data)
   int16_t current_int = (data[2] << 8) | data[3];
   uint16_t angle_int = (data[4] << 8) | data[5];
 
-  this->speed = speed_int * 0.1f * 2 * sp::PI / 60.0f;
+  this->speed = speed_int * 0.1f * 2 * sp::SP_PI / 60.0f;
   this->torque = current_int * DDT_MOTOR_RAW_TO_CURRENT * torque_const_;
-  this->angle = sp::limit_angle(angle_int / 32767.0f * 2 * sp::PI);
+  this->angle = sp::limit_angle(angle_int / 32767.0f * 2 * sp::SP_PI);
   this->error = data[6];
   this->mode = data[7];
 }

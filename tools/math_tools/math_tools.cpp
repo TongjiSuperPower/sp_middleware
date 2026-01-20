@@ -4,8 +4,8 @@ namespace sp
 {
 float limit_angle(float angle)
 {
-  while (angle > PI) angle -= 2 * PI;
-  while (angle <= -PI) angle += 2 * PI;
+  while (angle > SP_PI) angle -= 2 * SP_PI;
+  while (angle <= -SP_PI) angle += 2 * SP_PI;
   return angle;
 }
 

@@ -81,11 +81,11 @@ void LK_Motor::read_state2(const uint8_t * data)
   last_ecd_ = encoder;
 
   // 多圈角度
-  float motor_angle = (encoder / 65536.0f) * 2.0f * sp::PI + step_ * 2.0f * sp::PI;
+  float motor_angle = (encoder / 65536.0f) * 2.0f * sp::SP_PI + step_ * 2.0f * sp::SP_PI;
 
   this->temp = data[1];
   this->torque = iq * (66.0f / 4096.0f) * torque_const_ * ratio_;
-  this->speed = speed / 180.0f * sp::PI / ratio_;
+  this->speed = speed / 180.0f * sp::SP_PI / ratio_;
   this->angle = sp::limit_angle(motor_angle / ratio_);
   this->multicycle_angle = motor_angle / ratio_;
 }
