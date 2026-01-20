@@ -8,9 +8,7 @@ namespace sp
 class Gimbal
 {
 public:
-  Gimbal(
-    float yaw0, float pitch0, bool reverse_yaw = false, bool reverse_yaw0 = false,
-    bool reverse_pitch = false, bool reverse_pitch0 = false);
+  Gimbal(float yaw0, float pitch0, bool reverse_yaw = false, bool reverse_pitch = false);
 
   void update(const sp::Mahony & gimbal_imu, const float & yaw_angle, const float & pitch_angle);
 

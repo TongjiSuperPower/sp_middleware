@@ -5,9 +5,7 @@
 namespace sp
 {
 
-Gimbal::Gimbal(
-  float yaw0, float pitch0, bool reverse_yaw, bool reverse_yaw0, bool reverse_pitch,
-  bool reverse_pitch0)
+Gimbal::Gimbal(float yaw0, float pitch0, bool reverse_yaw, bool reverse_pitch)
 : yaw0_(yaw0),
   pitch0_(pitch0),
   sign_yaw_((reverse_yaw) ? -1.0f : 1.0f),

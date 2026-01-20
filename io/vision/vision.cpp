@@ -46,7 +46,7 @@ void Vision::send(
   tx_data_.crc16 =
     get_crc16(reinterpret_cast<uint8_t *>(&tx_data_), sizeof(tx_data_) - sizeof(tx_data_.crc16));
 
-  CDC_Transmit_HS(reinterpret_cast<uint8_t *>(&tx_data_), sizeof(tx_data_));
+  CDC_Transmit_FS(reinterpret_cast<uint8_t *>(&tx_data_), sizeof(tx_data_));
 }
 
 }  // namespace sp

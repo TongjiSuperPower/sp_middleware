@@ -18,7 +18,7 @@ extern "C" void vision_task()
 
     // 使用调试(f5)查看vis内部变量的变化
 
-    osDelay(2); // 500Hz
+    osDelay(1); // 1000Hz
   }
 }
 
