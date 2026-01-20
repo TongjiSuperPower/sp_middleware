@@ -118,14 +118,20 @@ public:
   RefereeMouseData mouse;    // 只读! 鼠标数据
   RefereeKeysData keys;      // 只读! 键盘数据
 
+  bool is_open() const;
+  bool is_alive(uint32_t now_ms) const;
+
   void request();
-  void update(uint16_t size);
+  void update(uint16_t size, uint32_t stamp_ms);
 
 private:
   const bool use_dma_;
   std::array<uint8_t, 255> buff_;
 
-  void update(uint8_t * frame_start, uint16_t size);
+  bool has_read_ = false;
+  uint32_t last_read_ms_;
+
+  void update(uint8_t * frame_start, uint16_t size, uint32_t stamp_ms);
   void update_remote(const VT03RemoteData * data);
   void update_mouse_and_keys(const referee::RemoteControl * data);
 };
