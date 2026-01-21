@@ -389,12 +389,13 @@ struct __attribute__((packed)) SentryInfo
   uint32_t can_confirm_free_resurrect : 1;    // bit 19     : 哨兵机器人当前是否可以确认免费复活
   uint32_t can_exchange_immediate_resurrect : 1;  // bit 20     : 哨兵机器人当前是否可以兑换立即复活
   uint32_t immediate_resurrect_cost
-    : 10;                  // bits 21-30 : 哨兵机器人当前若兑换立即复活需要花费的金币数
-  uint32_t reserved1 : 1;  // bit 31     : 保留
+    : 10;                   // bits 21-30 : 哨兵机器人当前若兑换立即复活需要花费的金币数
+  uint32_t reserved1 : 1;   // bit 31     : 保留
+  uint16_t reserved2 : 12;  // bit 0-11 ：保留
   uint16_t sentry_current_pose
     : 2;  // bit 12-13      : 哨兵当前姿态，1 为进攻姿态，2 为防御姿态，3 为移动姿态
   uint16_t energy_status : 1;  // bits 14  : 己方能量机关是否能够进入正在激活状态，1 为当前可激活
-  uint16_t reserved2 : 1;      // bits 15 : 保留
+  uint16_t reserved3 : 1;      // bits 15 : 保留
 };
 
 // 0x020E 雷达自主决策信息同步
