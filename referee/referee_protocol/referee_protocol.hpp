@@ -79,6 +79,9 @@ constexpr uint16_t CUSTOM_CLIENT_DATA = 0x0306;      // 自定义控制器与选
 constexpr uint16_t MAP_DATA = 0x0307;                // 选手端小地图接收哨兵数据
 constexpr uint16_t CUSTOM_INFO = 0x0308;             // 选手端小地图接收机器人数据
 constexpr uint16_t ROBOT_CUSTOM_DATA = 0x0309;       // 自定义控制器接收机器人数据 图传链路
+constexpr uint16_t ROBOT_CLIENT_DATA = 0x0310;       // 机器人发送给自定义客户端的数据 图传链路
+constexpr uint16_t SET_IMAGE_TRANSFER = 0x0F01;      //设置图传出图信道 图传链路
+constexpr uint16_t INQUIRY_IMAGE_TRANSFER = 0x0F02;  //查询图传出图信道 图传链路
 }  // namespace sp::referee::cmd_id
 
 namespace sp::referee::data_cmd_id
@@ -142,23 +145,14 @@ struct __attribute__((packed)) GameResult
 // 0x0003 比赛机器人血量数据
 struct __attribute__((packed)) GameRobotHP
 {
-  uint16_t red_1_robot_hp;  // 红 1 英雄机器人血量。若该机器人未上场或者被罚下，则血量为 0
-  uint16_t red_2_robot_hp;  // 红 2 工程机器人血量
-  uint16_t red_3_robot_hp;  // 红 3 步兵机器人血量
-  uint16_t red_4_robot_hp;  // 红 4 步兵机器人血量
-  uint16_t reserved1;       // 保留
-  uint16_t red_7_robot_hp;  // 红 7 哨兵机器人血量
-  uint16_t red_outpost_hp;  // 红方前哨站血量
-  uint16_t red_base_hp;     // 红方基地血量
-
-  uint16_t blue_1_robot_hp;  // 蓝 1 英雄机器人血量
-  uint16_t blue_2_robot_hp;  // 蓝 2 工程机器人血量
-  uint16_t blue_3_robot_hp;  // 蓝 3 步兵机器人血量
-  uint16_t blue_4_robot_hp;  // 蓝 4 步兵机器人血量
-  uint16_t reserved2;        // 保留
-  uint16_t blue_7_robot_hp;  // 蓝 7 哨兵机器人血量
-  uint16_t blue_outpost_hp;  // 蓝方前哨站血量
-  uint16_t blue_base_hp;     // 蓝方基地血量
+  uint16_t ally_1_robot_hp;  // 己方 1 英雄机器人血量
+  uint16_t ally_2_robot_hp;  // 己方 2 工程机器人血量
+  uint16_t ally_3_robot_hp;  // 己方 3 步兵机器人血量
+  uint16_t ally_4_robot_hp;  // 己方 4 步兵机器人血量
+  uint16_t reserved;         // 保留
+  uint16_t ally_7_robot_hp;  // 己方 7 哨兵机器人血量
+  uint16_t ally_outpost_hp;  // 己方前哨站血量
+  uint16_t ally_base_hp;     // 己方基地血量
 };
 
 // 0x0101 机器人事件数据
@@ -170,22 +164,27 @@ struct __attribute__((packed)) EventData
   // bit 0：己方与兑换区不重叠的补给区占领状态，1 为已占领
   // bit 1：己方与兑换区重叠的补给区占领状态，1 为已占领
   // bit 2：己方补给区的占领状态，1 为已占领（仅 RMUL 适用）
-  uint32_t energy_status : 2;  // bit 3-4
-  // bit 3：己方小能量机关的激活状态，1 为已激活
-  // bit 4：己方大能量机关的激活状态，1 为已激活
-  uint32_t central_highground_status : 2;  // bit 5-6
-  // bit 5-6：己方中央高地的占领状态，1 为被己方占领，2 为被对方占领
-  uint32_t trapezoidal_highground_status : 2;  // bit 7-8
+  uint32_t energy_status : 4;  // bit 3-6
+  // bit 3-4：己方小能量机关的激活状态，0 为未激活，1 为已激活，2 为正在激活
+  // bit 5-6：己方大能量机关的激活状态，0 为未激活，1 为已激活，2 为正在激活
+  uint32_t central_highground_status : 2;  // bit 7-8
+  // bit 7-8：己方中央高地的占领状态，1 为被己方占领，2 为被对方占领
+  uint32_t trapezoidal_highground_status : 2;  // bit 9-10
   // bit 7-8：己方梯形高地的占领状态，1 为已占领
-  uint32_t last_hit_time : 9;  // bit 9-17
+  uint32_t last_hit_time : 9;  // bit 11-19
   // bit  9-17：对方飞镖最后一次击中己方前哨站或基地的时间（0-420，开局默认为 0）
-  uint32_t last_hit_target : 3;  // bit 18-20
+  uint32_t last_hit_target : 3;  // bit 20-22
   // bit 18-20：对方飞镖最后一次击中己方前哨站或基地的具体目标，开局默认为 0
   // 1 为击中前哨站，2 为击中基地固定目标，3 为击中基地随机固定目标，4 为击中基地随机移动目标
-  uint32_t center_boost_status : 2;  // bit 21-22
+  uint32_t center_boost_status : 2;  // bit 23-24
   // 中心增益点的占领状态，0 为未被占领，1 为被己方占领，2为被对方占领，3 为被双方占领。（仅 RMUL 适用）
-  uint32_t reserved : 8;  // bit 23-31
-  // 保留
+  uint32_t fortess_boost_status : 2;  // bit 25-26
+  // 己方堡垒增益点的占领状态，0 为未被占领，1 为被己方占领，2为被对方占领，3 为被双方占领。
+  uint32_t outpost_boost_status : 2;  // bit 27-28
+  // 己方前哨站增益点的占领状态，0 为未被占领，1 为被己方占领，2为被双方占领。
+  uint32_t base_boost_status : 2;  // bit 29
+  // 己方基地增益点的占领状态，1 为已占领。
+  uint32_t reserved : 2;  // bit 30-31 : 保留
 };
 
 // 0x0104 裁判警告数据
@@ -242,9 +241,8 @@ struct __attribute__((packed)) RobotPos
 struct __attribute__((packed)) Buff
 {
   uint8_t recovery_y_buff;  // 机器人回血增益（百分比，值为 10 表示每秒恢复血量上限的 10%）
-  uint8_t
-    cooling_buff;  // 机器人射击热量冷却倍率（直接值，值为 5 表示 5 倍冷却;堡垒增益点提供的固定热量冷却增益暂不适用）
-  uint8_t defence_buff;        // 机器人防御增益（百分比，值为 50 表示 50%防御增益）
+  uint16_t cooling_buff;    // 机器人射击热量冷却增益具体值（直接值，值为 x 表示热量冷却增加 x/s）
+  uint8_t defence_buff;     // 机器人防御增益（百分比，值为 50 表示 50%防御增益）
   uint8_t vulnerability_buff;  // 机器人负防御增益（百分比，值为 30 表示-30%防御增益）
   uint16_t attack_buff;        // 机器人攻击增益（百分比，值为 50 表示 50%攻击增益）
   uint8_t remaining_energy;
@@ -268,10 +266,7 @@ struct __attribute__((packed)) HurtData
   uint8_t HP_deduction_reason : 4;
   // bit 4-7：血量变化类型
   // 0：装甲模块被弹丸攻击导致扣血
-  // 1：裁判系统重要模块离线导致扣血
-  // 2：射击初速度超限导致扣血
-  // 3：射击热量超限导致扣血
-  // 4：底盘功率超限导致扣血
+  // 1：装甲模块或超级电容管理模块离线导致扣血
   // 5：装甲模块受到撞击导致扣血
 };
 
@@ -290,6 +285,8 @@ struct __attribute__((packed)) ProjectileAllowance
   uint16_t projectile_allowance_17mm;  // 17mm 弹丸允许发弹量
   uint16_t projectile_allowance_42mm;  // 42mm 弹丸允许发弹量
   uint16_t remaining_gold_coin;        // 剩余金币数量
+  uint16_t
+    projectile_allowance_fortress;  // 堡垒增益点提供的储备 17mm 弹丸允许发弹量；该值与机器人是否实际占领堡垒无关
 };
 
 // 0x0209 机器人RFID模块状态
@@ -319,7 +316,24 @@ struct __attribute__((packed)) RFID_Status
   uint32_t friendly_big_resource : 1;     // bit 21：己方大资源岛增益点
   uint32_t enemy_big_resource : 1;        // bit 22：对方大资源岛增益点
   uint32_t center_point : 1;              // bit 23：中心增益点（仅 RMUL 适用）
-  uint32_t reserved : 8;                  // bit 24-31：保留
+  uint32_t enemy_fort : 1;                // bit 24：对方堡垒增益点
+  uint32_t enemy_outpost : 1;             // bit 25：对方前哨站增益点
+  uint32_t friendly_tunnel_road_down
+    : 1;  // bit 26：己方地形跨越增益点（隧道）（靠近己方一侧公路区下方）
+  uint32_t friendly_tunnel_road_up
+    : 1;  // bit 27：己方地形跨越增益点（隧道）（靠近己方一侧公路区上方）
+  uint32_t friendly_tunnel_trapezoid_low
+    : 1;  //bit 28：己方地形跨越增益点（隧道）（靠近己方梯形高地较低处）
+  uint32_t friendly_tunnel_trapezoid_high
+    : 1;  //bit 29：己方地形跨越增益点（隧道）（靠近己方梯形高地较高处）
+  uint32_t enemy_tunnel_road_down
+    : 1;  // bit 30：对方地形跨越增益点（隧道）（靠近己方一侧公路区下方）
+  uint32_t enemy_tunnel_road_up
+    : 1;  // bit 31：对方地形跨越增益点（隧道）（靠近己方一侧公路区上方）
+  uint8_t enemy_tunnel_trapezoid_low
+    : 1;  //bit 0：对方地形跨越增益点（隧道）（靠近己方梯形高地较低处）
+  uint8_t enemy_tunnel_trapezoid_high
+    : 1;  //bit 1：对方地形跨越增益点（隧道）（靠近己方梯形高地较高处）
 };
 
 // 0x020A 飞镖选手端指令数据
@@ -351,13 +365,19 @@ struct __attribute__((packed)) GroundRobotPosition
 // 0x020C 雷达标记进度数据
 struct __attribute__((packed)) RadarMarkData
 {
-  // 在对应机器人被标记进度≥100 时发送 1，被标记进度<100 时发送 0。
-  uint8_t enemy_hero_1_vulnerable : 1;      // bit 0: 对方 1号英雄机器人易伤情况
-  uint8_t enemy_engineer_2_vulnerable : 1;  // bit 1: 对方 2号工程机器人易伤情况
-  uint8_t enemy_infantry_3_vulnerable : 1;  // bit 2: 对方 3号步兵机器人易伤情况
-  uint8_t enemy_infantry_4_vulnerable : 1;  // bit 3: 对方 4号步兵机器人易伤情况
-  uint8_t enemy_sentry_vulnerable : 1;      // bit 4: 对方哨兵机器人易伤情况
-  uint8_t reserved : 3;                     // bit 5-7: 保留
+  // 对方机器人：在对应机器人被标记进度≥100 时发送 1，被标记进度<100 时发送 0。
+  // 己方机器人：在对应机器人被标记进度≥50 时发送 1，被标记进度<50 时发送 0。
+  uint16_t enemy_hero_1_vulnerable : 1;      // bit 0: 对方 1号英雄机器人易伤情况
+  uint16_t enemy_engineer_2_vulnerable : 1;  // bit 1: 对方 2号工程机器人易伤情况
+  uint16_t enemy_infantry_3_vulnerable : 1;  // bit 2: 对方 3号步兵机器人易伤情况
+  uint16_t enemy_infantry_4_vulnerable : 1;  // bit 3: 对方 4号步兵机器人易伤情况
+  uint16_t enemy_sentry_vulnerable : 1;      // bit 4: 对方哨兵机器人易伤情况
+  uint16_t friendly_hero_1_special : 1;      // bit 5: 己方 1号英雄机器人特殊标识情况
+  uint16_t friendly_engineer_2_special : 1;  // bit 6: 己方 2号工程机器人特殊标识情况
+  uint16_t friendly_infantry_3_special : 1;  // bit 7: 己方 3号步兵机器人特殊标识情况
+  uint16_t friendly_infantry_4_special : 1;  // bit 8: 己方 4号步兵机器人特殊标识情况
+  uint16_t friendly_sentry_special : 1;      // bit 9: 己方哨兵机器人特殊标识情况
+  uint16_t reserved : 6;                     // bit 10-15: 保留
 };
 
 // 0x020D 哨兵自主决策信息同步
@@ -368,22 +388,26 @@ struct __attribute__((packed)) SentryInfo
   uint32_t remote_exchange_health_count : 4;  // bits 15-18 : 哨兵机器人成功远程兑换血量的次数
   uint32_t can_confirm_free_resurrect : 1;    // bit 19     : 哨兵机器人当前是否可以确认免费复活
   uint32_t can_exchange_immediate_resurrect : 1;  // bit 20     : 哨兵机器人当前是否可以兑换立即复活
-  uint32_t
-    immediate_resurrect_cost : 10;  // bits 21-30 : 哨兵机器人当前若兑换立即复活需要花费的金币数
-  uint32_t reserved1 : 1;           // bit 31     : 保留
-  uint16_t is_out_of_battle : 1;    // bit 0      : 哨兵当前是否处于脱战状态
-  uint16_t team_17mm_remaining_exchanges : 11;  // bits 1-11  : 队伍 17mm 允许发弹量的剩余可兑换数
-  uint16_t reserved2 : 4;                       // bits 12-15 : 保留
+  uint32_t immediate_resurrect_cost
+    : 10;                  // bits 21-30 : 哨兵机器人当前若兑换立即复活需要花费的金币数
+  uint32_t reserved1 : 1;  // bit 31     : 保留
+  uint16_t sentry_current_pose
+    : 2;  // bit 12-13      : 哨兵当前姿态，1 为进攻姿态，2 为防御姿态，3 为移动姿态
+  uint16_t energy_status : 1;  // bits 14  : 己方能量机关是否能够进入正在激活状态，1 为当前可激活
+  uint16_t reserved2 : 1;      // bits 15 : 保留
 };
 
 // 0x020E 雷达自主决策信息同步
 struct __attribute__((packed)) RadarInfo
 {
-  uint8_t
-    double_vul_trigger_chance : 2;  // bits 0-1 : 雷达拥有触发双倍易伤的机会（0~2），开局为 0，最大可达 2
-  uint8_t
-    opponent_in_double_vulnerability : 1;  // bit 2 : 对方是否正在被触发双倍易伤 0：对方未被触发双倍易伤 1：对方正在被触发双倍易伤
-  uint8_t reserved : 5;  // bits 3-7
+  uint8_t double_vul_trigger_chance
+    : 2;  // bits 0-1 : 雷达拥有触发双倍易伤的机会（0~2），开局为 0，最大可达 2
+  uint8_t opponent_in_double_vulnerability
+    : 1;  // bit 2 : 对方是否正在被触发双倍易伤 0：对方未被触发双倍易伤 1：对方正在被触发双倍易伤
+  uint8_t friendly_encryption_level
+    : 2;  // bit 3-4：己方加密等级（即对方干扰波难度等级），开局为 1，最高为 3
+  uint8_t can_ket_be_modified : 1;  // bit 5：当前是否可以修改密钥，1 为可修改
+  uint8_t reserved : 2;             // bit 6-7：保留
 };
 
 // 0x0301 机器人交互数据
@@ -466,17 +490,28 @@ struct __attribute__((packed)) SentryCmd
   uint32_t resurrect : 1;             // bit 0：是否确认复活 0：否 1：是
   uint32_t immediate_resurrect : 1;   // bit 1：是否消耗金币兑换立即复活  0：否 1：是
   uint32_t exchange_17mm_value : 11;  // bit 2-12：发弹量兑换值（递增有效）
-  uint32_t
-    remote_exchange_17mm_count : 4;  // bit 13-16：远程兑换发弹量次数，开局为0，单调递增，每次加1
-  uint32_t
-    remote_exchange_blood_count : 4;  // bit 17-20：远程兑换血量次数，开局为0，单调递增，每次加1
-  uint32_t reserved : 11;             // bit 21-31：保留
+  uint32_t remote_exchange_17mm_count
+    : 4;  // bit 13-16：远程兑换发弹量次数，开局为0，单调递增，每次加1
+  uint32_t remote_exchange_blood_count
+    : 4;  // bit 17-20：远程兑换血量次数，开局为0，单调递增，每次加1
+  uint32_t sentry_change_pose
+    : 2;  // bit 21-22：哨兵修改当前姿态指令，1 为进攻姿态，2 为防御姿态，3 为移动姿态，默认为 3；修改此值即可改变哨兵姿态。
+  uint32_t confirm_energy_activated
+    : 1;  // bit 23：哨兵机器人是否确认使能量机关进入正在激活状态，1 为确认。默认为 0。
+  uint32_t reserved : 8;  // bit 24-31：保留
 };
 
 // 0x0301 0x0121 雷达自主决策指令 TODO
 struct __attribute__((packed)) RadarCmd
 {
-  uint8_t radar_cmd;  // 触发双倍易伤次数， 开局为0，单调递增，每次加1，最大为2
+  uint8_t radar_cmd;     // 触发双倍易伤次数， 开局为0，单调递增，每次加1，最大为2
+  uint8_t password_cmd;  //密钥更新或验证指令
+  uint8_t password_1;
+  uint8_t password_2;
+  uint8_t password_3;
+  uint8_t password_4;
+  uint8_t password_5;
+  uint8_t password_6;
 };
 
 // 0x0302 自定义控制器与机器人交互数据 图传链路
