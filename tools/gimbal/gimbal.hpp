@@ -8,9 +8,7 @@ namespace sp
 class Gimbal
 {
 public:
-  Gimbal(
-    float yaw0, float pitch0, bool reverse_yaw = false, bool reverse_yaw0 = false,
-    bool reverse_pitch = false, bool reverse_pitch0 = false);
+  Gimbal(float yaw0, float pitch0, bool reverse_yaw = false, bool reverse_pitch = false);
 
   void update(const sp::Mahony & gimbal_imu, const float & yaw_angle, const float & pitch_angle);
 
@@ -20,6 +18,10 @@ public:
   float pitch_fdb_in_joint;  //只读！ 云台pitch轴相对于码盘的反馈角度，单位：rad
   float yaw_set_in_joint;    //只读！ 云台yaw轴相对于码盘的设定角度，单位：rad
   float pitch_set_in_joint;  //只读！ 云台pitch轴相对于码盘的设定角度，单位：rad
+
+  float base_yaw_in_world;    //只读！ 底盘系相对于地面系的yaw角，单位：rad
+  float base_pitch_in_world;  //只读！ 底盘系相对于地面系的pitch角，单位：rad
+  float base_roll_in_world;   //只读！ 底盘系相对于地面系的roll角，单位：rad
 
 private:
   float yaw0_;    //云台yaw轴码盘零点位置，单位：rad

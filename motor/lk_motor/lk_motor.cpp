@@ -5,10 +5,9 @@
 namespace sp
 {
 
-
 LK_Motor::LK_Motor(uint8_t motor_id, float ratio, float torque_const)
-: rx_id(0x140 + motor_id), 
-  tx_id(0x140 + motor_id), 
+: rx_id(0x140 + motor_id),
+  tx_id(0x140 + motor_id),
   motor_id_(motor_id),
   ratio_(ratio),
   torque_const_(torque_const)
@@ -75,18 +74,20 @@ void LK_Motor::read_state2(const uint8_t * data)
   }
 
   // 多圈编码
-  if (encoder - last_ecd_ > 65535/2)
+  if (encoder - last_ecd_ > 32768)
     step_--;
-  else if (encoder - last_ecd_ < -65535/2)
+  else if (encoder - last_ecd_ < -32768)
     step_++;
   last_ecd_ = encoder;
 
-  float angle_rad = float(encoder - 65535/2) / 65535 * 2 * sp::SP_PI / ratio_;
+  // 多圈角度
+  float motor_angle = (encoder / 65536.0f) * 2.0f * sp::PI + step_ * 2.0f * sp::PI;
 
   this->temp = data[1];
-  this->torque = iq * ( 66.0f / 4096.0f ) * torque_const_ * ratio_;
-  this->speed = speed / 180.0f * sp::SP_PI / ratio_;
-  this->angle = sp::limit_angle(angle_rad + step_ * 2 * sp::SP_PI / ratio_);
+  this->torque = iq * (66.0f / 4096.0f) * torque_const_ * ratio_;
+  this->speed = speed / 180.0f * sp::PI / ratio_;
+  this->angle = sp::limit_angle(motor_angle / ratio_);
+  this->multicycle_angle = motor_angle / ratio_;
 }
 
 void LK_Motor::write_turn_off(uint8_t * data) const
@@ -151,7 +152,7 @@ void LK_Motor::write_torque(uint8_t * data) const
   data[5] = cmd_raw_ >> 8;
 }
 
-void LK_Motor::cmd_position(int32_t position, uint8_t direction) 
+void LK_Motor::cmd_position(int32_t position, uint8_t direction)
 {
   cmd_position_ = position * 100;
   spin_direction_ = direction;
@@ -159,12 +160,10 @@ void LK_Motor::cmd_position(int32_t position, uint8_t direction)
 
 void LK_Motor::cmd_angle(int32_t angle) { cmd_angle_ = angle * 1000; }
 
-
 void LK_Motor::cmd_torque(float value)
 {
   float raw = value / torque_const_ / (33.0f / 2048.f) / ratio_;
   cmd_raw_ = sp::limit_max(raw, 2048.0f);
 }
-
 
 }  // namespace sp

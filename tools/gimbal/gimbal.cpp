@@ -5,9 +5,7 @@
 namespace sp
 {
 
-Gimbal::Gimbal(
-  float yaw0, float pitch0, bool reverse_yaw, bool reverse_yaw0, bool reverse_pitch,
-  bool reverse_pitch0)
+Gimbal::Gimbal(float yaw0, float pitch0, bool reverse_yaw, bool reverse_pitch)
 : yaw0_(yaw0),
   pitch0_(pitch0),
   sign_yaw_((reverse_yaw) ? -1.0f : 1.0f),
@@ -17,6 +15,9 @@ Gimbal::Gimbal(
   this->pitch_fdb_in_joint = 0.0f;
   this->yaw_set_in_joint = 0.0f;
   this->pitch_set_in_joint = 0.0f;
+  this->base_yaw_in_world = 0.0f;
+  this->base_pitch_in_world = 0.0f;
+  this->base_roll_in_world = 0.0f;
   for (int i = 0; i < 3; ++i) {
     for (int j = 0; j < 3; ++j) {
       this->R_base2world_[i][j] = 0.0f;
@@ -87,6 +88,10 @@ void Gimbal::update(
       cosf(gimbal_imu.roll);
   R_base2world_[2][2] = sinf(gimbal_imu.pitch) * sinf(pitch_relative_angle) +
                         cosf(gimbal_imu.pitch) * cosf(gimbal_imu.roll) * cosf(pitch_relative_angle);
+
+  base_yaw_in_world = atan2f(R_base2world_[1][0], R_base2world_[0][0]);
+  base_pitch_in_world = asinf(-R_base2world_[2][0]);
+  base_roll_in_world = atan2f(R_base2world_[2][1], R_base2world_[2][2]);
 };
 
 void Gimbal::calc(float yaw_set_in_world, float pitch_set_in_world)
