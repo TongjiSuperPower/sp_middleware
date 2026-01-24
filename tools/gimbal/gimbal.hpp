@@ -12,6 +12,7 @@ public:
 
   void update(const sp::Mahony & gimbal_imu, const float & yaw_angle, const float & pitch_angle);
 
+  //不能用于自瞄，原因是C版安装精度、上电瞬间的世界系定义误差等会导致计算误差积累，可等双imu版发布
   void calc(float yaw_set_in_world, float pitch_set_in_world);
 
   float yaw_fdb_in_joint;    //只读！ 云台yaw轴相对于码盘的反馈角度，单位：rad
