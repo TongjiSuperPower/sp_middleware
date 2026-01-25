@@ -113,14 +113,13 @@ void Mahony::update(float ax, float ay, float az, float wx, float wy, float wz)
 
   culculate_yaw_pitch_roll_rates(gx, gy, gz, this->roll, this->pitch, this->yaw);
   //调用函数计算对应欧拉角的微分
-  pitch_geom_last = pitch_geom;
-  sp::Gimbal::quaternion_frame_transform(
-    this->q, g_world, g_base, true);  // 将重力向量从地面系转换到底盘系
+  if (this->q[3] != 0.0f || this->q[0] != 0.0f) {
+    pitch_geom_last = pitch_geom;
 
-  this->pitch_geom =
-    std::atan2(g_base[0], std::sqrt(g_base[1] * g_base[1] + g_base[2] * g_base[2]));
-  // 计算几何pitch角及其微分
-  this->vpitch_geom = (this->pitch_geom - this->pitch_geom_last) / dt_;
+    this->pitch_geom = 2 * std::atan2(this->q[3], this->q[0]);  // 计算几何pitch角 范围[-pi, pi]
+    // 计算几何pitch角及其微分
+    this->vpitch_geom = (this->pitch_geom - this->pitch_geom_last) / dt_;
+  }
 }
 
 void Mahony::culculate_yaw_pitch_roll_rates(

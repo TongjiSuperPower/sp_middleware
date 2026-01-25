@@ -65,8 +65,6 @@ private:
   float integral_fbz_;
 
   void init(float ax, float ay, float az);
-  float g_world[3] = {0.0f, 0.0f, -1.0f};  // 重力加速度在地面系下的向量
-  float g_base[3];
 };
 
 }  // namespace sp
