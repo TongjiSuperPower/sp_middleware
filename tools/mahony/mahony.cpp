@@ -112,14 +112,9 @@ void Mahony::update(float ax, float ay, float az, float wx, float wy, float wz)
     1.0f - 2.0f * (this->q[1] * this->q[1] + this->q[2] * this->q[2]));
 
   culculate_yaw_pitch_roll_rates(gx, gy, gz, this->roll, this->pitch, this->yaw);
-  //调用函数计算对应欧拉角的微分
-  if (this->q[3] != 0.0f || this->q[0] != 0.0f) {
-    pitch_geom_last = pitch_geom;
 
-    this->pitch_geom = 2 * std::atan2(this->q[3], this->q[0]);  // 计算几何pitch角 范围[-pi, pi]
-    // 计算几何pitch角及其微分
-    this->vpitch_geom = (this->pitch_geom - this->pitch_geom_last) / dt_;
-  }
+  //调用函数计算对应欧拉角的微分
+  pitch_geom_calc();
 }
 
 void Mahony::culculate_yaw_pitch_roll_rates(
@@ -163,6 +158,18 @@ void Mahony::init(float ax, float ay, float az)
   this->yaw = yaw0;
   this->pitch = pitch0;
   this->roll = roll0;
+}
+
+void Mahony::pitch_geom_calc()
+{
+  this->pitch_geom_last = this->pitch_geom;
+  sp::Gimbal::quaternion_frame_transform(
+    this->q, this->g_world, this->g_base, true);  // 将重力向量从地面系转换到底盘系
+
+  this->pitch_geom =
+    std::atan2(std::sqrt(g_base[1] * g_base[1] + g_base[0] * g_base[0]), g_base[2]);
+  // 计算几何pitch角及其微分
+  this->vpitch_geom = (this->pitch_geom - this->pitch_geom_last) / dt_;
 }
 
 }  // namespace sp
