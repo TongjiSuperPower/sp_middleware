@@ -121,4 +121,40 @@ void Gimbal::calc(float yaw_set_in_world, float pitch_set_in_world)
   pitch_set_in_joint = -asinf(common_term_z);
 }
 
+// 四元数坐标变换：v_out = q ⊗ v_in ⊗ q*
+// 输入：q[4] = {w, x, y, z} 表示从坐标系A到坐标系B的旋转
+//      v_in[3] = {x, y, z} 在坐标系B中的同一个向量的坐标
+// 输出：v_out[3] = {x, y, z} 在坐标系A中的同一个向量的坐标向量
+// conjugate_q: 是否对 q 取共轭（true 时使用 q* 而不是 q，相当于反向旋转）
+// 注意：这是 passive rotation（坐标系变换），不是 active rotation（向量旋转）
+void Gimbal::quaternion_frame_transform(
+  const float q[4], const float v_in[3], float v_out[3], bool conjugate_q)
+{
+  // 根据 conjugate 标志决定四元数的符号
+  float w = q[0];
+  float x = conjugate_q ? -q[1] : q[1];
+  float y = conjugate_q ? -q[2] : q[2];
+  float z = conjugate_q ? -q[3] : q[3];
+
+  float vx = v_in[0], vy = v_in[1], vz = v_in[2];
+
+  // 优化的四元数-向量旋转公式（避免构造完整四元数）
+  // v_out = v_in + 2 * cross(q_vec, cross(q_vec, v_in) + w * v_in)
+
+  // 第一步：t = cross(q_vec, v_in) = q_vec × v_in
+  float tx = y * vz - z * vy;
+  float ty = z * vx - x * vz;
+  float tz = x * vy - y * vx;
+
+  // 第二步：t = t + w * v_in
+  tx += w * vx;
+  ty += w * vy;
+  tz += w * vz;
+
+  // 第三步：v_out = v_in + 2 * cross(q_vec, t)
+  v_out[0] = vx + 2.0f * (y * tz - z * ty);
+  v_out[1] = vy + 2.0f * (z * tx - x * tz);
+  v_out[2] = vz + 2.0f * (x * ty - y * tx);
+}
+
 }  // namespace sp

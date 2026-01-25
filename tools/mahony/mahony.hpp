@@ -18,6 +18,10 @@ public:
   float vpitch;  // 只读! 单位: rad/s
   float vroll;   // 只读! 单位: rad/s
 
+  float pitch_geom;  // 只读! 单位: rad 范围[-pi, pi]
+  float pitch_geom_last;
+  float vpitch_geom;  // 只读! 单位: rad/s
+
   /* *****************************************************************************
   变量说明:
   这里的vyaw, vpitch, vroll的定义是yaw/pitch/roll的微分(dt=1/控制频率1000Hz)
@@ -61,6 +65,8 @@ private:
   float integral_fbz_;
 
   void init(float ax, float ay, float az);
+  float g_world[3] = {0.0f, 0.0f, -1.0f};  // 重力加速度在地面系下的向量
+  float g_base[3];
 };
 
 }  // namespace sp

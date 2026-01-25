@@ -15,6 +15,14 @@ public:
   //不能用于自瞄，原因是C版安装精度、上电瞬间的世界系定义误差等会导致计算误差积累，可等双imu版发布
   void calc(float yaw_set_in_world, float pitch_set_in_world);
 
+  // 四元数旋转向量：v_out = q ⊗ v_in ⊗ q*
+  // 输入：q[4] = {w, x, y, z} 表示从坐标系A到坐标系B的旋转
+  //      v_in[3] = {x, y, z} 在坐标系A中的向量
+  // 输出：v_out[3] = {x, y, z} 在坐标系B中的向量
+  // conjugate_q: 是否对 q 取共轭（即使用 q* 而不是 q）
+  static void quaternion_frame_transform(
+    const float q[4], const float v_in[3], float v_out[3], bool conjugate_q = false);
+
   float yaw_fdb_in_joint;    //只读！ 云台yaw轴相对于码盘的反馈角度，单位：rad
   float pitch_fdb_in_joint;  //只读！ 云台pitch轴相对于码盘的反馈角度，单位：rad
   float yaw_set_in_joint;    //只读！ 云台yaw轴相对于码盘的设定角度，单位：rad
