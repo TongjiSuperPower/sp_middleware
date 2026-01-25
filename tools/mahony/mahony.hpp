@@ -63,8 +63,11 @@ private:
   float integral_fbx_;
   float integral_fby_;
   float integral_fbz_;
-  float g_world[3] = {0.0f, 0.0f, -1.0f};  // 重力加速度在地面系下的向量
-  float g_base[3];
+  float base_x[3] = {1.0f, 0.0f, 0.0f};  //base系的x轴
+  float base_z[3] = {0.0f, 0.0f, 1.0f};  //base系的z轴
+  float world_x[3];                      //world系的x轴
+  float world_z[3];                      //world系的z轴
+
   void pitch_geom_calc();
   void init(float ax, float ay, float az);
 };

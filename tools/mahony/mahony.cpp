@@ -163,11 +163,28 @@ void Mahony::init(float ax, float ay, float az)
 void Mahony::pitch_geom_calc()
 {
   this->pitch_geom_last = this->pitch_geom;
-  sp::Gimbal::quaternion_frame_transform(
-    this->q, this->g_world, this->g_base, true);  // 将重力向量从地面系转换到底盘系
 
-  this->pitch_geom =
-    std::atan2(std::sqrt(g_base[1] * g_base[1] + g_base[0] * g_base[0]), g_base[2]);
+  sp::Gimbal::quaternion_frame_transform(
+    this->q, this->base_x, this->world_x, false);  //将base系的x轴转换到world系
+  sp::Gimbal::quaternion_frame_transform(
+    this->q, this->base_z, this->world_z, false);  //将base系的z轴转换到world系
+
+  float pitch_init = std::asin(
+    -world_x[2]);  //初始pitch角度(云台x轴在world系下的投影与world系xy平面的夹角)(低头为正)
+
+  //接下来结合z轴判断pitch角度的象限
+  if (world_z[2] >= 0.0f) {
+    this->pitch_geom = pitch_init;
+  }
+  else {
+    if (world_x[2] >= 0.0f) {
+      this->pitch_geom = -M_PI - pitch_init;  //抬头倒扣
+    }
+    else {
+      this->pitch_geom = M_PI - pitch_init;  //低头倒扣
+    }  //这里仍然避免不了+-2pi的跳变,这就没关系了,至少我们先把值域扩展到了+-pi
+  }
+
   // 计算几何pitch角及其微分
   this->vpitch_geom = (this->pitch_geom - this->pitch_geom_last) / dt_;
 }
