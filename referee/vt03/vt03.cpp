@@ -6,13 +6,6 @@ namespace sp
 {
 VT03::VT03(UART_HandleTypeDef * huart, bool use_dma) : huart(huart), use_dma_(use_dma) {}
 
-bool VT03::is_open() const { return has_read_; }
-
-bool VT03::is_alive(uint32_t now_ms) const
-{
-  return is_open() && (now_ms - last_read_ms_ < 100);
-}
-
 void VT03::request()
 {
   if (use_dma_) {
@@ -23,13 +16,10 @@ void VT03::request()
   }
 }
 
-void VT03::update(uint16_t size, uint32_t stamp_ms) { update(buff_.data(), size, stamp_ms); }
+void VT03::update(uint16_t size) { update(buff_.data(), size); }
 
-void VT03::update(uint8_t * frame_start, uint16_t size, uint32_t stamp_ms)
+void VT03::update(uint8_t * frame_start, uint16_t size)
 {
-  has_read_ = true;
-  last_read_ms_ = stamp_ms;
-
   if (frame_start[0] == 0xA9 && frame_start[1] == 0x53) {
     size_t frame_len = sizeof(VT03RemoteData);
 
@@ -39,7 +29,7 @@ void VT03::update(uint8_t * frame_start, uint16_t size, uint32_t stamp_ms)
     update_remote(reinterpret_cast<VT03RemoteData *>(frame_start));
 
     // 递归解析, 因为缓冲区中可能包含多帧裁判系统的数据
-    update(frame_start + frame_len, size - frame_len, stamp_ms);
+    update(frame_start + frame_len, size - frame_len);
     return;
   }
 
@@ -81,7 +71,7 @@ void VT03::update(uint8_t * frame_start, uint16_t size, uint32_t stamp_ms)
   }
 
   // 递归解析, 因为缓冲区中可能包含多帧裁判系统的数据
-  update(frame_start + frame_len, size - frame_len, stamp_ms);
+  update(frame_start + frame_len, size - frame_len);
 }
 
 void VT03::update_remote(const VT03RemoteData * data)

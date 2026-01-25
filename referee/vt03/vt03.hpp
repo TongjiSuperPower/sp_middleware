@@ -122,7 +122,7 @@ public:
   bool is_alive(uint32_t now_ms) const;
 
   void request();
-  void update(uint16_t size, uint32_t stamp_ms);
+  void update(uint16_t size);
 
 private:
   const bool use_dma_;
@@ -131,7 +131,7 @@ private:
   bool has_read_ = false;
   uint32_t last_read_ms_;
 
-  void update(uint8_t * frame_start, uint16_t size, uint32_t stamp_ms);
+  void update(uint8_t * frame_start, uint16_t size);
   void update_remote(const VT03RemoteData * data);
   void update_mouse_and_keys(const referee::RemoteControl * data);
 };
