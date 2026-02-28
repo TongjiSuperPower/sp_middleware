@@ -37,6 +37,7 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     applications/imu_task.cpp # <- 添加这一行
     sp_middleware/io/bmi088/bmi088.cpp # <- 添加这一行
     sp_middleware/tools/mahony/mahony.cpp # <- 添加这一行
+    sp_middleware/tools/gimbal/gimbal.cpp # <- 添加这一行
 )
 
 target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
