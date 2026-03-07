@@ -29,7 +29,9 @@ void Mahony::update(float ax, float ay, float az, float wx, float wy, float wz)
     init(ax, ay, az);
     return;
   }
-
+  w[0] = wx;
+  w[1] = wy;
+  w[2] = wz;
   float gx = wx;
   float gy = wy;
   float gz = wz;

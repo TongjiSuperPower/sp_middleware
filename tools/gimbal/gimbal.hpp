@@ -1,21 +1,26 @@
 #ifndef SP__GIMBAL_HPP
 #define SP__GIMBAL_HPP
 
-#include "tools\low_pass_filter\low_pass_filter.hpp"
-#include "tools\mahony\mahony.hpp"
-#include "tools\math_tools\math_tools.hpp"
+#include "tools/low_pass_filter/low_pass_filter.hpp"
+#include "tools/mahony/mahony.hpp"
+#include "tools/math_tools/math_tools.hpp"
 namespace sp
 {
 class Gimbal
 {
 public:
   Gimbal(
-    float yaw0, float pitch0, bool reverse_yaw = false, bool reverse_yaw0 = false,
-    bool reverse_pitch = false, bool reverse_pitch0 = false, float dt = 1e-3f);
-
+    float yaw0, float pitch0, bool reverse_yaw = false, bool reverse_pitch = false,
+    float dt = 1e-3f);
+  void update_all_single(
+    const sp::Mahony & gimbal_imu, const float & yaw_angle, const float & pitch_angle);
+  void calc_all_target_single(
+    const sp::Mahony & gimbal_imu, float yaw_set_in_world, float pitch_set_in_world,
+    float vyaw_set_in_world, float vpitch_set_in_world, float acc_yaw_set_in_world,
+    float acc_pitch_set_in_world);
   void update(const sp::Mahony & gimbal_imu, const float & yaw_angle, const float & pitch_angle);
 
-  void update_q(
+  void update_q_chassis2world(
     const sp::Mahony & gimbal_imu, const float & yaw_angle, const float & pitch_angle,
     const float & roll0_ = 0.0f);
   void calc(float yaw_set_in_world, float pitch_set_in_world);
@@ -83,13 +88,26 @@ public:
   float R_base2world_[3]
                      [3];  //底盘系相对于地面系的旋转矩阵,已经考虑了上电瞬间世界系由云台x轴投影定义
   //后续会把旋转矩阵转换成四元数作为一个private变量并且用来计算底盘运动角速度
-  float dq
-    [4];  //只读！底盘系相对于地面系的角速度 (在地面系下) 第一个分量是1,后三个分量才是角速度wx,wy,wz
+
+  float dq[4];
+  //只读！底盘系相对于地面系的角速度 (在地面系下) 第一个分量是1,后三个分量才是角速度wx,wy,wz
 
   float yaw_rel;
   float pitch_rel;
   float roll_rel;
   float q_chassis2world[4];  //底盘系相对于地面系的四元数表示 能将底盘系的向量转换到地面系
+  float roll_relative_speed;
+  float pitch_relative_speed;
+  float yaw_relative_speed;
+  float k_torque[3] = {0.0f, 0.0f, 0.0f};  //pitch轴的力矩补偿系数 严格物理运算
+
+  float yaw_target_relative_angle = 0.0f;
+  float pitch_target_relative_angle = 0.0f;
+  float yaw_target_relative_speed = 0.0f;
+  float pitch_target_relative_speed = 0.0f;
+  float yaw_target_relative_acc = 0.0f;
+  float pitch_target_relative_acc = 0.0f;
+
 private:
   float yaw0_;    //云台yaw轴码盘零点位置，单位：rad
   float pitch0_;  //云台pitch轴码盘零点位置，单位：rad
@@ -97,11 +115,46 @@ private:
   float sign_pitch_;
   float dt_;
   float q_last_chassis2world[4];  //底盘系相对于地面系的上次四元数表示
+
+  float w_chassis_in_worldframe[3] = {0.0f, 0.0f, 0.0f};
+  float w_last_chassis_in_worldframe[3] = {0.0f, 0.0f, 0.0f};
+
+  float w_chassis_in_gimbalframe[3] = {0.0f, 0.0f, 0.0f};
+  float w_chassis_in_chassisframe[3] = {0.0f, 0.0f, 0.0f};
+  float w_relative[3] = {0.0f, 0.0f, 0.0f};
+
+  float acc_chassis_in_worldframe[3] = {0.0f, 0.0f, 0.0f};
+  float acc_chassis_in_gimbalframe[3] = {0.0f, 0.0f, 0.0f};
+
+  float gun_target_vector[3] = {0.0f, 0.0f, 0.0f};
+  float gun_target_vector_in_chassisframe[3] = {0.0f, 0.0f, 0.0f};
   sp::LowPassFilter yaw_relative_angle_filter;
   sp::LowPassFilter pitch_relative_angle_filter;
+
+  sp::AngleUnwrapper yaw_unwrapper_;  // yaw角度展开器,将输入的yaw电机角度展开
+  sp::AngleUnwrapper
+    yaw_target_relative_angle_unwrapper;  // yaw电机目标角度展开器,将输出的yaw电机目标角度展开
+
+  //从最开始要将他俩与电机反馈速度滤波器设置成相同
+  // 电机目标速度滤波器
+  sp::LowPassFilter pitch_target_relative_speed_filter;
+  sp::LowPassFilter yaw_target_relative_speed_filter;
+  // 电机反馈速度滤波器
+  sp::LowPassFilter roll_relative_speed_filter;
+  sp::LowPassFilter pitch_relative_speed_filter;
+  sp::LowPassFilter yaw_relative_speed_filter;
+
   sp::LowPassFilter yaw_relative_angle_filter0;
-  sp::LowPassFilter pitch_relative_angle_filter0;  //这两个滤波器必须要请勿去掉
-  sp::AngleUnwrapper yaw_unwrapper_;               // yaw角度展开器
+  sp::LowPassFilter pitch_relative_angle_filter0;  //这两个滤波器是杨少代码用的滤波器
+  float A_Tdot_Edot[3] = {0.0f, 0.0f, 0.0f};
+  float B_acc_chassis_in_gimbalframe[3] = {0.0f, 0.0f, 0.0f};
+  float C_cross_product[3] = {0.0f, 0.0f, 0.0f};
+  float D_Jdot_E_Motor_dot[3] = {0.0f, 0.0f, 0.0f};
+  float F[3] = {0.0f, 0.0f, 0.0f};
+  float Final[3] = {0.0f, 0.0f, 0.0f};
+  // 电机目标加速度滤波器
+  sp::LowPassFilter pitch_motor_target_acc_filter;
+  sp::LowPassFilter yaw_motor_target_acc_filter;
 };
 
 }  // namespace sp
