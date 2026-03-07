@@ -47,6 +47,18 @@ void LK_Motor::write_clear_error(uint8_t * data) const
   data[7] = 0x00;
 }
 
+void LK_Motor::write_open(uint8_t * data) const
+{
+  data[0] = 0x88;
+  data[1] = 0x00;
+  data[2] = 0x00;
+  data[3] = 0x00;
+  data[4] = 0x00;
+  data[5] = 0x00;
+  data[6] = 0x00;
+  data[7] = 0x00;
+}
+
 void LK_Motor::write_state2(uint8_t * data) const
 {
   data[0] = 0x9C;

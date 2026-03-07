@@ -36,6 +36,8 @@ public:
   // 电机状态没有恢复正常时，错误标志无法清除
   void write_clear_error(uint8_t * data) const;
 
+  void write_open(uint8_t * data) const;
+
   // 该命令读取当前电机的温度、电机转矩电流、转速、编码器位置
   void write_state2(uint8_t * data) const;
   void read_state2(const uint8_t * data);
