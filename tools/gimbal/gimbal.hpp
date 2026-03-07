@@ -14,15 +14,20 @@ public:
     float dt = 1e-3f);
   void update_all_single(
     const sp::Mahony & gimbal_imu, const float & yaw_angle, const float & pitch_angle);
-  void calc_all_target_single(
+  void calc_all_target(
     const sp::Mahony & gimbal_imu, float yaw_set_in_world, float pitch_set_in_world,
     float vyaw_set_in_world, float vpitch_set_in_world, float acc_yaw_set_in_world,
     float acc_pitch_set_in_world);
+  void update_all_dual(const sp::Mahony & gimbal_imu, const sp::Mahony & chassis_imu);
+
   void update(const sp::Mahony & gimbal_imu, const float & yaw_angle, const float & pitch_angle);
 
   void update_q_chassis2world(
     const sp::Mahony & gimbal_imu, const float & yaw_angle, const float & pitch_angle,
     const float & roll0_ = 0.0f);
+  //已有底盘的姿态四元数和云台姿态四元数,算出底盘和云台之间的相对四元数,并将相对四元数转换成欧拉角
+  void update_q_gimbal2chassis(const sp::Mahony & gimbal_imu, const sp::Mahony & chassis_imu);
+
   void calc(float yaw_set_in_world, float pitch_set_in_world);
 
   // 四元数转欧拉角：q[0]=w, q[1]=x, q[2]=y, q[3]=z
@@ -91,7 +96,8 @@ public:
 
   float dq[4];
   //只读！底盘系相对于地面系的角速度 (在地面系下) 第一个分量是1,后三个分量才是角速度wx,wy,wz
-
+  float q_gimbal2chassis
+    [4];  //云台系相对于底盘系的四元数表示 能将云台系的向量转换到底盘系,用于计算电机相对角度
   float yaw_rel;
   float pitch_rel;
   float roll_rel;
@@ -118,6 +124,7 @@ private:
   float sign_yaw_;
   float sign_pitch_;
   float dt_;
+  float euler_motor[3];           //电机相对于底盘的欧拉角表示
   float q_last_chassis2world[4];  //底盘系相对于地面系的上次四元数表示
 
   float w_chassis_in_worldframe[3] = {0.0f, 0.0f, 0.0f};
@@ -134,6 +141,7 @@ private:
   float gun_target_vector_in_chassisframe[3] = {0.0f, 0.0f, 0.0f};
   sp::LowPassFilter yaw_relative_angle_filter;
   sp::LowPassFilter pitch_relative_angle_filter;
+  sp::LowPassFilter roll_relative_angle_filter;
 
   sp::AngleUnwrapper yaw_unwrapper_;  // yaw角度展开器,将输入的yaw电机角度展开
   sp::AngleUnwrapper

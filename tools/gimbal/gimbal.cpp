@@ -14,6 +14,8 @@ Gimbal::Gimbal(float yaw0, float pitch0, bool reverse_yaw, bool reverse_pitch, f
   sign_pitch_((reverse_pitch) ? -1.0f : 1.0f),
   yaw_relative_angle_filter(0.1f),
   pitch_relative_angle_filter(0.1f),
+  roll_relative_angle_filter(0.1f),
+
   yaw_relative_angle_filter0(1.0f),    //弃用
   pitch_relative_angle_filter0(1.0f),  //弃用
   //电机目标速度滤波器,从最开始要将他俩与电机反馈速度滤波器设置成相同
@@ -47,6 +49,7 @@ void Gimbal::update_all_single(
   const sp::Mahony & gimbal_imu, const float & yaw_angle, const float & pitch_angle)
 {
   //更新底盘相对于地面的四元数表示和底盘的角速度
+  //单imu的处理函数,更新电机角度和底盘姿态及角速度
   update_q_chassis2world(gimbal_imu, yaw_angle, pitch_angle);
 
   //更新底盘的角加速度,并换到云台系表示
@@ -88,7 +91,48 @@ void Gimbal::update_all_single(
     true);  //将重力方向转换到云台系下,k_torque[2]可以用来做重力补偿
 }
 
-void Gimbal::calc_all_target_single(
+void Gimbal::update_all_dual(const sp::Mahony & gimbal_imu, const sp::Mahony & chassis_imu)
+{
+  //双imu的处理函数,更新了电机角度
+  update_q_gimbal2chassis(gimbal_imu, chassis_imu);
+  //将底盘角速度换到地面系,并微分获得角加速度,再换到云台系表示底盘角加速度
+  w_last_chassis_in_worldframe[0] = w_chassis_in_worldframe[0];
+  w_last_chassis_in_worldframe[1] = w_chassis_in_worldframe[1];
+  w_last_chassis_in_worldframe[2] = w_chassis_in_worldframe[2];
+  quaternion_frame_transform(chassis_imu.q, chassis_imu.w, w_chassis_in_worldframe, false);
+  sp::diff_vec3(
+    w_chassis_in_worldframe, w_last_chassis_in_worldframe, acc_chassis_in_worldframe, dt_);
+  quaternion_frame_transform(
+    gimbal_imu.q, acc_chassis_in_worldframe, acc_chassis_in_gimbalframe, true);
+
+  //底盘角速度换到云台系并更新云台相对于底盘的欧拉角变化率,可用作电机角速度反馈值
+  quaternion_frame_transform(gimbal_imu.q, w_chassis_in_worldframe, w_chassis_in_gimbalframe, true);
+  w_relative[0] = gimbal_imu.w[0] - w_chassis_in_gimbalframe[0];
+  w_relative[1] = gimbal_imu.w[1] - w_chassis_in_gimbalframe[1];
+  w_relative[2] = gimbal_imu.w[2] - w_chassis_in_gimbalframe[2];
+  sp::Gimbal::transform_omiga_in_body_2_euler_rates(
+    w_relative, roll_rel, pitch_rel, yaw_rel, roll_relative_speed, pitch_relative_speed,
+    yaw_relative_speed);
+  // 对电机反馈速度进行滤波
+  roll_relative_speed_filter.update(roll_relative_speed);
+  roll_relative_speed = roll_relative_speed_filter.out;
+  pitch_relative_speed_filter.update(pitch_relative_speed);
+  pitch_relative_speed = pitch_relative_speed_filter.out;
+  yaw_relative_speed_filter.update(yaw_relative_speed);
+  yaw_relative_speed = yaw_relative_speed_filter.out;
+
+  //底盘角速度换到底盘系w_chassis_in_chassisframe可用作小陀螺补偿
+  quaternion_frame_transform(
+    q_chassis2world, w_chassis_in_worldframe, w_chassis_in_chassisframe, true);
+
+  //重力补偿
+  static float g[3] = {0.0f, 0.0f, 1.0f};  //地面系下重力方向
+  sp::Gimbal::quaternion_frame_transform(
+    gimbal_imu.q, g, this->k_torque,
+    true);  //将重力方向转换到云台系下,k_torque[2]可以用来做重力补偿
+}
+
+void Gimbal::calc_all_target(
   const sp::Mahony & gimbal_imu, float yaw_set_in_world, float pitch_set_in_world,
   float vyaw_set_in_world, float vpitch_set_in_world, float acc_yaw_set_in_world,
   float acc_pitch_set_in_world)
@@ -360,6 +404,41 @@ void Gimbal::update_q_chassis2world(
   this->dq[3] *= 2.0f / dt_;
 }
 
+void Gimbal::update_q_gimbal2chassis(const sp::Mahony & gimbal_imu, const sp::Mahony & chassis_imu)
+{
+  //已有底盘的姿态四元数,算出底盘和云台之间的相对四元数,并将相对四元数转换成欧拉角
+  quaternion_multiply(chassis_imu.q, gimbal_imu.q, q_gimbal2chassis, true, false);
+  q_chassis2world[0] = chassis_imu.q[0];
+  q_chassis2world[1] = chassis_imu.q[1];
+  q_chassis2world[2] = chassis_imu.q[2];
+  q_chassis2world[3] = chassis_imu.q[3];
+
+  // 归一化防止数值漂移
+  float norm = sqrtf(
+    q_gimbal2chassis[0] * q_gimbal2chassis[0] + q_gimbal2chassis[1] * q_gimbal2chassis[1] +
+    q_gimbal2chassis[2] * q_gimbal2chassis[2] + q_gimbal2chassis[3] * q_gimbal2chassis[3]);
+  if (norm > 1e-12f) {
+    float inv = 1.0f / norm;
+    q_gimbal2chassis[0] *= inv;
+    q_gimbal2chassis[1] *= inv;
+    q_gimbal2chassis[2] *= inv;
+    q_gimbal2chassis[3] *= inv;
+  }
+
+  quaternion_to_euler(q_gimbal2chassis, euler_motor);
+  //后续考虑是否用电机编码器值和euler_motor进行融合滤波
+  roll_rel = euler_motor[0];
+  pitch_rel = euler_motor[1];
+  yaw_rel = this->yaw_unwrapper_.update(euler_motor[2]);  // 展开消除±π跳变euler_motor[2];
+
+  // 角度低通滤波
+  yaw_relative_angle_filter.update(yaw_rel);
+  pitch_relative_angle_filter.update(pitch_rel);
+  roll_relative_angle_filter.update(roll_rel);
+  yaw_rel = yaw_relative_angle_filter.out;
+  pitch_rel = pitch_relative_angle_filter.out;
+  roll_rel = roll_relative_angle_filter.out;
+}
 void Gimbal::calc(float yaw_set_in_world, float pitch_set_in_world)
 {
   float cy = cosf(yaw_set_in_world);
