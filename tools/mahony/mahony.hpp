@@ -24,6 +24,10 @@ public:
   float vroll;   // 只读! 单位: rad/s
 
   float acc_euler[3];  // 只读! 单位: m/s² 由微分欧拉角角速度计算得到的欧拉角的角加速度
+  float pitch_geom;    // 只读! 单位: rad 范围[-pi, pi]
+  float pitch_geom_last;
+  float vpitch_geom;  // 只读! 单位: rad/s
+
   /* *****************************************************************************
   变量说明:
   这里的vyaw, vpitch, vroll的定义是yaw/pitch/roll的微分(dt=1/控制频率1000Hz)
@@ -52,10 +56,10 @@ public:
     float ax, float ay, float az, float wx, float wy,
     float wz);  //用于更新物体相对于地面的姿态 四元数和欧拉角以及其微分
 
-  // void culculate_yaw_pitch_roll_rates(
-  //   float wx, float wy, float wz, float roll, float pitch, float yaw);
-  // //用于计算物体相对于某一个系的欧拉角微分,注意要带入相对于该系的欧拉角值
-  // //后续会改成一个静态函数不用单独定义一个类
+  void culculate_yaw_pitch_roll_rates(
+    float wx, float wy, float wz, float roll, float pitch, float yaw);
+  //用于计算物体相对于某一个系的欧拉角微分,注意要带入相对于该系的欧拉角值
+  //后续会改成一个静态函数不用单独定义一个类
 private:
   const float dt_;
   const float two_kp_;
@@ -66,7 +70,12 @@ private:
   float integral_fbx_;
   float integral_fby_;
   float integral_fbz_;
+  float base_x[3] = {1.0f, 0.0f, 0.0f};  //base系的x轴
+  float base_z[3] = {0.0f, 0.0f, 1.0f};  //base系的z轴
+  float world_x[3];                      //world系的x轴
+  float world_z[3];                      //world系的z轴
 
+  void pitch_geom_calc();
   void init(float ax, float ay, float az);
 };
 

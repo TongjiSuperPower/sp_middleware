@@ -66,6 +66,14 @@ uint32_t float_to_uint(float input, float min, float max, size_t bits)
   return norm * ((1 << bits) - 1);
 }
 
+float map(float x, float in_min, float in_max, float out_min, float out_max)
+{
+  if (fabsf(in_max - in_min) < 1e-6f) {
+    return out_min;
+  }
+  return out_min + (x - in_min) * (out_max - out_min) / (in_max - in_min);
+}
+
 int8_t sgn(float input) { return (input > 0) - (input < 0); }
 
 void diff_vec3(const float v_next[3], const float v_prev[3], float result[3], float dt)

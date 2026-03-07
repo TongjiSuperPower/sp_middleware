@@ -44,7 +44,7 @@ void Swerve::convert(const float v[2], float yaw, float yaw_offset, float & angl
   }
 
   float v_angle = std::atan2(v[1], v[0]);
-  float v_angle_flipped = limit_angle(v_angle + PI);
+  float v_angle_flipped = limit_angle(v_angle + SP_PI);
   float pivot_angle = sign_ * limit_angle(yaw - yaw_offset);
 
   float a = limit_angle(v_angle - pivot_angle);

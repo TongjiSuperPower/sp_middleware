@@ -108,6 +108,10 @@ public:
   float yaw_target_relative_acc = 0.0f;
   float pitch_target_relative_acc = 0.0f;
 
+  float base_yaw_in_world;    //只读！ 底盘系相对于地面系的yaw角，单位：rad
+  float base_pitch_in_world;  //只读！ 底盘系相对于地面系的pitch角，单位：rad
+  float base_roll_in_world;   //只读！ 底盘系相对于地面系的roll角，单位：rad
+
 private:
   float yaw0_;    //云台yaw轴码盘零点位置，单位：rad
   float pitch0_;  //云台pitch轴码盘零点位置，单位：rad
