@@ -79,6 +79,8 @@ private:
   float base_z[3] = {0.0f, 0.0f, 1.0f};  //base系的z轴
   float world_x[3];                      //world系的x轴
   float world_z[3];                      //world系的z轴
+  void quaternion_frame_transform_for_mahony(
+    const float q[4], const float v_in[3], float v_out[3], bool conjugate_q);
 
   void pitch_geom_calc();
   void init(float ax, float ay, float az);
