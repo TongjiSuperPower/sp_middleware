@@ -9,6 +9,8 @@ public:
   Mahony(float dt, float kp = 0.5f, float ki = 0.0f);
 
   // 新增：用于动态修改 kp 和 ki 的接口
+  //kp表示对重力的置信度,kp越高则越相信重力的方向,并将其作为pitch和roll的方向
+  //kp越低则越相信角速度积分
   void set_kp(float kp);
   void set_ki(float ki);
 
