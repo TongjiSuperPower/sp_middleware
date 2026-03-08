@@ -211,4 +211,14 @@ void Mahony::pitch_geom_calc()
   this->vpitch_geom = (this->pitch_geom - this->pitch_geom_last) / dt_;
 }
 
+void Mahony::set_kp(float kp)
+{
+  this->two_kp_ = 2.0f * kp;
+}
+
+void Mahony::set_ki(float ki)
+{
+  this->two_ki_ = 2.0f * ki;
+}
+
 }  // namespace sp

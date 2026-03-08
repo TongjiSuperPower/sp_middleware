@@ -7,6 +7,11 @@ class Mahony
 {
 public:
   Mahony(float dt, float kp = 0.5f, float ki = 0.0f);
+
+  // 新增：用于动态修改 kp 和 ki 的接口
+  void set_kp(float kp);
+  void set_ki(float ki);
+
   float q_last[4];  // 只读! 上次更新后的四元数顺序为wxyz
 
   float q[4];  // 只读! 四元数顺序为wxyz 该四元数的含义是表示某物体相对于地面的姿态
@@ -62,8 +67,8 @@ public:
   //后续会改成一个静态函数不用单独定义一个类
 private:
   const float dt_;
-  const float two_kp_;
-  const float two_ki_;
+  float two_kp_;
+  float two_ki_;
 
   bool inited_;
 
