@@ -98,32 +98,9 @@ void Mahony::update(float ax, float ay, float az, float wx, float wy, float wz)
   this->q[2] = q2 * norm;
   this->q[3] = q3 * norm;
 
-  //实验测试看用四元数微分出来的w怎么样  结果是非常好
-  // //得到云台系下的云台运动的
-  // sp::Gimbal::quaternion_multiply(this->q_last, this->q, dq, true, false);
-  // //这个dq一定不能归一化, 因为他就不是单位四元数
-
-  // //使用泰勒展开近似四元数增量表示的角速度(必须保证他在1ms内是小量)
-  // this->dq[0] *= 2.0f / dt_;
-  // this->dq[1] *= 2.0f / dt_;
-  // this->dq[2] *= 2.0f / dt_;
-  // this->dq[3] *= 2.0f / dt_;
-  // float w[3] = {dq[1], dq[2], dq[3]};
-  // sp::Gimbal::transform_omiga_in_body_2_euler_rates(
-  //   w, this->roll, this->pitch, this->yaw, this->vroll_test, this->vpitch_test, this->vyaw_test);
-
-  //这个四元数是归一化之后的四元数,
-  //而且我检验了,这个四元数Q_(W <- G )= {q[0],q[1],q[2],q[3]}是标量在前形式,后边虚部所表示的向量是旋转轴在地面系W下的坐标
-  //这个四元数的意义是
-  //1.将同一个向量在云台系下的坐标转换到地面系下的坐标即 v_world = Q * v_gimbal * Q_conjugate
-  //这个向量直接转换成欧拉角,此欧拉角的含义是云台系当前姿态相对于地面系的欧拉角(内旋ZYX顺序)
-
-  // 计算欧拉角(云台相对于底盘的欧拉角)(通过四元数转换)
-  //稍微改了以下老代码(老代码是对的),数值上完全等价
   //只是用到了1=q[0]^2+q[1]^2+q[2]^2+q[3]^2这个关系简化了一些计算
   //以后的同学在用ai理解mahony算法的时候会更容易,形式更加相同
-
-  //要加万向锁保护  ,我的理想是加根据历史记录进行保护
+  //之后要加万向锁保护  ,我的理想是加根据历史记录进行保护
   this->yaw = std::atan2(
     2.0f * (this->q[0] * this->q[3] + this->q[1] * this->q[2]),
     1.0f - 2.0f * (this->q[2] * this->q[2] + this->q[3] * this->q[3]));
@@ -132,9 +109,10 @@ void Mahony::update(float ax, float ay, float az, float wx, float wy, float wz)
     2.0f * (this->q[0] * this->q[1] + this->q[2] * this->q[3]),
     1.0f - 2.0f * (this->q[1] * this->q[1] + this->q[2] * this->q[2]));
 
+  //计算欧拉角变化率
   culculate_yaw_pitch_roll_rates(gx, gy, gz, this->roll, this->pitch, this->yaw);
 
-  //调用函数计算对应欧拉角的微分
+  //将pitch进行值域扩充,解决串腿翻倒后自启问题
   pitch_geom_calc();
 }
 
