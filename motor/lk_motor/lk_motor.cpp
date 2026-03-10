@@ -181,7 +181,7 @@ void LK_Motor::cmd_position(int32_t position, uint8_t direction)
   spin_direction_ = direction;
 }
 
-void LK_Motor::cmd_angle_speed(int32_t angle, int32_t max_speed)
+void LK_Motor::cmd_angle_speed(int32_t angle, uint32_t max_speed)
 {
   cmd_angle_ = angle * 100 * 10;
   cmd_max_speed_ = max_speed * 10;
