@@ -157,6 +157,17 @@ void LK_Motor::write_angle_increment(uint8_t * data) const
   data[7] = cmd_angle_ >> 24;
 }
 
+void LK_Motor::write_angle_increment2(uint8_t * data) const
+{
+  data[0] = 0xA8;
+  data[2] = cmd_max_speed_;
+  data[3] = cmd_max_speed_ >> 8;
+  data[4] = cmd_angle_;
+  data[5] = cmd_angle_ >> 8;
+  data[6] = cmd_angle_ >> 16;
+  data[7] = cmd_angle_ >> 24;
+}
+
 void LK_Motor::write_torque(uint8_t * data) const
 {
   data[0] = 0xA1;
@@ -170,7 +181,11 @@ void LK_Motor::cmd_position(int32_t position, uint8_t direction)
   spin_direction_ = direction;
 }
 
-void LK_Motor::cmd_angle(int32_t angle) { cmd_angle_ = angle * 1000; }
+void LK_Motor::cmd_angle_speed(int32_t angle, uint32_t max_speed)
+{
+  cmd_angle_ = angle * 100 * 10;
+  cmd_max_speed_ = max_speed * 10;
+}
 
 void LK_Motor::cmd_torque(float value)
 {

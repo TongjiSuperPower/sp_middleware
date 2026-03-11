@@ -55,10 +55,12 @@ public:
   void write_angle_increment(uint8_t * data) const;
   // 主机发送该命令以控制电机的转矩电流输出
   void write_torque(uint8_t * data) const;
+  // 主机发送该命令以控制电机的角度增量（带最大速度限制）
+  void write_angle_increment2(uint8_t * data) const;
 
   // 控制值 direction 设置电机转动的方向，为 uint8_t 类型，0x00 代表顺时针，0x01 代表逆时针
   void cmd_position(int32_t position, uint8_t direction);
-  void cmd_angle(int32_t angle);
+  void cmd_angle_speed(int32_t angle, uint32_t max_speed = 0);
   void cmd_torque(float value);
 
 private:
@@ -66,7 +68,8 @@ private:
   const float ratio_;
   const float torque_const_;
 
-  int32_t cmd_angle_;
+  int32_t cmd_angle_;       // 单位: 度
+  uint32_t cmd_max_speed_;   // 单位: 度/s
   int16_t cmd_raw_ = 0;
 
   bool has_read_;

@@ -2,7 +2,6 @@
 
 #include <cmath>
 
-#include "tools/gimbal/gimbal.hpp"
 #include "tools/math_tools/math_tools.hpp"
 namespace sp
 {
@@ -99,32 +98,9 @@ void Mahony::update(float ax, float ay, float az, float wx, float wy, float wz)
   this->q[2] = q2 * norm;
   this->q[3] = q3 * norm;
 
-  //实验测试看用四元数微分出来的w怎么样  结果是非常好
-  // //得到云台系下的云台运动的
-  // sp::Gimbal::quaternion_multiply(this->q_last, this->q, dq, true, false);
-  // //这个dq一定不能归一化, 因为他就不是单位四元数
-
-  // //使用泰勒展开近似四元数增量表示的角速度(必须保证他在1ms内是小量)
-  // this->dq[0] *= 2.0f / dt_;
-  // this->dq[1] *= 2.0f / dt_;
-  // this->dq[2] *= 2.0f / dt_;
-  // this->dq[3] *= 2.0f / dt_;
-  // float w[3] = {dq[1], dq[2], dq[3]};
-  // sp::Gimbal::transform_omiga_in_body_2_euler_rates(
-  //   w, this->roll, this->pitch, this->yaw, this->vroll_test, this->vpitch_test, this->vyaw_test);
-
-  //这个四元数是归一化之后的四元数,
-  //而且我检验了,这个四元数Q_(W <- G )= {q[0],q[1],q[2],q[3]}是标量在前形式,后边虚部所表示的向量是旋转轴在地面系W下的坐标
-  //这个四元数的意义是
-  //1.将同一个向量在云台系下的坐标转换到地面系下的坐标即 v_world = Q * v_gimbal * Q_conjugate
-  //这个向量直接转换成欧拉角,此欧拉角的含义是云台系当前姿态相对于地面系的欧拉角(内旋ZYX顺序)
-
-  // 计算欧拉角(云台相对于底盘的欧拉角)(通过四元数转换)
-  //稍微改了以下老代码(老代码是对的),数值上完全等价
   //只是用到了1=q[0]^2+q[1]^2+q[2]^2+q[3]^2这个关系简化了一些计算
   //以后的同学在用ai理解mahony算法的时候会更容易,形式更加相同
-
-  //要加万向锁保护  ,我的理想是加根据历史记录进行保护
+  //之后要加万向锁保护  ,我的理想是加根据历史记录进行保护
   this->yaw = std::atan2(
     2.0f * (this->q[0] * this->q[3] + this->q[1] * this->q[2]),
     1.0f - 2.0f * (this->q[2] * this->q[2] + this->q[3] * this->q[3]));
@@ -133,9 +109,10 @@ void Mahony::update(float ax, float ay, float az, float wx, float wy, float wz)
     2.0f * (this->q[0] * this->q[1] + this->q[2] * this->q[3]),
     1.0f - 2.0f * (this->q[1] * this->q[1] + this->q[2] * this->q[2]));
 
+  //计算欧拉角变化率
   culculate_yaw_pitch_roll_rates(gx, gy, gz, this->roll, this->pitch, this->yaw);
 
-  //调用函数计算对应欧拉角的微分
+  //将pitch进行值域扩充,解决串腿翻倒后自启问题
   pitch_geom_calc();
 }
 
@@ -186,9 +163,9 @@ void Mahony::pitch_geom_calc()
 {
   this->pitch_geom_last = this->pitch_geom;
 
-  sp::Gimbal::quaternion_frame_transform(
+  quaternion_frame_transform_for_mahony(
     this->q, this->base_x, this->world_x, false);  //将base系的x轴转换到world系
-  sp::Gimbal::quaternion_frame_transform(
+  quaternion_frame_transform_for_mahony(
     this->q, this->base_z, this->world_z, false);  //将base系的z轴转换到world系
 
   float pitch_init = std::asin(
@@ -211,14 +188,45 @@ void Mahony::pitch_geom_calc()
   this->vpitch_geom = (this->pitch_geom - this->pitch_geom_last) / dt_;
 }
 
-void Mahony::set_kp(float kp)
-{
-  this->two_kp_ = 2.0f * kp;
-}
+void Mahony::set_kp(float kp) { this->two_kp_ = 2.0f * kp; }
 
-void Mahony::set_ki(float ki)
+void Mahony::set_ki(float ki) { this->two_ki_ = 2.0f * ki; }
+
+//专门给mahony写的四元数换系,以免老是引用gimbal类
+// 四元数坐标变换：v_out = q ⊗ v_in ⊗ q*
+// 输入：q[4] = {w, x, y, z} 表示从坐标系A到坐标系B的旋转
+//      v_in[3] = {x, y, z} 在坐标系B中的同一个向量的坐标
+// 输出：v_out[3] = {x, y, z} 在坐标系A中的同一个向量的坐标向量
+// conjugate_q: 是否对 q 取共轭（true 时使用 q* 而不是 q，相当于反向旋转）
+// 注意：这是 passive rotation（坐标系变换），不是 active rotation（向量旋转）
+void Mahony::quaternion_frame_transform_for_mahony(
+  const float q[4], const float v_in[3], float v_out[3], bool conjugate_q)
 {
-  this->two_ki_ = 2.0f * ki;
+  // 根据 conjugate 标志决定四元数的符号
+  float w = q[0];
+  float x = conjugate_q ? -q[1] : q[1];
+  float y = conjugate_q ? -q[2] : q[2];
+  float z = conjugate_q ? -q[3] : q[3];
+
+  float vx = v_in[0], vy = v_in[1], vz = v_in[2];
+
+  // 优化的四元数-向量旋转公式（避免构造完整四元数）
+  // v_out = v_in + 2 * cross(q_vec, cross(q_vec, v_in) + w * v_in)
+
+  // 第一步：t = cross(q_vec, v_in) = q_vec × v_in
+  float tx = y * vz - z * vy;
+  float ty = z * vx - x * vz;
+  float tz = x * vy - y * vx;
+
+  // 第二步：t = t + w * v_in
+  tx += w * vx;
+  ty += w * vy;
+  tz += w * vz;
+
+  // 第三步：v_out = v_in + 2 * cross(q_vec, t)
+  v_out[0] = vx + 2.0f * (y * tz - z * ty);
+  v_out[1] = vy + 2.0f * (z * tx - x * tz);
+  v_out[2] = vz + 2.0f * (x * ty - y * tx);
 }
 
 }  // namespace sp

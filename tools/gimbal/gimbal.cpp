@@ -7,27 +7,29 @@
 namespace sp
 {
 
-Gimbal::Gimbal(float yaw0, float pitch0, bool reverse_yaw, bool reverse_pitch, float dt)
+Gimbal::Gimbal(
+  float yaw0, float pitch0, bool reverse_yaw, bool reverse_pitch, float dt,
+  const GimbalFilterConfig & fc)
 : yaw0_(yaw0),
   pitch0_(pitch0),
   sign_yaw_((reverse_yaw) ? -1.0f : 1.0f),
   sign_pitch_((reverse_pitch) ? -1.0f : 1.0f),
-  yaw_relative_angle_filter(0.1f),
-  pitch_relative_angle_filter(0.1f),
-  roll_relative_angle_filter(0.1f),
+  yaw_relative_angle_filter(fc.yaw_angle),
+  pitch_relative_angle_filter(fc.pitch_angle),
+  roll_relative_angle_filter(fc.roll_angle),
 
   yaw_relative_angle_filter0(1.0f),    //弃用
   pitch_relative_angle_filter0(1.0f),  //弃用
-  //电机目标速度滤波器,从最开始要将他俩与电机反馈速度滤波器设置成相同
-  pitch_target_relative_speed_filter(0.8f),
-  yaw_target_relative_speed_filter(0.6f),
+  //电机目标速度滤波器
+  pitch_target_relative_speed_filter(fc.pitch_target_speed),
+  yaw_target_relative_speed_filter(fc.yaw_target_speed),
   // 电机反馈速度滤波器
-  roll_relative_speed_filter(0.6f),
-  pitch_relative_speed_filter(0.8f),
-  yaw_relative_speed_filter(0.6f),
+  roll_relative_speed_filter(fc.roll_fdb_speed),
+  pitch_relative_speed_filter(fc.pitch_fdb_speed),
+  yaw_relative_speed_filter(fc.yaw_fdb_speed),
   //电机目标加速度滤波器
-  pitch_motor_target_acc_filter(0.03f),
-  yaw_motor_target_acc_filter(0.03f),
+  pitch_motor_target_acc_filter(fc.pitch_target_acc),
+  yaw_motor_target_acc_filter(fc.yaw_target_acc),
   dt_(dt)
 {
   this->yaw_fdb_in_joint = 0.0f;
@@ -48,8 +50,7 @@ Gimbal::Gimbal(float yaw0, float pitch0, bool reverse_yaw, bool reverse_pitch, f
 void Gimbal::update_all_single(
   const sp::Mahony & gimbal_imu, const float & yaw_angle, const float & pitch_angle)
 {
-  //更新底盘相对于地面的四元数表示和底盘的角速度
-  //单imu的处理函数,更新电机角度和底盘姿态及角速度
+  //更新电机角度和底盘姿态及角速度
   update_q_chassis2world(gimbal_imu, yaw_angle, pitch_angle);
 
   //更新底盘的角加速度,并换到云台系表示
@@ -93,7 +94,7 @@ void Gimbal::update_all_single(
 
 void Gimbal::update_all_dual(const sp::Mahony & gimbal_imu, const sp::Mahony & chassis_imu)
 {
-  //双imu的处理函数,更新了电机角度
+  //更新等效电机角度
   update_q_gimbal2chassis(gimbal_imu, chassis_imu);
   //将底盘角速度换到地面系,并微分获得角加速度,再换到云台系表示底盘角加速度
   w_last_chassis_in_worldframe[0] = w_chassis_in_worldframe[0];
