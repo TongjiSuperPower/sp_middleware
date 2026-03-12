@@ -15,7 +15,9 @@ public:
   // pmax: position最大值, 单位: rad
   // vmax: velocity最大值, 单位: rad/s
   // tmax: torque最大值, 单位: N·m
-  DM_Motor(uint16_t can_id, uint16_t master_id, float pmax, float vmax, float tmax);
+  DM_Motor(
+    uint16_t can_id, uint16_t master_id, float pmax, float vmax, float tmax,
+    bool multi_circle = false);
 
   const uint16_t rx_id;  // 电机反馈帧ID
   const uint16_t tx_id;  // 电机控制帧ID
@@ -35,7 +37,7 @@ public:
   void write_enable(uint8_t * data) const;
   void write_clear_error(uint8_t * data) const;
 
-  // MIT力控模式, 单位: N·m
+  // MIT力控模式, 单位: N·m 
   void cmd(float torque);
 
 private:
@@ -43,10 +45,16 @@ private:
   const float vmax_;
   const float tmax_;
 
-  bool has_read_ = false;
+  bool has_read_;
   uint32_t last_read_ms_;
 
   float cmd_torque_;
+
+  //多圈计数
+  float angle_raw_ = 0;
+  float last_angle_raw_ = 0.0f;
+  int32_t circle_;
+  bool multi_circle_;
 };
 
 }  // namespace sp
