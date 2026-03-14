@@ -88,8 +88,33 @@ void VT03::update_remote(const VT03RemoteData * data)
   this->pause = data->pause;
   this->trigger = data->trigger;
 
+  this->mouse.vx = data->mouse_x / 32768.0f;
+  this->mouse.vy = data->mouse_y / 32768.0f;
+  this->mouse.vs = data->mouse_z / 32768.0f;
+  this->mouse.left = data->mouse_left;
+  this->mouse.middle = data->mouse_middle;
+  this->mouse.right = data->mouse_right;
+
+  this->keys.w = (data->keys & 0x0001);
+  this->keys.s = (data->keys & 0x0002);
+  this->keys.a = (data->keys & 0x0004);
+  this->keys.d = (data->keys & 0x0008);
+  this->keys.shift = (data->keys & 0x0010);
+  this->keys.ctrl = (data->keys & 0x0020);
+  this->keys.q = (data->keys & 0x0040);
+  this->keys.e = (data->keys & 0x0080);
+  this->keys.r = (data->keys & 0x0100);
+  this->keys.f = (data->keys & 0x0200);
+  this->keys.g = (data->keys & 0x0400);
+  this->keys.z = (data->keys & 0x0800);
+  this->keys.x = (data->keys & 0x1000);
+  this->keys.c = (data->keys & 0x2000);
+  this->keys.v = (data->keys & 0x4000);
+  this->keys.b = (data->keys & 0x8000);
+
   this->mode = (data->mode_sw == 2)   ? VT03Mode::S
                : (data->mode_sw == 1) ? VT03Mode::N
                                       : VT03Mode::C;
 }
+
 }  // namespace sp
