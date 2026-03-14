@@ -60,12 +60,6 @@ void VT03::update(uint8_t * frame_start, uint16_t size, uint32_t stamp_ms)
         reinterpret_cast<uint8_t *>(&this->custom));
       break;
 
-    // 0x0304 键鼠遥控数据
-    case referee::cmd_id::REMOTE_CONTROL:
-      update_mouse_and_keys(
-        reinterpret_cast<referee::RemoteControl *>(frame_start + referee::DATA_START));
-      break;
-
     // 0x0309 自定义控制器与机器人交互数据
     case referee::cmd_id::ROBOT_CUSTOM_DATA:
       std::copy(

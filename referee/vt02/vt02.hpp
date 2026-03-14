@@ -67,7 +67,6 @@ private:
 
   uint8_t buff_[VT02_BUFF_SIZE];
 
-  void update_mouse_and_keys();
 };
 
 }  // namespace sp
