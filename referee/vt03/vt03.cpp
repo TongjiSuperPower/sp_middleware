@@ -92,31 +92,4 @@ void VT03::update_remote(const VT03RemoteData * data)
                : (data->mode_sw == 1) ? VT03Mode::N
                                       : VT03Mode::C;
 }
-
-void VT03::update_mouse_and_keys(const referee::RemoteControl * data)
-{
-  this->mouse.vx = data->mouse_x / 32768.0f;
-  this->mouse.vy = data->mouse_y / 32768.0f;
-  this->mouse.vs = data->mouse_z / 32768.0f;
-  this->mouse.left = data->left_button_down;
-  this->mouse.right = data->right_button_down;
-
-  this->keys.w = (data->keyboard_value & 0x0001);
-  this->keys.s = (data->keyboard_value & 0x0002);
-  this->keys.a = (data->keyboard_value & 0x0004);
-  this->keys.d = (data->keyboard_value & 0x0008);
-  this->keys.shift = (data->keyboard_value & 0x0010);
-  this->keys.ctrl = (data->keyboard_value & 0x0020);
-  this->keys.q = (data->keyboard_value & 0x0040);
-  this->keys.e = (data->keyboard_value & 0x0080);
-  this->keys.r = (data->keyboard_value & 0x0100);
-  this->keys.f = (data->keyboard_value & 0x0200);
-  this->keys.g = (data->keyboard_value & 0x0400);
-  this->keys.z = (data->keyboard_value & 0x0800);
-  this->keys.x = (data->keyboard_value & 0x1000);
-  this->keys.c = (data->keyboard_value & 0x2000);
-  this->keys.v = (data->keyboard_value & 0x4000);
-  this->keys.b = (data->keyboard_value & 0x8000);
-}
-
 }  // namespace sp

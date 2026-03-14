@@ -47,7 +47,6 @@ public:
   // 0x0307 选手端小地图接收哨兵数据 选手端接收
   // 0x0308 选手端小地图接收机器人数据 选手端接收
   // 0x0309 自定义控制器接收机器人数据 图传链路
-  referee::RobotClientData robot_client_data;  // 只读! 0x0309 机器人发送给自定义客户端的数据 图传链路
 
   void request();
   void update(uint16_t size);

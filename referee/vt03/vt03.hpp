@@ -133,7 +133,6 @@ private:
 
   void update(uint8_t * frame_start, uint16_t size, uint32_t stamp_ms);
   void update_remote(const VT03RemoteData * data);
-  void update_mouse_and_keys(const referee::RemoteControl * data);
 };
 
 }  // namespace sp
