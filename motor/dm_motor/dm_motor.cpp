@@ -1,5 +1,7 @@
 #include "dm_motor.hpp"
 
+#include <cstring>
+
 #include "tools/math_tools/math_tools.hpp"
 
 namespace sp
@@ -12,9 +14,9 @@ DM_Motor::DM_Motor(
   pmax_(pmax),
   vmax_(vmax),
   tmax_(tmax),
-  multi_circle_(multi_circle),
   has_read_(false),
-  circle_(0)
+  circle_(0),
+  multi_circle_(multi_circle)
 {
 }
 
