@@ -49,15 +49,19 @@ struct __attribute__((packed)) VT03RemoteData
   uint64_t fn_2 : 1;
   uint64_t wheel : 11;
   uint64_t trigger : 1;
+  uint64_t padding1 : 3;  
 
-  int16_t mouse_x;
-  int16_t mouse_y;
-  int16_t mouse_z;
-  uint8_t mouse_left : 2;
-  uint8_t mouse_right : 2;
-  uint8_t mouse_middle : 2;
-  uint16_t key;
-  uint16_t crc16;
+  int16_t mouse_x;  
+  int16_t mouse_y;  
+  int16_t mouse_z;  
+
+  uint8_t mouse_left : 2;   
+  uint8_t mouse_right : 2;   
+  uint8_t mouse_middle : 2;  
+  uint8_t padding2 : 2;      
+
+  uint16_t keys;   
+  uint16_t crc16;  
 };
 
 enum class VT03Mode
@@ -67,16 +71,17 @@ enum class VT03Mode
   S
 };
 
-struct RefereeMouseData
+struct VT03MouseData
 {
   float vx;  // 取值范围: [-1, 1]
   float vy;  // 取值范围: [-1, 1]
   float vs;  // 取值范围: [-1, 1], 鼠标滚轮, s代表scroll
   bool left;
+  bool middle;  //中键
   bool right;
 };
 
-struct RefereeKeysData
+struct __attribute__((packed)) VT03KeysData
 {
   bool w;
   bool s;
@@ -115,8 +120,8 @@ public:
 
   RefereeCustomData custom;  // 只读! 自定义控制器数据
   RefereeRobotData robot;    // 只读！机器人向自定义控制器发送数据
-  RefereeMouseData mouse;    // 只读! 鼠标数据
-  RefereeKeysData keys;      // 只读! 键盘数据
+  VT03MouseData mouse;       // 只读! 鼠标数据
+  VT03KeysData keys;         // 只读! 键盘数据
 
   bool is_open() const;
   bool is_alive(uint32_t now_ms) const;
@@ -133,7 +138,6 @@ private:
 
   void update(uint8_t * frame_start, uint16_t size, uint32_t stamp_ms);
   void update_remote(const VT03RemoteData * data);
-  void update_mouse_and_keys(const referee::RemoteControl * data);
 };
 
 }  // namespace sp

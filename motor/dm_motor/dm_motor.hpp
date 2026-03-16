@@ -15,10 +15,12 @@ public:
   // pmax: position最大值, 单位: rad
   // vmax: velocity最大值, 单位: rad/s
   // tmax: torque最大值, 单位: N·m
-  DM_Motor(uint16_t can_id, uint16_t master_id, float pmax, float vmax, float tmax);
+  DM_Motor(
+    uint16_t can_id, uint16_t master_id, float pmax, float vmax, float tmax,
+    bool multi_circle = false);
 
-  const uint16_t rx_id;      // 电机反馈帧ID
-  const uint16_t tx_id;      // 电机控制帧ID
+  const uint16_t rx_id;  // 电机反馈帧ID
+  const uint16_t tx_id;  // 电机控制帧ID
   const uint16_t tx_id_vel;  // 速度模式 控制帧ID (0x200 + CAN ID)
 
   // 只读! 8: 超压, 9: 欠压, A: 过流, B: MOS过温, C: 线圈过温, D: 通讯丢失, E: 过载
@@ -32,12 +34,7 @@ public:
   bool is_alive(uint32_t now_ms) const;
 
   void read(uint8_t * data, uint32_t stamp_ms);
-
-  // MIT 模式数据打包
   void write(uint8_t * data) const;
-  // 速度模式数据打包
-  void write_velocity(uint8_t * data) const;
-
   void write_enable(uint8_t * data) const;
   void write_disable(uint8_t * data) const;
   void write_clear_error(uint8_t * data) const;
@@ -46,6 +43,16 @@ public:
   void cmd(float torque);
   // 速度模式指令缓存, 单位: rad/s
   void cmd_velocity(float velocity);
+  
+  void cmd_mit(float p_des, float v_des, float kp, float kd, float t_ff);
+
+  // MIT速度控制模式
+  // velocity: 目标速度 (rad/s)
+  // kd: 速度环增益 (建议根据实际负载调试，范围 0~5)
+  void cmd_mit_velocity(float velocity, float kd);
+
+  // 完整的MIT模式数据打包
+  void write_mit(uint8_t * data) const;
 
   void cmd_mit(float p_des, float v_des, float kp, float kd, float t_ff);
 
@@ -62,11 +69,16 @@ private:
   const float vmax_;
   const float tmax_;
 
-  bool has_read_ = false;
+  bool has_read_;
   uint32_t last_read_ms_;
 
   float cmd_torque_;
-  float cmd_velocity_ = 0.0f;
+
+  //多圈计数
+  float angle_raw_ = 0;
+  float last_angle_raw_ = 0.0f;
+  int32_t circle_;
+  bool multi_circle_;
 
   // 新增 MIT 模式参数缓存
   float cmd_p_des_ = 0.0f;
