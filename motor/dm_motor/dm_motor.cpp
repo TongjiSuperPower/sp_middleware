@@ -39,12 +39,11 @@ void DM_Motor::write(uint8_t * data) const
   data[7] = torque_uint;
 }
 
-// 新增：速度模式打包
 void DM_Motor::write_velocity(uint8_t * data) const
 {
   // 浮点数占用 4 个字节，直接内存拷贝即可满足“低位在前”的小端要求
   std::memcpy(data, &cmd_velocity_, sizeof(float));
-  
+
   // 保险起见，将后4个字节清零（CAN帧通常发8字节，尽管速度模式只用前4字节）
   data[4] = 0x00;
   data[5] = 0x00;
@@ -64,6 +63,18 @@ void DM_Motor::write_enable(uint8_t * data) const
   data[7] = 0xFC;
 }
 
+void DM_Motor::write_disable(uint8_t * data) const
+{
+  data[0] = 0xFF;
+  data[1] = 0xFF;
+  data[2] = 0xFF;
+  data[3] = 0xFF;
+  data[4] = 0xFF;
+  data[5] = 0xFF;
+  data[6] = 0xFF;
+  data[7] = 0xFD;
+}
+
 void DM_Motor::write_clear_error(uint8_t * data) const
 {
   data[0] = 0xFF;
@@ -79,5 +90,41 @@ void DM_Motor::write_clear_error(uint8_t * data) const
 void DM_Motor::cmd(float torque) { cmd_torque_ = limit_max(torque, tmax_); }
 
 void DM_Motor::cmd_velocity(float velocity) { cmd_velocity_ = limit_max(velocity, vmax_); }
+
+void DM_Motor::cmd_mit(float p_des, float v_des, float kp, float kd, float t_ff)
+{
+  cmd_p_des_ = limit_max(p_des, pmax_);
+  cmd_v_des_ = limit_max(v_des, vmax_);
+
+  cmd_kp_ = limit_max(kp, 500.0f);
+  if (cmd_kp_ < 0.0f) cmd_kp_ = 0.0f;
+  cmd_kd_ = limit_max(kd, 5.0f);
+  if (cmd_kd_ < 0.0f) cmd_kd_ = 0.0f;
+
+  cmd_t_ff_ = limit_max(t_ff, tmax_);
+}
+
+void DM_Motor::cmd_mit_velocity(float velocity, float kd)
+{
+  cmd_mit(0.0f, velocity, 0.0f, kd, 0.0f);
+}
+
+void DM_Motor::write_mit(uint8_t * data) const
+{
+  uint16_t p_int = float_to_uint(cmd_p_des_, -pmax_, pmax_, 16);
+  uint16_t v_int = float_to_uint(cmd_v_des_, -vmax_, vmax_, 12);
+  uint16_t kp_int = float_to_uint(cmd_kp_, 0.0f, 500.0f, 12);
+  uint16_t kd_int = float_to_uint(cmd_kd_, 0.0f, 5.0f, 12);
+  uint16_t t_int = float_to_uint(cmd_t_ff_, -tmax_, tmax_, 12);
+
+  data[0] = (p_int >> 8) & 0xFF;                           // p_des[15:8]
+  data[1] = p_int & 0xFF;                                  // p_des[7:0]
+  data[2] = (v_int >> 4) & 0xFF;                           // v_des[11:4]
+  data[3] = ((v_int & 0xF) << 4) | ((kp_int >> 8) & 0xF);  // v_des[3:0] | Kp[11:8]
+  data[4] = kp_int & 0xFF;                                 // Kp[7:0]
+  data[5] = (kd_int >> 4) & 0xFF;                          // Kd[11:4]
+  data[6] = ((kd_int & 0xF) << 4) | ((t_int >> 8) & 0xF);  // Kd[3:0] | t_ff[11:8]
+  data[7] = t_int & 0xFF;                                  // t_ff[7:0]
+}
 
 }  // namespace sp

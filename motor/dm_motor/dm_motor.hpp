@@ -39,12 +39,23 @@ public:
   void write_velocity(uint8_t * data) const;
 
   void write_enable(uint8_t * data) const;
+  void write_disable(uint8_t * data) const;
   void write_clear_error(uint8_t * data) const;
 
   // MIT力控模式指令缓存, 单位: N·m
   void cmd(float torque);
   // 速度模式指令缓存, 单位: rad/s
   void cmd_velocity(float velocity);
+
+  void cmd_mit(float p_des, float v_des, float kp, float kd, float t_ff);
+
+  // MIT速度控制模式
+  // velocity: 目标速度 (rad/s)
+  // kd: 速度环增益 (建议根据实际负载调试，范围 0~5)
+  void cmd_mit_velocity(float velocity, float kd);
+
+  // 完整的MIT模式数据打包
+  void write_mit(uint8_t * data) const;
 
 private:
   const float pmax_;
@@ -56,6 +67,13 @@ private:
 
   float cmd_torque_;
   float cmd_velocity_ = 0.0f;
+
+  // 新增 MIT 模式参数缓存
+  float cmd_p_des_ = 0.0f;
+  float cmd_v_des_ = 0.0f;
+  float cmd_kp_ = 0.0f;
+  float cmd_kd_ = 0.0f;
+  float cmd_t_ff_ = 0.0f;
 };
 
 }  // namespace sp
