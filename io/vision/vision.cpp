@@ -26,6 +26,7 @@ void Vision::update(uint8_t * buf, uint32_t len)
   this->pitch_vel = rx_data_.pitch_vel;
   this->pitch_acc = rx_data_.pitch_acc;
   this->autoaim_last_read_ms_ = osKernelSysTick();
+  this->autoaim_alive =(osKernelSysTick() - this->autoaim_last_read_ms_ < 100);
 }
 
 void Vision::send(
