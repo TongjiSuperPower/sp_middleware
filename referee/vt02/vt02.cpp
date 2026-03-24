@@ -15,7 +15,7 @@ void VT02::request()
     // dismiss return
     HAL_UARTEx_ReceiveToIdle_DMA(huart_, buff_, VT02_BUFF_SIZE);
 
-    // ref: https://github.com/HNUYueLuRM/basic_framework/blob/master/bsp/usart/bsp_usart.c
+    // ref: basic_framework/bsp/usart/bsp_usart.c at master · HNUYueLuRM/basic_framework
     __HAL_DMA_DISABLE_IT(huart_->hdmarx, DMA_IT_HT);
   }
   else {
@@ -24,7 +24,7 @@ void VT02::request()
   }
 }
 
-void VT02::update()
+void VT02::update(uint32_t stamp_ms)
 {
   if (buff_[0] != REFEREE_SOF) return;
   if (!check_crc8(buff_, REFEREE_HEAD_LEN)) return;
@@ -35,8 +35,14 @@ void VT02::update()
 
   uint16_t cmd_id = (buff_[6] << 8) | buff_[5];
   if (cmd_id == REFEREE_CUSTOM_CMD_ID) {
+    last_read_ms_ = stamp_ms;
+    has_read_ = true;
     std::memcpy(&(this->custom), buff_ + REFEREE_DATA_START, sizeof(RefereeCustomData));
   }
 }
+
+bool VT02::is_open() const { return has_read_; }
+
+bool VT02::is_alive(uint32_t now_ms) const { return is_open() && (now_ms - last_read_ms_ < 2000); }
 
 }  // namespace sp

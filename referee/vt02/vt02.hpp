@@ -9,14 +9,14 @@ constexpr size_t VT02_BUFF_SIZE = 50;
 
 struct __attribute__((packed)) RefereeCustomData
 {
-  float yaw;
-  float roll;
-  float pitch;
-  float roll2;
-  float x;
-  float y;
-  float z;
-  bool button;
+  float control;
+  float j0;
+  float j1;
+  float j2;
+  float j3;
+  float j4;
+  float j5;
+  float gripper;
   uint8_t reserved;  //保留位
 };
 
@@ -59,14 +59,16 @@ public:
   RefereeKeysData keys;      // 只读!
 
   void request();
-  void update();
+  void update(uint32_t stamp_ms);
+  bool is_open() const;
+  bool is_alive(uint32_t now_ms) const;
 
 private:
   UART_HandleTypeDef * huart_;
   bool use_dma_;
-
+  bool has_read_;
+  uint32_t last_read_ms_;
   uint8_t buff_[VT02_BUFF_SIZE];
-
 };
 
 }  // namespace sp
