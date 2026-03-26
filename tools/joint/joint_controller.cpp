@@ -4,16 +4,20 @@
 
 template <typename MotorType>
 JointMotorController<MotorType>::JointMotorController(
-  float mid, float min, float max, bool reverse, MotorType & motor, sp::PID & pid,
-  sp::PID & motor_speed_pid, bool feedforward)
+  float mid, float min, float max, float min_m, float max_m, float max_v, bool reverse,
+  MotorType & motor, sp::PID & pid, sp::PID & motor_speed_pid, bool feedforward, bool limited)
 : mid_(mid),
   min_(min),
   max_(max),
+  min_m_(min_m),
+  max_m_(max_m),
+  max_v_(max_v),
   sign_(reverse ? -1.0f : 1.0f),
-  feedforward_(feedforward),
   motor_(motor),
   pid_(pid),
-  motor_speed_pid_(motor_speed_pid)
+  motor_speed_pid_(motor_speed_pid),
+  feedforward_(feedforward),
+  limited_(limited)
 {
 }
 
@@ -22,6 +26,12 @@ void JointMotorController<MotorType>::disable()
 {
   mode_ = ControlMode::DISABLE;
   set_ = pos;
+}
+
+template <typename MotorType>
+void JointMotorController<MotorType>::init()
+{
+  init_angle_ = motor_.angle;
 }
 
 template <typename MotorType>
@@ -38,10 +48,22 @@ void JointMotorController<MotorType>::cmd(float value)
 }
 
 template <typename MotorType>
+void JointMotorController<MotorType>::cmd_max()
+{
+  cmd(max_);
+}
+
+template <typename MotorType>
+void JointMotorController<MotorType>::cmd_min()
+{
+  cmd(min_);
+}
+
+template <typename MotorType>
 void JointMotorController<MotorType>::cmd_v(float value)
 {
   mode_ = ControlMode::VELOCITY;
-  v_set_ = value;
+  v_set_ = sp::limit_max(value, max_v_);
 }
 
 template <typename MotorType>
@@ -61,9 +83,11 @@ void JointMotorController<MotorType>::set_feedforward(float value)
 template <typename MotorType>
 void JointMotorController<MotorType>::control()
 {
-  this->pos = sign_ * motor_.angle - mid_;
-  if (this->pos > max_) this->pos -= 2 * sp::SP_PI;
-  if (this->pos < min_) this->pos += 2 * sp::SP_PI;
+  this->pos = sign_ * motor_.angle - mid_ - init_angle_;
+  if (limited_) {
+    if (this->pos > max_m_) this->pos -= 2 * sp::SP_PI;
+    if (this->pos < min_m_) this->pos += 2 * sp::SP_PI;
+  }
 
   this->vel = sign_ * motor_.speed;
   this->torque_fdb = sign_ * motor_.torque;
