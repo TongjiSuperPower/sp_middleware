@@ -37,14 +37,14 @@ void JointMotorController<MotorType>::init()
 template <typename MotorType>
 void JointMotorController<MotorType>::add(float value)
 {
-  cmd(sp::limit_angle(set_ + value));
+  cmd(set_ + value);
 }
 
 template <typename MotorType>
 void JointMotorController<MotorType>::cmd(float value)
 {
   mode_ = ControlMode::POSITION;
-  set_ = value;
+  set_ = sp::limit_min_max(value, min_, max_);
 }
 
 template <typename MotorType>
@@ -64,6 +64,7 @@ void JointMotorController<MotorType>::cmd_v(float value)
 {
   mode_ = ControlMode::VELOCITY;
   v_set_ = sp::limit_max(value, max_v_);
+  set_ = this->pos;
 }
 
 template <typename MotorType>
@@ -71,7 +72,8 @@ void JointMotorController<MotorType>::cmd_t(float value)
 {
   mode_ = ControlMode::TORQUE;
   t_set_ = sign_ * value;
-  set_ = pos;
+  set_ = this->pos;
+  v_set_ = this->vel;
 }
 
 template <typename MotorType>
@@ -102,7 +104,7 @@ void JointMotorController<MotorType>::control()
   }
   else {
     if (mode_ == ControlMode::POSITION) {
-      pid_.calc(set_, sp::limit_angle(pos));
+      pid_.calc(set_, this->pos);
       motor_speed_pid_.calc(pid_.out, this->vel);
     }
     else if (mode_ == ControlMode::VELOCITY) {
