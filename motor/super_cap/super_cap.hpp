@@ -37,8 +37,8 @@ public:
 private:
   SuperCapMode mode_;
 
-  uint8_t temputer_;  // 温度(现阶段恒定为25)
-  uint8_t status_;    // 状态标志位（现阶段保留为0x10）
+  uint8_t temperature_;  // 温度(现阶段恒定为25)
+  uint8_t status_;       // 状态标志位（现阶段保留为0x10）
 
   uint32_t last_read_ms_;  // 上一次读取数据的时间戳
 };

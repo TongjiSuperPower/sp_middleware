@@ -12,7 +12,7 @@ void SuperCap::read(uint8_t * data, uint32_t stamp_ms)
   this->power_in = ((int16_t)(((data)[1] << 8) | (data)[0])) / 10.0f;
   this->power_out = ((int16_t)(((data)[3] << 8) | (data)[2])) / 10.0f;
   this->voltage = ((int16_t)(((data)[5] << 8) | (data)[4])) / 100.0f;
-  this->temputer_ = (data)[6];
+  this->temperature_ = (data)[6];
   this->status_ = (data)[7];
 
   // 计算能量
