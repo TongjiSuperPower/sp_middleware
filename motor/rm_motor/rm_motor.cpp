@@ -102,7 +102,7 @@ bool RM_Motor::is_open() const { return has_read_; }
 
 bool RM_Motor::is_alive(uint32_t now_ms) const
 {
-  return is_open() && (now_ms - last_read_ms_ < 100);
+  return is_open() && (now_ms - last_read_ms_ < 200);
 }
 
 void RM_Motor::read(uint8_t * data, uint32_t stamp_ms)
