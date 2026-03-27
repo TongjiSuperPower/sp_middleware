@@ -46,6 +46,7 @@ Gimbal::Gimbal(
       this->R_base2world_[i][j] = (i == j) ? 1.0f : 0.0f;
     }
   }
+  euler_zyx_to_quaternion(0.0f, 0.0f, install_roll, this->install_roll_q);
 }
 void Gimbal::update_all_single(
   const sp::Mahony & gimbal_imu, const float & yaw_angle, const float & pitch_angle)
@@ -92,8 +93,10 @@ void Gimbal::update_all_single(
     true);  //将重力方向转换到云台系下,k_torque[2]可以用来做重力补偿
 }
 
-void Gimbal::update_all_dual(const sp::Mahony & gimbal_imu, const sp::Mahony & chassis_imu)
+void Gimbal::update_all_dual(const sp::Mahony & gimbal_imu, sp::Mahony & chassis_imu)
 {
+  //使用底盘安装roll去矫正chassis_imu的姿态,使其与gimbal_imu在roll轴上对齐,从而获得更准确的底盘姿态
+  correct_chassis_imu(chassis_imu);
   //更新等效电机角度
   update_q_gimbal2chassis(gimbal_imu, chassis_imu);
   //将底盘角速度换到地面系,并微分获得角加速度,再换到云台系表示底盘角加速度
@@ -633,6 +636,60 @@ void Gimbal::Transform_matrix_rates_multipy_Euler_rates(
               (cosf(roll) * cosf(pitch) * vroll - sinf(roll) * sinf(pitch) * vpitch) * (vyaw);
   result[2] = -cosf(roll) * vroll * (vpitch) +
               (-cosf(roll) * sinf(pitch) * vpitch - sinf(roll) * cosf(pitch) * vroll) * (vyaw);
+}
+
+// 欧拉角(ZYX顺序: yaw->pitch->roll)转四元数
+// 输入: yaw, pitch, roll 的含义为: 机体系从与世界系重合开始, 先绕世界Z轴旋转yaw, 再绕新Y轴旋转pitch, 最后绕新X轴旋转roll
+// 输出: q[4] = {w, x, y, z}, 表示将机体系下向量变换到世界系下的四元数, 即 v_world = q ⊗ v_body ⊗ q*
+void Gimbal::euler_zyx_to_quaternion(float yaw, float pitch, float roll, float q[4])
+{
+  // 半角
+  float half_yaw = 0.5f * yaw;
+  float half_pitch = 0.5f * pitch;
+  float half_roll = 0.5f * roll;
+
+  float cy = cosf(half_yaw);
+  float sy = sinf(half_yaw);
+  float cp = cosf(half_pitch);
+  float sp = sinf(half_pitch);
+  float cr = cosf(half_roll);
+  float sr = sinf(half_roll);
+
+  // ZYX 内旋 (先yaw->再pitch->最后roll) 对应的四元数, 保持与quaternion_to_euler一致
+  q[0] = cy * cp * cr + sy * sp * sr;  // w
+  q[1] = cy * cp * sr - sy * sp * cr;  // x
+  q[2] = cy * sp * cr + sy * cp * sr;  // y
+  q[3] = sy * cp * cr - cy * sp * sr;  // z
+
+  // 数值安全: 归一化 q，防止由于数值误差导致模长偏离1
+  float norm = sqrtf(q[0] * q[0] + q[1] * q[1] + q[2] * q[2] + q[3] * q[3]);
+  if (norm > 1e-12f) {
+    float inv = 1.0f / norm;
+    q[0] *= inv;
+    q[1] *= inv;
+    q[2] *= inv;
+    q[3] *= inv;
+  }
+  else {
+    // 极端异常兜底，退回单位四元数
+    q[0] = 1.0f;
+    q[1] = q[2] = q[3] = 0.0f;
+  }
+}
+
+void Gimbal::correct_chassis_imu(sp::Mahony & chassis_imu)
+{
+  float q_temporary[4];
+  float w_temporary[3];
+  q_temporary[0] = chassis_imu.q[0];
+  q_temporary[1] = chassis_imu.q[1];
+  q_temporary[2] = chassis_imu.q[2];
+  q_temporary[3] = chassis_imu.q[3];
+  w_temporary[0] = chassis_imu.w[0];
+  w_temporary[1] = chassis_imu.w[1];
+  w_temporary[2] = chassis_imu.w[2];
+  quaternion_multiply(this->install_roll_q, q_temporary, chassis_imu.q, true, false);
+  quaternion_frame_transform(this->install_roll_q, w_temporary, chassis_imu.w, true);
 }
 
 }  // namespace sp
