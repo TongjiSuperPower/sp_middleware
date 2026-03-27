@@ -31,7 +31,8 @@ void Vision::update(uint8_t * buf, uint32_t len)
 
 void Vision::send(
   uint8_t mode, float q[4], float yaw, float yaw_vel, float pitch, float pitch_vel,
-  float bullet_speed, uint16_t bullet_count)
+  float bullet_speed, uint16_t bullet_count, float supercap_power_in, float supercap_power_out,
+  float supercap_voltage, uint8_t supercap_temputer, uint8_t supercap_status)
 {
   tx_data_.mode = mode;
   tx_data_.q[0] = q[0];
@@ -44,6 +45,11 @@ void Vision::send(
   tx_data_.pitch_vel = pitch_vel;
   tx_data_.bullet_speed = bullet_speed;
   tx_data_.bullet_count = bullet_count;
+  tx_data_.supercap_power_in = supercap_power_in;
+  tx_data_.supercap_power_out = supercap_power_out;
+  tx_data_.supercap_voltage = supercap_voltage;
+  tx_data_.supercap_temputer = supercap_temputer;
+  tx_data_.supercap_status = supercap_status;
   tx_data_.crc16 =
     get_crc16(reinterpret_cast<uint8_t *>(&tx_data_), sizeof(tx_data_) - sizeof(tx_data_.crc16));
 

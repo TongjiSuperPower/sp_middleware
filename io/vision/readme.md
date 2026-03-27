@@ -14,7 +14,8 @@ extern "C" void vision_task()
 {
   while (true) {
     // 推荐实际使用时放在imu_task
-    vis.send(0, imu.q, imu.yaw, imu.vyaw, imu.pitch, imu.vpitch, 24.0f, 0);
+    vis.send(0, imu.q, imu.yaw, imu.vyaw, imu.pitch, imu.vpitch, 24.0f, 0, 
+             supercap.power_in, supercap.power_out, supercap.voltage, supercap.temputer, supercap.status);
 
     // 使用调试(f5)查看vis内部变量的变化
 
