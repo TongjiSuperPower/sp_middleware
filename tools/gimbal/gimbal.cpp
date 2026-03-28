@@ -8,7 +8,7 @@ namespace sp
 {
 
 Gimbal::Gimbal(
-  float yaw0, float pitch0, bool reverse_yaw, bool reverse_pitch, float dt,
+  float yaw0, float pitch0, bool reverse_yaw, bool reverse_pitch, float dt, float install_roll,
   const GimbalFilterConfig & fc)
 : yaw0_(yaw0),
   pitch0_(pitch0),
@@ -30,7 +30,8 @@ Gimbal::Gimbal(
   //电机目标加速度滤波器
   pitch_motor_target_acc_filter(fc.pitch_target_acc),
   yaw_motor_target_acc_filter(fc.yaw_target_acc),
-  dt_(dt)
+  dt_(dt),
+  install_roll_(install_roll)
 {
   this->yaw_fdb_in_joint = 0.0f;
   this->pitch_fdb_in_joint = 0.0f;
@@ -46,7 +47,7 @@ Gimbal::Gimbal(
       this->R_base2world_[i][j] = (i == j) ? 1.0f : 0.0f;
     }
   }
-  euler_zyx_to_quaternion(0.0f, 0.0f, install_roll, this->install_roll_q);
+  euler_zyx_to_quaternion(0.0f, 0.0f, install_roll_, this->install_roll_q_);
 }
 void Gimbal::update_all_single(
   const sp::Mahony & gimbal_imu, const float & yaw_angle, const float & pitch_angle)
@@ -688,8 +689,8 @@ void Gimbal::correct_chassis_imu(sp::Mahony & chassis_imu)
   w_temporary[0] = chassis_imu.w[0];
   w_temporary[1] = chassis_imu.w[1];
   w_temporary[2] = chassis_imu.w[2];
-  quaternion_multiply(this->install_roll_q, q_temporary, chassis_imu.q, true, false);
-  quaternion_frame_transform(this->install_roll_q, w_temporary, chassis_imu.w, true);
+  quaternion_multiply(this->install_roll_q_, q_temporary, chassis_imu.q, true, false);
+  quaternion_frame_transform(this->install_roll_q_, w_temporary, chassis_imu.w, true);
 }
 
 }  // namespace sp

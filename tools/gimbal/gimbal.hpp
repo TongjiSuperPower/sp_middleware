@@ -35,7 +35,8 @@ class Gimbal
 public:
   Gimbal(
     float yaw0 = 0.0f, float pitch0 = 0.0f, bool reverse_yaw = false, bool reverse_pitch = false,
-    float dt = 1e-3f, const GimbalFilterConfig & filter_config = GimbalFilterConfig{});
+    float dt = 1e-3f, float install_roll = 0.0f,
+    const GimbalFilterConfig & filter_config = GimbalFilterConfig{});
 
   //单imu更新函数，输入云台姿态和电机角度
   void update_all_single(
@@ -169,11 +170,11 @@ private:
   float pitch0_;  //云台pitch轴码盘零点位置，单位：rad
   float sign_yaw_;
   float sign_pitch_;
-  float dt_;                                           //控制周期
-  float euler_motor[3];                                //电机相对于底盘的欧拉角表示
-  float q_last_chassis2world[4];                       //底盘系相对于地面系的上次四元数表示
-  float install_roll = 0.0f;                           //底盘安装roll角,用于双imu矫正底盘姿态
-  float install_roll_q[4] = {0.0f, 0.0f, 0.0f, 1.0f};  //底盘安装roll角对应的四元数表示
+  float dt_;                                            //控制周期
+  float euler_motor[3];                                 //电机相对于底盘的欧拉角表示
+  float q_last_chassis2world[4];                        //底盘系相对于地面系的上次四元数表示
+  float install_roll_ = 0.0f;                           //底盘安装roll角,用于双imu矫正底盘姿态
+  float install_roll_q_[4] = {1.0f, 0.0f, 0.0f, 0.0f};  //底盘安装roll角对应的四元数表示
 
   float w_chassis_in_worldframe[3] = {0.0f, 0.0f, 0.0f};
   float w_last_chassis_in_worldframe[3] = {0.0f, 0.0f, 0.0f};
