@@ -47,6 +47,9 @@ public:
 
   void calc(float set, float fdb, float set_dot, float fdb_dot);
 
+  // 清零PID的所有状态（输出与缓存等）
+  void clear();
+
 private:
   const float dt_;
   const float kp_, ki_, kd_;
