@@ -24,7 +24,7 @@ bool DM_Motor::is_open() const { return has_read_; }
 
 bool DM_Motor::is_alive(uint32_t now_ms) const
 {
-  return is_open() && (now_ms - last_read_ms_ < 100);
+  return is_open() && (now_ms - last_read_ms_ < 200);
 }
 
 //multi_circle是true就用多圈
