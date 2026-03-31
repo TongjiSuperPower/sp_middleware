@@ -66,7 +66,7 @@ void PID::calc(float set, float fdb, float set_dot, float fdb_dot)
   this->data.dout = kd_ * (set_dot - fdb_dot);
 
   this->out = limit_max(this->data.pout + this->data.iout + this->data.dout, max_out_);
-}  
+}
 
 void PID::calc(float set, float fdb, float integral_pause_threshold)
 {
@@ -90,11 +90,10 @@ void PID::calc(float set, float fdb, float integral_pause_threshold)
 
   // 积分分离
   // 当P项输出的绝对值已经很大时，暂停积分累积
-  if (std::abs(this->data.pout) > integral_pause_threshold) 
-  {
+  if (std::abs(this->data.pout) > integral_pause_threshold) {
     // 将本次的积分增量设为0
     this->data.trapezoid = 0.0f;
-  } 
+  }
   else {
     // 只有当P项输出在可接受范围内时，才正常计算积分增量
     this->data.trapezoid = (this->data.err[0] + this->data.err[1]) / 2 * dt_;
@@ -110,6 +109,12 @@ void PID::calc(float set, float fdb, float integral_pause_threshold)
   this->data.dout = kd_ * this->data.dbuf[0] / dt_;
 
   this->out = limit_max(this->data.pout + this->data.iout + this->data.dout, max_out_);
-} 
+}
 
-}   // namespace sp
+void PID::clear()
+{
+  this->data = {};   // 清空所有的中间状态和缓存数组
+  this->out = 0.0f;  // 清空输出
+}
+
+}  // namespace sp
