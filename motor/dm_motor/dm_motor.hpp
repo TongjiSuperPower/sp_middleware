@@ -19,8 +19,8 @@ public:
     uint16_t can_id, uint16_t master_id, float pmax, float vmax, float tmax,
     bool multi_circle = false);
 
-  const uint16_t rx_id;  // 电机反馈帧ID
-  const uint16_t tx_id;  // 电机控制帧ID
+  const uint16_t rx_id;      // 电机反馈帧ID
+  const uint16_t tx_id;      // 电机控制帧ID
   const uint16_t tx_id_vel;  // 速度模式 控制帧ID (0x200 + CAN ID)
 
   // 只读! 8: 超压, 9: 欠压, A: 过流, B: MOS过温, C: 线圈过温, D: 通讯丢失, E: 过载
@@ -29,6 +29,9 @@ public:
   float angle = 0;   // 只读! 单位: rad
   float speed = 0;   // 只读! 单位: rad/s
   float torque = 0;  // 只读! 单位: N·m
+
+  float T_MOS = 0;    // 电机MOS管温度 单位: ℃
+  float T_Rotor = 0;  // 电机转子温度 单位: ℃
 
   bool is_open() const;
   bool is_alive(uint32_t now_ms) const;
