@@ -54,7 +54,8 @@ void Gimbal::update_all_single(
 {
   //更新电机角度和底盘姿态及角速度
   update_q_chassis2world(gimbal_imu, yaw_angle, pitch_angle);
-
+  //转换出底盘姿态欧拉角
+  quaternion_to_euler(this->q_chassis2world, this->chassis_euler_in_world);
   //更新底盘的角加速度,并换到云台系表示
   w_last_chassis_in_worldframe[0] = w_chassis_in_worldframe[0];
   w_last_chassis_in_worldframe[1] = w_chassis_in_worldframe[1];
@@ -101,6 +102,9 @@ void Gimbal::update_all_dual(const sp::Mahony & gimbal_imu, sp::Mahony & chassis
   //更新等效电机角度
   update_q_gimbal2chassis(gimbal_imu, chassis_imu);
   //将底盘角速度换到地面系,并微分获得角加速度,再换到云台系表示底盘角加速度
+  //转换出底盘姿态欧拉角
+  quaternion_to_euler(this->q_chassis2world, this->chassis_euler_in_world);
+
   w_last_chassis_in_worldframe[0] = w_chassis_in_worldframe[0];
   w_last_chassis_in_worldframe[1] = w_chassis_in_worldframe[1];
   w_last_chassis_in_worldframe[2] = w_chassis_in_worldframe[2];
