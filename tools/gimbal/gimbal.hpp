@@ -141,9 +141,9 @@ public:
     [4];  //云台系相对于底盘系的四元数表示 能将云台系的向量转换到底盘系,用于计算电机相对角度
   float q_chassis2world[4];  //底盘系相对于地面系的四元数表示 能将底盘系的向量转换到地面系
 
-  float yaw_rel;    //只读！ 云台yaw轴相对于码盘的反馈角度，单位：rad
-  float pitch_rel;  //只读！ 云台pitch轴相对于码盘的反馈角度，单位：rad
-  float roll_rel;   //只读！ 云台roll轴相对于码盘的反馈角度，往往是零单位：rad
+  float yaw_rel;    //只读！ 云台yaw轴相对于设定零点的相对角度，单位：rad
+  float pitch_rel;  //只读！ 云台pitch轴相对于设定零点的相对角度，单位：rad
+  float roll_rel;   //只读！ 云台roll轴相对于设定零点的相对角度，往往是零,单位：rad
 
   float roll_relative_speed;   //只读！ 云台roll轴相对底盘的角速度，单位：rad/s
   float pitch_relative_speed;  //只读！ 云台pitch轴相对底盘的角速度，单位：rad/s
@@ -161,7 +161,9 @@ public:
   float pitch_target_relative_acc =
     0.0f;  //只读！ 云台pitch轴目标相对角加速度（相对底盘），单位：rad/s²
 
-  float base_yaw_in_world;    //只读！ 底盘系相对于地面系的yaw角，单位：rad
+  float chassis_euler_in_world
+    [3];                    //只读！底盘系相对于地面系的欧拉角表示，单位：rad，顺序为roll pitch yaw
+  float base_yaw_in_world;  //只读！ 底盘系相对于地面系的yaw角，单位：rad
   float base_pitch_in_world;  //只读！ 底盘系相对于地面系的pitch角，单位：rad
   float base_roll_in_world;   //只读！ 底盘系相对于地面系的roll角，单位：rad
 
