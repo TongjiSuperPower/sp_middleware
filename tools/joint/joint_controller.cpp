@@ -44,6 +44,7 @@ template <typename MotorType>
 void JointMotorController<MotorType>::cmd(float value)
 {
   mode_ = ControlMode::POSITION;
+  v_set_ = 0;
   set_ = sp::limit_min_max(value, min_, max_);
 }
 
@@ -81,6 +82,24 @@ bool JointMotorController<MotorType>::cmd_v_until_t(float value, float t_thresho
     mode_ = ControlMode::VELOCITY;
     v_set_ = sp::limit_max(value, max_v_);
     set_ = this->pos;
+    return false;
+  }
+}
+
+template <typename MotorType>
+bool JointMotorController<MotorType>::cmd_pos_until_t(float value, float t_threshold)
+{
+  if (fabs(this->torque_fdb) > t_threshold) {
+    mode_ = ControlMode::TORQUE;
+    t_set_ = 0;
+    v_set_ = 0;
+    set_ = this->pos;
+    return true;
+  }
+  else {
+    mode_ = ControlMode::POSITION;
+    v_set_ = 0;
+    set_ = sp::limit_min_max(value, min_, max_);
     return false;
   }
 }
