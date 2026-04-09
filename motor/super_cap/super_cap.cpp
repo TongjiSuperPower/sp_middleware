@@ -2,7 +2,7 @@
 
 namespace sp
 {
-SuperCap::SuperCap(SuperCapMode mode) : mode_(mode) {}
+SuperCap::SuperCap(SuperCapMode mode, float capacitance) : mode_(mode), capacitance_(capacitance) {}
 
 bool SuperCap::is_alive(uint32_t now_ms) const { return (now_ms - last_read_ms_ < 100); }
 
@@ -16,7 +16,7 @@ void SuperCap::read(uint8_t * data, uint32_t stamp_ms)
   this->status = (data)[7];
 
   // 计算能量
-  this->cap_energy = 0.5f * CAPACITANCE * this->voltage * this->voltage;
+  this->cap_energy = 0.5f * this->capacitance_ * this->voltage * this->voltage;
 
   // 更新时间戳
   last_read_ms_ = stamp_ms;
