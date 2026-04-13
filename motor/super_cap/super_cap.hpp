@@ -13,8 +13,6 @@ enum class SuperCapMode
   DISCHARGE_DISOUTPUT  // 不充不放
 };
 
-constexpr float CAPACITANCE = 5.0f;  // 电容容量
-
 class SuperCap
 {
 public:
@@ -30,7 +28,7 @@ public:
 
   float cap_energy;
 
-  SuperCap(SuperCapMode mode_ = SuperCapMode::AUTOMODE);
+  SuperCap(SuperCapMode mode_ = SuperCapMode::AUTOMODE, float capacitance = 5.0f);
 
   bool is_alive(uint32_t now_ms) const;
 
@@ -39,6 +37,7 @@ public:
 
 private:
   SuperCapMode mode_;
+  float capacitance_;  // 电容容量
 
   uint32_t last_read_ms_;  // 上一次读取数据的时间戳
 };
