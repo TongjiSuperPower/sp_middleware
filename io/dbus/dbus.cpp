@@ -89,23 +89,24 @@ void DBus::update(uint16_t size, uint32_t stamp_ms)
 
   this->mouse.left = (buff_[12] == 1);
   this->mouse.right = (buff_[13] == 1);
+  this->keyboard_value = keyboard_value;
 
-  this->keys.w = ((keyboard_value & 0x0001) != 0);
-  this->keys.s = ((keyboard_value & 0x0002) != 0);
-  this->keys.a = ((keyboard_value & 0x0004) != 0);
-  this->keys.d = ((keyboard_value & 0x0008) != 0);
-  this->keys.shift = ((keyboard_value & 0x0010) != 0);
-  this->keys.ctrl = ((keyboard_value & 0x0020) != 0);
-  this->keys.q = ((keyboard_value & 0x0040) != 0);
-  this->keys.e = ((keyboard_value & 0x0080) != 0);
-  this->keys.r = ((keyboard_value & 0x0100) != 0);
-  this->keys.f = ((keyboard_value & 0x0200) != 0);
-  this->keys.g = ((keyboard_value & 0x0400) != 0);
-  this->keys.z = ((keyboard_value & 0x0800) != 0);
-  this->keys.x = ((keyboard_value & 0x1000) != 0);
-  this->keys.c = ((keyboard_value & 0x2000) != 0);
-  this->keys.v = ((keyboard_value & 0x4000) != 0);
-  this->keys.b = ((keyboard_value & 0x8000) != 0);
+  this->keys.w = ((keyboard_value & DBUS_KEY_W_MASK) != 0);
+  this->keys.s = ((keyboard_value & DBUS_KEY_S_MASK) != 0);
+  this->keys.a = ((keyboard_value & DBUS_KEY_A_MASK) != 0);
+  this->keys.d = ((keyboard_value & DBUS_KEY_D_MASK) != 0);
+  this->keys.shift = ((keyboard_value & DBUS_KEY_SHIFT_MASK) != 0);
+  this->keys.ctrl = ((keyboard_value & DBUS_KEY_CTRL_MASK) != 0);
+  this->keys.q = ((keyboard_value & DBUS_KEY_Q_MASK) != 0);
+  this->keys.e = ((keyboard_value & DBUS_KEY_E_MASK) != 0);
+  this->keys.r = ((keyboard_value & DBUS_KEY_R_MASK) != 0);
+  this->keys.f = ((keyboard_value & DBUS_KEY_F_MASK) != 0);
+  this->keys.g = ((keyboard_value & DBUS_KEY_G_MASK) != 0);
+  this->keys.z = ((keyboard_value & DBUS_KEY_Z_MASK) != 0);
+  this->keys.x = ((keyboard_value & DBUS_KEY_X_MASK) != 0);
+  this->keys.c = ((keyboard_value & DBUS_KEY_C_MASK) != 0);
+  this->keys.v = ((keyboard_value & DBUS_KEY_V_MASK) != 0);
+  this->keys.b = ((keyboard_value & DBUS_KEY_B_MASK) != 0);
 }
 
 bool DBus::is_open() const { return has_read_; }
