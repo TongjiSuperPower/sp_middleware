@@ -88,4 +88,16 @@ bool check_crc16(const uint8_t * data, uint32_t len)
   return get_crc16(data, len - 2) == crc16;
 }
 
+void append_crc8(uint8_t * data, uint16_t len)
+{
+  data[len - 1] = get_crc8(data, len - 1);
+}
+
+void append_crc16(uint8_t * data, uint32_t len)
+{
+  uint16_t crc16 = get_crc16(data, len - 2);
+  data[len - 2] = crc16 & 0x00ff;
+  data[len - 1] = (crc16 >> 8) & 0x00ff;
+}
+
 }  // namespace sp

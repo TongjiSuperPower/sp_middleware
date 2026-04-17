@@ -2,6 +2,7 @@
 #define SP__VT03_HPP
 
 #include <array>
+#include <cstring>
 
 #include "referee/referee_protocol/referee_protocol.hpp"
 #include "usart.h"
@@ -49,19 +50,19 @@ struct __attribute__((packed)) VT03RemoteData
   uint64_t fn_2 : 1;
   uint64_t wheel : 11;
   uint64_t trigger : 1;
-  uint64_t padding1 : 3;  
+  uint64_t padding1 : 3;
 
-  int16_t mouse_x;  
-  int16_t mouse_y;  
-  int16_t mouse_z;  
+  int16_t mouse_x;
+  int16_t mouse_y;
+  int16_t mouse_z;
 
-  uint8_t mouse_left : 2;   
-  uint8_t mouse_right : 2;   
-  uint8_t mouse_middle : 2;  
-  uint8_t padding2 : 2;      
+  uint8_t mouse_left : 2;
+  uint8_t mouse_right : 2;
+  uint8_t mouse_middle : 2;
+  uint8_t padding2 : 2;
 
-  uint16_t keys;   
-  uint16_t crc16;  
+  uint16_t keys;
+  uint16_t crc16;
 };
 
 enum class VT03Mode
@@ -101,6 +102,14 @@ struct __attribute__((packed)) VT03KeysData
   bool b;
 };
 
+struct __attribute__((packed)) CustomByteBlock
+{
+  uint8_t robot_satus;
+  uint8_t padding[299];
+};
+
+static_assert(sizeof(CustomByteBlock) == 300, "CustomByteBlock MUST be exactly 300 bytes!");
+
 class VT03
 {
 public:
@@ -129,12 +138,17 @@ public:
   void request();
   void update(uint16_t size, uint32_t stamp_ms);
 
+  // 发送自定义客户端数据 (0x0310)
+  void send_custom_client_data(const CustomByteBlock & custom_data);
+
 private:
   const bool use_dma_;
   std::array<uint8_t, 255> buff_;
 
   bool has_read_ = false;
   uint32_t last_read_ms_;
+
+  uint8_t seq_ = 0;  // 发送序列号，随每次发送递增
 
   void update(uint8_t * frame_start, uint16_t size, uint32_t stamp_ms);
   void update_remote(const VT03RemoteData * data);

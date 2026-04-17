@@ -17,6 +17,10 @@ uint16_t get_crc16(const uint8_t * data, uint32_t len);
 // len包括crc16
 bool check_crc16(const uint8_t * data, uint32_t len);
 
+void append_crc8(uint8_t * data, uint16_t len);
+
+void append_crc16(uint8_t * data, uint32_t len);
+
 }  // namespace sp
 
 #endif  // SP__CRC_HPP

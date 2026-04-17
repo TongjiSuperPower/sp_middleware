@@ -117,4 +117,42 @@ void VT03::update_remote(const VT03RemoteData * data)
                                       : VT03Mode::C;
 }
 
+void VT03::send_custom_client_data(const CustomByteBlock & custom_data)
+{
+  // 静态数组避免频繁在栈上分配内存，320字节通常足够裁判系统单包使用
+  static uint8_t tx_buff[320];
+
+  constexpr size_t data_len = sizeof(CustomByteBlock);
+  constexpr size_t frame_len =
+    referee::HEAD_LEN + referee::CMD_ID_LEN + data_len + referee::TAIL_LEN;
+
+  // 1. 安全防线：防止缓冲区溢出
+  if (frame_len > sizeof(tx_buff)) return;
+
+  // 2. 组装帧头 (Frame Header)
+  tx_buff[0] = referee::SOF;
+  tx_buff[1] = data_len & 0xFF;
+  tx_buff[2] = (data_len >> 8) & 0xFF;
+  tx_buff[3] = this->seq_++;
+  sp::append_crc8(tx_buff, referee::HEAD_LEN);  // 一步追加 CRC8
+
+  // 3. 组装命令码 (Cmd ID = 0x0310)
+  tx_buff[referee::HEAD_LEN] = 0x10;
+  tx_buff[referee::HEAD_LEN + 1] = 0x03;
+
+  // 4. 拷贝数据段 (Data)
+  std::memcpy(tx_buff + referee::DATA_START, &custom_data, data_len);
+
+  // 5. 组装帧尾 (Frame Tail / CRC16)
+  sp::append_crc16(tx_buff, frame_len);  // 优雅地一步追加 CRC16
+
+  // 6. 物理层发送
+  if (use_dma_) {
+    HAL_UART_Transmit_DMA(this->huart, tx_buff, frame_len);
+  }
+  else {
+    HAL_UART_Transmit_IT(this->huart, tx_buff, frame_len);
+  }
+}
+
 }  // namespace sp
