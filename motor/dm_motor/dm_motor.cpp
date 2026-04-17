@@ -49,6 +49,9 @@ void DM_Motor::read(uint8_t * data, uint32_t stamp_ms)
 
   last_angle_raw_ = angle_raw_;
   this->angle = multi_circle_ ? angle_raw_ + circle_ * 2 * pmax_ : angle_raw_;
+
+  this->T_MOS = data[6];
+  this->T_Rotor = data[7];
 }
 
 void DM_Motor::write(uint8_t * data) const

@@ -180,6 +180,159 @@ void Plotter::plot(
   plot_frame_.data[11] = value12;
   send();
 }
+
+void Plotter::plot(
+  float value1, float value2, float value3, float value4, float value5, float value6, float value7,
+  float value8, float value9, float value10, float value11, float value12, float value13)
+{
+  static_assert(PLOTTER_FLOAT_NUM >= 13);
+  plot_frame_.size = 4 * 13;
+  plot_frame_.data[0] = value1;
+  plot_frame_.data[1] = value2;
+  plot_frame_.data[2] = value3;
+  plot_frame_.data[3] = value4;
+  plot_frame_.data[4] = value5;
+  plot_frame_.data[5] = value6;
+  plot_frame_.data[6] = value7;
+  plot_frame_.data[7] = value8;
+  plot_frame_.data[8] = value9;
+  plot_frame_.data[9] = value10;
+  plot_frame_.data[10] = value11;
+  plot_frame_.data[11] = value12;
+  plot_frame_.data[12] = value13;
+  send();
+}
+
+void Plotter::plot(
+  float value1, float value2, float value3, float value4, float value5, float value6, float value7,
+  float value8, float value9, float value10, float value11, float value12, float value13,
+  float value14)
+{
+  static_assert(PLOTTER_FLOAT_NUM >= 14);
+  plot_frame_.size = 4 * 14;
+  plot_frame_.data[0] = value1;
+  plot_frame_.data[1] = value2;
+  plot_frame_.data[2] = value3;
+  plot_frame_.data[3] = value4;
+  plot_frame_.data[4] = value5;
+  plot_frame_.data[5] = value6;
+  plot_frame_.data[6] = value7;
+  plot_frame_.data[7] = value8;
+  plot_frame_.data[8] = value9;
+  plot_frame_.data[9] = value10;
+  plot_frame_.data[10] = value11;
+  plot_frame_.data[11] = value12;
+  plot_frame_.data[12] = value13;
+  plot_frame_.data[13] = value14;
+  send();
+}
+
+void Plotter::plot(
+  float value1, float value2, float value3, float value4, float value5, float value6, float value7,
+  float value8, float value9, float value10, float value11, float value12, float value13,
+  float value14, float value15)
+{
+  static_assert(PLOTTER_FLOAT_NUM >= 15);
+  plot_frame_.size = 4 * 15;
+  plot_frame_.data[0] = value1;
+  plot_frame_.data[1] = value2;
+  plot_frame_.data[2] = value3;
+  plot_frame_.data[3] = value4;
+  plot_frame_.data[4] = value5;
+  plot_frame_.data[5] = value6;
+  plot_frame_.data[6] = value7;
+  plot_frame_.data[7] = value8;
+  plot_frame_.data[8] = value9;
+  plot_frame_.data[9] = value10;
+  plot_frame_.data[10] = value11;
+  plot_frame_.data[11] = value12;
+  plot_frame_.data[12] = value13;
+  plot_frame_.data[13] = value14;
+  plot_frame_.data[14] = value15;
+  send();
+}
+
+void Plotter::plot(
+  float value1, float value2, float value3, float value4, float value5, float value6, float value7,
+  float value8, float value9, float value10, float value11, float value12, float value13,
+  float value14, float value15, float value16)
+{
+  static_assert(PLOTTER_FLOAT_NUM >= 16);
+  plot_frame_.size = 4 * 16;
+  plot_frame_.data[0] = value1;
+  plot_frame_.data[1] = value2;
+  plot_frame_.data[2] = value3;
+  plot_frame_.data[3] = value4;
+  plot_frame_.data[4] = value5;
+  plot_frame_.data[5] = value6;
+  plot_frame_.data[6] = value7;
+  plot_frame_.data[7] = value8;
+  plot_frame_.data[8] = value9;
+  plot_frame_.data[9] = value10;
+  plot_frame_.data[10] = value11;
+  plot_frame_.data[11] = value12;
+  plot_frame_.data[12] = value13;
+  plot_frame_.data[13] = value14;
+  plot_frame_.data[14] = value15;
+  plot_frame_.data[15] = value16;
+  send();
+}
+
+void Plotter::plot(
+  float value1, float value2, float value3, float value4, float value5, float value6, float value7,
+  float value8, float value9, float value10, float value11, float value12, float value13,
+  float value14, float value15, float value16, float value17)
+{
+  static_assert(PLOTTER_FLOAT_NUM >= 17);
+  plot_frame_.size = 4 * 17;
+  plot_frame_.data[0] = value1;
+  plot_frame_.data[1] = value2;
+  plot_frame_.data[2] = value3;
+  plot_frame_.data[3] = value4;
+  plot_frame_.data[4] = value5;
+  plot_frame_.data[5] = value6;
+  plot_frame_.data[6] = value7;
+  plot_frame_.data[7] = value8;
+  plot_frame_.data[8] = value9;
+  plot_frame_.data[9] = value10;
+  plot_frame_.data[10] = value11;
+  plot_frame_.data[11] = value12;
+  plot_frame_.data[12] = value13;
+  plot_frame_.data[13] = value14;
+  plot_frame_.data[14] = value15;
+  plot_frame_.data[15] = value16;
+  plot_frame_.data[16] = value17;
+  send();
+}
+
+void Plotter::plot(
+  float value1, float value2, float value3, float value4, float value5, float value6, float value7,
+  float value8, float value9, float value10, float value11, float value12, float value13,
+  float value14, float value15, float value16, float value17, float value18)
+{
+  static_assert(PLOTTER_FLOAT_NUM >= 18);
+  plot_frame_.size = 4 * 18;
+  plot_frame_.data[0] = value1;
+  plot_frame_.data[1] = value2;
+  plot_frame_.data[2] = value3;
+  plot_frame_.data[3] = value4;
+  plot_frame_.data[4] = value5;
+  plot_frame_.data[5] = value6;
+  plot_frame_.data[6] = value7;
+  plot_frame_.data[7] = value8;
+  plot_frame_.data[8] = value9;
+  plot_frame_.data[9] = value10;
+  plot_frame_.data[10] = value11;
+  plot_frame_.data[11] = value12;
+  plot_frame_.data[12] = value13;
+  plot_frame_.data[13] = value14;
+  plot_frame_.data[14] = value15;
+  plot_frame_.data[15] = value16;
+  plot_frame_.data[16] = value17;
+  plot_frame_.data[17] = value18;
+  send();
+}
+
 void Plotter::send()
 {
   if (use_dma_) {

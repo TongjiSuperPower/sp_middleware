@@ -63,16 +63,17 @@ public:
   void cmd_angle_speed(int32_t angle, uint32_t max_speed = 0);
   void cmd_torque(float value);
 
+  bool has_read_;
+
 private:
   const uint8_t motor_id_;
   const float ratio_;
   const float torque_const_;
 
   int32_t cmd_angle_;       // 单位: 度
-  uint32_t cmd_max_speed_;   // 单位: 度/s
+  uint32_t cmd_max_speed_;  // 单位: 度/s
   int16_t cmd_raw_ = 0;
 
-  bool has_read_;
   int32_t step_;
   uint16_t last_ecd_;
 

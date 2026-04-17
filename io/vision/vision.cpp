@@ -17,6 +17,7 @@ void Vision::update(uint8_t * buf, uint32_t len)
 
   std::copy(buf, buf + len, reinterpret_cast<uint8_t *>(&rx_data_));
 
+  this->autoaim_alive = (osKernelSysTick() - this->autoaim_last_read_ms_ < 100);
   this->control = (rx_data_.mode != 0);
   this->fire = (rx_data_.mode == 2);
   this->yaw = rx_data_.yaw;
@@ -26,13 +27,12 @@ void Vision::update(uint8_t * buf, uint32_t len)
   this->pitch_vel = rx_data_.pitch_vel;
   this->pitch_acc = rx_data_.pitch_acc;
   this->autoaim_last_read_ms_ = osKernelSysTick();
-  this->autoaim_alive =(osKernelSysTick() - this->autoaim_last_read_ms_ < 100);
 }
 
 void Vision::send(
   uint8_t mode, float q[4], float yaw, float yaw_vel, float pitch, float pitch_vel,
   float bullet_speed, uint16_t bullet_count, float supercap_power_in, float supercap_power_out,
-  float supercap_voltage, uint8_t supercap_temputer, uint8_t supercap_status)
+  float supercap_voltage, uint8_t supercap_temperature, uint8_t supercap_status)
 {
   tx_data_.mode = mode;
   tx_data_.q[0] = q[0];
@@ -48,7 +48,7 @@ void Vision::send(
   tx_data_.supercap_power_in = supercap_power_in;
   tx_data_.supercap_power_out = supercap_power_out;
   tx_data_.supercap_voltage = supercap_voltage;
-  tx_data_.supercap_temputer = supercap_temputer;
+  tx_data_.supercap_temperature = supercap_temperature;
   tx_data_.supercap_status = supercap_status;
   tx_data_.crc16 =
     get_crc16(reinterpret_cast<uint8_t *>(&tx_data_), sizeof(tx_data_) - sizeof(tx_data_.crc16));

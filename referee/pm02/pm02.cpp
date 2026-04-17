@@ -125,6 +125,20 @@ void PM02::update(uint8_t * frame_start, uint16_t size)
       std::memcpy(&(this->map_command), frame_start + referee::DATA_START, data_len);
       break;
 
+    // 0x0310 机器人发送给自定义客户端的数据
+    case referee::cmd_id::ROBOT_CLIENT_DATA:
+      std::memset(&(this->robot_to_client), 0, sizeof(referee::RobotToClientData));
+      std::memcpy(&(this->robot_to_client), frame_start + referee::DATA_START, data_len);
+      // TODO: 触发回调或标志位，通知应用层
+      break;
+
+    // 0x0311 自定义客户端发送给机器人的自定义指令
+    case referee::cmd_id::CLIENT_ROBOT_DATA:
+      std::memset(&(this->client_to_robot), 0, sizeof(referee::ClientToRobotData));
+      std::memcpy(&(this->client_to_robot), frame_start + referee::DATA_START, data_len);
+      // TODO: 在这里把数据丢给你新建的模块处理，或者通过 USB 转发给机载小电脑
+      break;
+
     default:
       break;
   }

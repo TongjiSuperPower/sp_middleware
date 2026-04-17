@@ -78,7 +78,8 @@ constexpr uint16_t CUSTOM_CLIENT_DATA = 0x0306;      // 自定义控制器与选
 constexpr uint16_t MAP_DATA = 0x0307;                // 选手端小地图接收哨兵数据
 constexpr uint16_t CUSTOM_INFO = 0x0308;             // 选手端小地图接收机器人数据
 constexpr uint16_t ROBOT_CUSTOM_DATA = 0x0309;       // 自定义控制器接收机器人数据 图传链路
-constexpr uint16_t ROBOT_CLIENT_DATA = 0x0310;       // 机器人发送给自定义客户端的数据 图传链路
+constexpr uint16_t ROBOT_CLIENT_DATA = 0x0310;       // 机器人发送给自定义客户端的数据 图传链路 (最大300字节)
+constexpr uint16_t CLIENT_ROBOT_DATA = 0x0311;       // 自定义客户端发送给机器人的自定义指令 (最大30字节)
 constexpr uint16_t SET_IMAGE_TRANSFER = 0x0F01;      //设置图传出图信道 图传链路
 constexpr uint16_t INQUIRY_IMAGE_TRANSFER = 0x0F02;  //查询图传出图信道 图传链路
 }  // namespace sp::referee::cmd_id
@@ -336,29 +337,29 @@ struct __attribute__((packed)) RFID_Status
   uint32_t center_point : 1;              // bit 23：中心增益点（仅 RMUL 适用）
   uint32_t enemy_fort : 1;                // bit 24：对方堡垒增益点
   uint32_t enemy_outpost : 1;             // bit 25：对方前哨站增益点
-  uint32_t friendly_tunnel_road_down
-    : 1;  // bit 26：己方地形跨越增益点（隧道）（靠近己方一侧公路区下方）
-  uint32_t friendly_tunnel_road_mid
-    : 1;  // bit 27：己方地形跨越增益点（隧道）（靠近己方一侧公路区中间）
-  uint32_t friendly_tunnel_road_up
-    : 1;  // bit 28：己方地形跨越增益点（隧道）（靠近己方一侧公路区上方）
-  uint32_t friendly_tunnel_trapezoid_low
-    : 1;  //bit 29：己方地形跨越增益点（隧道）（靠近己方梯形高地较低处）
-  uint32_t friendly_tunnel_trapezoid_mid
-    : 1;  //bit 30：己方地形跨越增益点（隧道）（靠近己方梯形高地较中间处）
-  uint32_t friendly_tunnel_trapezoid_high
-    : 1;  //bit 31：己方地形跨越增益点（隧道）（靠近己方梯形高地较高处）
-  uint32_t enemy_tunnel_road_down
-    : 1;  // bit 0：对方地形跨越增益点（隧道）（靠近己方一侧公路区下方）
-  uint32_t enemy_tunnel_road_mid
-    : 1;                              // bit 1：对方地形跨越增益点（隧道）（靠近己方一侧公路区中间）
+  uint32_t
+    friendly_tunnel_road_down : 1;  // bit 26：己方地形跨越增益点（隧道）（靠近己方一侧公路区下方）
+  uint32_t
+    friendly_tunnel_road_mid : 1;  // bit 27：己方地形跨越增益点（隧道）（靠近己方一侧公路区中间）
+  uint32_t
+    friendly_tunnel_road_up : 1;  // bit 28：己方地形跨越增益点（隧道）（靠近己方一侧公路区上方）
+  uint32_t
+    friendly_tunnel_trapezoid_low : 1;  //bit 29：己方地形跨越增益点（隧道）（靠近己方梯形高地较低处）
+  uint32_t
+    friendly_tunnel_trapezoid_mid : 1;  //bit 30：己方地形跨越增益点（隧道）（靠近己方梯形高地较中间处）
+  uint32_t
+    friendly_tunnel_trapezoid_high : 1;  //bit 31：己方地形跨越增益点（隧道）（靠近己方梯形高地较高处）
+  uint32_t
+    enemy_tunnel_road_down : 1;  // bit 0：对方地形跨越增益点（隧道）（靠近己方一侧公路区下方）
+  uint32_t
+    enemy_tunnel_road_mid : 1;        // bit 1：对方地形跨越增益点（隧道）（靠近己方一侧公路区中间）
   uint32_t enemy_tunnel_road_up : 1;  // bit 2：对方地形跨越增益点（隧道）（靠近己方一侧公路区上方）
-  uint8_t enemy_tunnel_trapezoid_low
-    : 1;  //bit 3：对方地形跨越增益点（隧道）（靠近己方梯形高地较低处）
-  uint8_t enemy_tunnel_trapezoid_mid
-    : 1;  //bit 4：对方地形跨越增益点（隧道）（靠近己方梯形高地较中间处）
-  uint8_t enemy_tunnel_trapezoid_high
-    : 1;  //bit 5：对方地形跨越增益点（隧道）（靠近己方梯形高地较高处）
+  uint8_t
+    enemy_tunnel_trapezoid_low : 1;  //bit 3：对方地形跨越增益点（隧道）（靠近己方梯形高地较低处）
+  uint8_t
+    enemy_tunnel_trapezoid_mid : 1;  //bit 4：对方地形跨越增益点（隧道）（靠近己方梯形高地较中间处）
+  uint8_t
+    enemy_tunnel_trapezoid_high : 1;  //bit 5：对方地形跨越增益点（隧道）（靠近己方梯形高地较高处）
 };
 
 // 0x020A 飞镖选手端指令数据
@@ -415,10 +416,10 @@ struct __attribute__((packed)) SentryInfo
   uint32_t remote_exchange_health_count : 4;  // bits 15-18 : 哨兵机器人成功远程兑换血量的次数
   uint32_t can_confirm_free_resurrect : 1;    // bit 19     : 哨兵机器人当前是否可以确认免费复活
   uint32_t can_exchange_immediate_resurrect : 1;  // bit 20     : 哨兵机器人当前是否可以兑换立即复活
-  uint32_t immediate_resurrect_cost
-    : 10;                      // bits 21-30 : 哨兵机器人当前若兑换立即复活需要花费的金币数
-  uint32_t reserved1 : 1;      // bit 31     : 保留
-  uint16_t out_of_combat : 1;  // bit 0     : 哨兵当前是否处于脱战状态，1 为脱战，0 为在战
+  uint32_t
+    immediate_resurrect_cost : 10;  // bits 21-30 : 哨兵机器人当前若兑换立即复活需要花费的金币数
+  uint32_t reserved1 : 1;           // bit 31     : 保留
+  uint16_t out_of_combat : 1;       // bit 0     : 哨兵当前是否处于脱战状态，1 为脱战，0 为在战
   uint16_t ammo_exchange_allowance : 11;  // bit 1-11  : 队伍 17mm 允许发弹量的剩余可兑换数
   uint16_t sentry_pose : 2;               // bit 12-13 : 哨兵当前姿态：1进攻，2防御，3移动
   uint16_t energy_mechanism_status : 1;   // bit 14    : 己方能量机关是否可进入激活状态，1为可激活
@@ -428,12 +429,12 @@ struct __attribute__((packed)) SentryInfo
 // 0x020E 雷达自主决策信息同步
 struct __attribute__((packed)) RadarInfo
 {
-  uint8_t double_vul_trigger_chance
-    : 2;  // bits 0-1 : 雷达拥有触发双倍易伤的机会（0~2），开局为 0，最大可达 2
-  uint8_t opponent_in_double_vulnerability
-    : 1;  // bit 2 : 对方是否正在被触发双倍易伤 0：对方未被触发双倍易伤 1：对方正在被触发双倍易伤
-  uint8_t friendly_encryption_level
-    : 2;  // bit 3-4：己方加密等级（即对方干扰波难度等级），开局为 1，最高为 3
+  uint8_t
+    double_vul_trigger_chance : 2;  // bits 0-1 : 雷达拥有触发双倍易伤的机会（0~2），开局为 0，最大可达 2
+  uint8_t
+    opponent_in_double_vulnerability : 1;  // bit 2 : 对方是否正在被触发双倍易伤 0：对方未被触发双倍易伤 1：对方正在被触发双倍易伤
+  uint8_t
+    friendly_encryption_level : 2;  // bit 3-4：己方加密等级（即对方干扰波难度等级），开局为 1，最高为 3
   uint8_t can_ket_be_modified : 1;  // bit 5：当前是否可以修改密钥，1 为可修改
   uint8_t reserved : 2;             // bit 6-7：保留
 };
@@ -518,14 +519,14 @@ struct __attribute__((packed)) SentryCmd
   uint32_t resurrect : 1;             // bit 0：是否确认复活 0：否 1：是
   uint32_t immediate_resurrect : 1;   // bit 1：是否消耗金币兑换立即复活  0：否 1：是
   uint32_t exchange_17mm_value : 11;  // bit 2-12：发弹量兑换值（递增有效）
-  uint32_t remote_exchange_17mm_count
-    : 4;  // bit 13-16：远程兑换发弹量次数，开局为0，单调递增，每次加1
-  uint32_t remote_exchange_blood_count
-    : 4;  // bit 17-20：远程兑换血量次数，开局为0，单调递增，每次加1
-  uint32_t sentry_change_pose
-    : 2;  // bit 21-22：哨兵修改当前姿态指令，1 为进攻姿态，2 为防御姿态，3 为移动姿态，默认为 3；修改此值即可改变哨兵姿态。
-  uint32_t confirm_energy_activated
-    : 1;  // bit 23：哨兵机器人是否确认使能量机关进入正在激活状态，1 为确认。默认为 0。
+  uint32_t
+    remote_exchange_17mm_count : 4;  // bit 13-16：远程兑换发弹量次数，开局为0，单调递增，每次加1
+  uint32_t
+    remote_exchange_blood_count : 4;  // bit 17-20：远程兑换血量次数，开局为0，单调递增，每次加1
+  uint32_t
+    sentry_change_pose : 2;  // bit 21-22：哨兵修改当前姿态指令，1 为进攻姿态，2 为防御姿态，3 为移动姿态，默认为 3；修改此值即可改变哨兵姿态。
+  uint32_t
+    confirm_energy_activated : 1;  // bit 23：哨兵机器人是否确认使能量机关进入正在激活状态，1 为确认。默认为 0。
   uint32_t reserved : 8;  // bit 24-31：保留
 };
 
@@ -610,6 +611,18 @@ struct __attribute__((packed)) CustomInfo
 struct __attribute__((packed)) RobotCustomData
 {
   uint8_t data[30];
+};
+
+// 0x0310 机器人发送给自定义客户端的数据
+struct __attribute__((packed)) RobotToClientData
+{
+  uint8_t data[300];  // 根据实际发送长度灵活处理，最大300
+};
+
+// 0x0311 自定义客户端发送给机器人的自定义指令
+struct __attribute__((packed)) ClientToRobotData
+{
+  uint8_t data[30];  // 包含你自定义的控制逻辑或键鼠数据
 };
 
 }  // namespace sp::referee

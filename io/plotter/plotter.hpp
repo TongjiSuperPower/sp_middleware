@@ -5,7 +5,7 @@
 
 namespace sp
 {
-constexpr size_t PLOTTER_FLOAT_NUM = 12;
+constexpr size_t PLOTTER_FLOAT_NUM = 18;
 
 struct __attribute__((packed)) PlotFrame
 {
@@ -43,6 +43,30 @@ public:
   void plot(
     float value1, float value2, float value3, float value4, float value5, float value6,
     float value7, float value8, float value9, float value10, float value11, float value12);
+  void plot(
+    float value1, float value2, float value3, float value4, float value5, float value6,
+    float value7, float value8, float value9, float value10, float value11, float value12,
+    float value13);
+  void plot(
+    float value1, float value2, float value3, float value4, float value5, float value6,
+    float value7, float value8, float value9, float value10, float value11, float value12,
+    float value13, float value14);
+  void plot(
+    float value1, float value2, float value3, float value4, float value5, float value6,
+    float value7, float value8, float value9, float value10, float value11, float value12,
+    float value13, float value14, float value15);
+  void plot(
+    float value1, float value2, float value3, float value4, float value5, float value6,
+    float value7, float value8, float value9, float value10, float value11, float value12,
+    float value13, float value14, float value15, float value16);
+  void plot(
+    float value1, float value2, float value3, float value4, float value5, float value6,
+    float value7, float value8, float value9, float value10, float value11, float value12,
+    float value13, float value14, float value15, float value16, float value17);
+  void plot(
+    float value1, float value2, float value3, float value4, float value5, float value6,
+    float value7, float value8, float value9, float value10, float value11, float value12,
+    float value13, float value14, float value15, float value16, float value17, float value18);
 
 private:
   UART_HandleTypeDef * huart_;

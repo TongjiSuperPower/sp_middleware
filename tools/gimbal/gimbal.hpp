@@ -35,13 +35,17 @@ class Gimbal
 public:
   Gimbal(
     float yaw0 = 0.0f, float pitch0 = 0.0f, bool reverse_yaw = false, bool reverse_pitch = false,
-    float dt = 1e-3f, const GimbalFilterConfig & filter_config = GimbalFilterConfig{});
+    float dt = 1e-3f, float install_roll = 0.0f,
+    const GimbalFilterConfig & filter_config = GimbalFilterConfig{});
 
   //单imu更新函数，输入云台姿态和电机角度
   void update_all_single(
     const sp::Mahony & gimbal_imu, const float & yaw_angle, const float & pitch_angle);
   //双imu更新函数，输入云台姿态、底盘姿态
-  void update_all_dual(const sp::Mahony & gimbal_imu, const sp::Mahony & chassis_imu);
+  void update_all_dual(const sp::Mahony & gimbal_imu, sp::Mahony & chassis_imu);
+
+  //双imu特有的函数，用于矫正底盘imu的姿态
+  void correct_chassis_imu(sp::Mahony & chassis_imu);
 
   void update(const sp::Mahony & gimbal_imu, const float & yaw_angle, const float & pitch_angle);
 
@@ -61,6 +65,11 @@ public:
     float acc_yaw_set_in_world = 0.0f, float acc_pitch_set_in_world = 0.0f);
 
   void calc(float yaw_set_in_world, float pitch_set_in_world);
+
+  // 欧拉角(ZYX顺序: yaw->pitch->roll)转四元数
+  // 输入: yaw, pitch, roll 的含义为: 机体系从与世界系重合开始, 先绕世界Z轴旋转yaw, 再绕新Y轴旋转pitch, 最后绕新X轴旋转roll
+  // 输出: q[4] = {w, x, y, z}, 表示将机体系下向量变换到世界系下的四元数, 即 v_world = q ⊗ v_body ⊗ q*
+  static void euler_zyx_to_quaternion(float yaw, float pitch, float roll, float q[4]);
 
   // 四元数转欧拉角：q[0]=w, q[1]=x, q[2]=y, q[3]=z
   // 返回数组顺序：[0]=roll, [1]=pitch, [2]=yaw，单位：rad
@@ -132,9 +141,9 @@ public:
     [4];  //云台系相对于底盘系的四元数表示 能将云台系的向量转换到底盘系,用于计算电机相对角度
   float q_chassis2world[4];  //底盘系相对于地面系的四元数表示 能将底盘系的向量转换到地面系
 
-  float yaw_rel;    //只读！ 云台yaw轴相对于码盘的反馈角度，单位：rad
-  float pitch_rel;  //只读！ 云台pitch轴相对于码盘的反馈角度，单位：rad
-  float roll_rel;   //只读！ 云台roll轴相对于码盘的反馈角度，往往是零单位：rad
+  float yaw_rel;    //只读！ 云台yaw轴相对于设定零点的相对角度，单位：rad
+  float pitch_rel;  //只读！ 云台pitch轴相对于设定零点的相对角度，单位：rad
+  float roll_rel;   //只读！ 云台roll轴相对于设定零点的相对角度，往往是零,单位：rad
 
   float roll_relative_speed;   //只读！ 云台roll轴相对底盘的角速度，单位：rad/s
   float pitch_relative_speed;  //只读！ 云台pitch轴相对底盘的角速度，单位：rad/s
@@ -152,7 +161,9 @@ public:
   float pitch_target_relative_acc =
     0.0f;  //只读！ 云台pitch轴目标相对角加速度（相对底盘），单位：rad/s²
 
-  float base_yaw_in_world;    //只读！ 底盘系相对于地面系的yaw角，单位：rad
+  float chassis_euler_in_world
+    [3];                    //只读！底盘系相对于地面系的欧拉角表示，单位：rad，顺序为roll pitch yaw
+  float base_yaw_in_world;  //只读！ 底盘系相对于地面系的yaw角，单位：rad
   float base_pitch_in_world;  //只读！ 底盘系相对于地面系的pitch角，单位：rad
   float base_roll_in_world;   //只读！ 底盘系相对于地面系的roll角，单位：rad
 
@@ -161,9 +172,11 @@ private:
   float pitch0_;  //云台pitch轴码盘零点位置，单位：rad
   float sign_yaw_;
   float sign_pitch_;
-  float dt_;                      //控制周期
-  float euler_motor[3];           //电机相对于底盘的欧拉角表示
-  float q_last_chassis2world[4];  //底盘系相对于地面系的上次四元数表示
+  float dt_;                                            //控制周期
+  float euler_motor[3];                                 //电机相对于底盘的欧拉角表示
+  float q_last_chassis2world[4];                        //底盘系相对于地面系的上次四元数表示
+  float install_roll_ = 0.0f;                           //底盘安装roll角,用于双imu矫正底盘姿态
+  float install_roll_q_[4] = {1.0f, 0.0f, 0.0f, 0.0f};  //底盘安装roll角对应的四元数表示
 
   float w_chassis_in_worldframe[3] = {0.0f, 0.0f, 0.0f};
   float w_last_chassis_in_worldframe[3] = {0.0f, 0.0f, 0.0f};

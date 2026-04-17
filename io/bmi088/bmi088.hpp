@@ -31,8 +31,8 @@ private:
   uint16_t csb2_pin_;
   const float r_ab_[3][3];
 
-  uint8_t rx_buff_[8];
-  uint8_t tx_buff_[8];
+  uint8_t rx_buff_[16];
+  uint8_t tx_buff_[16];
 
   uint8_t acc_init();
   void acc_update();

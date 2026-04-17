@@ -41,12 +41,14 @@ public:
   void add(float value) override;
   void init() override;
 
-  void cmd(float value) override;              // pos
-  void cmd_max() override;                     //pos
-  void cmd_min() override;                     //pos
-  void cmd_v(float value) override;            // vel
-  void set_feedforward(float value) override;  // feedforward_t
-  void cmd_t(float value) override;            // torque
+  void cmd(float value) override;                        // pos
+  void cmd_max() override;                               //pos
+  void cmd_min() override;                               //pos
+  void cmd_v(float value) override;                      // vel
+  bool cmd_v_until_t(float value, float t_threshold);    // vel with torque threshold
+  bool cmd_pos_until_t(float value, float t_threshold);  // pos with torque threshold
+  void set_feedforward(float value) override;            // feedforward_t
+  void cmd_t(float value) override;                      // torque
   void control() override;
 
   const float mid_;
