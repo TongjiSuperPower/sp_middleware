@@ -109,6 +109,13 @@ struct __attribute__((packed)) CustomByteBlock
 
 static_assert(sizeof(CustomByteBlock) == 300, "CustomByteBlock MUST be exactly 300 bytes!");
 
+struct VT03CustomClientData
+{
+  std::array<uint8_t, 30> data{};
+  uint8_t size = 0;
+  bool is_valid = false;
+};
+
 class VT03
 {
 public:
@@ -126,10 +133,11 @@ public:
   bool pause;     // 只读! 暂停按键
   bool trigger;   // 只读! 扳机按键
 
-  RefereeCustomData custom;  // 只读! 自定义控制器数据
-  RefereeRobotData robot;    // 只读！机器人向自定义控制器发送数据
-  VT03MouseData mouse;       // 只读! 鼠标数据
-  VT03KeysData keys;         // 只读! 键盘数据
+  RefereeCustomData custom;            // 只读! 自定义控制器数据
+  RefereeRobotData robot;              // 只读！机器人向自定义控制器发送数据
+  VT03MouseData mouse;                 // 只读! 鼠标数据
+  VT03KeysData keys;                   // 只读! 键盘数据
+  VT03CustomClientData custom_client;  // 只读! 自定义客户端向机器人发送的数据 0x0311
 
   bool is_open() const;
   bool is_alive(uint32_t now_ms) const;

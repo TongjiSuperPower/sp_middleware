@@ -67,6 +67,20 @@ void VT03::update(uint8_t * frame_start, uint16_t size, uint32_t stamp_ms)
         reinterpret_cast<uint8_t *>(&this->robot));
       break;
 
+    case referee::cmd_id::CLIENT_ROBOT_DATA:
+      std::fill(this->custom_client.data.begin(), this->custom_client.data.end(), 0);
+
+      if (data_len > this->custom_client.data.size()) {
+        this->custom_client.size = 0;
+        this->custom_client.is_valid = false;
+        break;
+      }
+
+      this->custom_client.size = static_cast<uint8_t>(data_len);
+      this->custom_client.is_valid = true;
+      std::memcpy(this->custom_client.data.data(), frame_start + referee::DATA_START, data_len);
+      break;
+
     default:
       break;
   }
