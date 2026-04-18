@@ -104,8 +104,7 @@ struct __attribute__((packed)) VT03KeysData
 
 struct __attribute__((packed)) CustomByteBlock
 {
-  uint8_t robot_satus;
-  uint8_t padding[299];
+  uint8_t padding[300];
 };
 
 static_assert(sizeof(CustomByteBlock) == 300, "CustomByteBlock MUST be exactly 300 bytes!");

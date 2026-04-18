@@ -1,32 +1,96 @@
 #include "vision.hpp"
 
+#include <cstring>
+
 #include "cmsis_os.h"
+#include "data_interfaces/uart/uart_task.hpp"
 #include "memory"
+#include "referee/vt03/vt03.hpp"
 #include "tools/crc/crc.hpp"
 #include "tools/math_tools/math_tools.hpp"
 #include "usbd_cdc_if.h"
+
+extern sp::VT03 vt03;
 
 namespace sp
 {
 
 void Vision::update(uint8_t * buf, uint32_t len)
 {
-  if (len != sizeof(rx_data_)) return;
-  if (buf[0] != 'S' || buf[1] != 'P') return;
-  if (!check_crc16(buf, len)) return;
+  if (len == 0 || buf == nullptr) return;
 
-  std::copy(buf, buf + len, reinterpret_cast<uint8_t *>(&rx_data_));
+  // Append new data to the buffer, discard all if overflow
+  if (rx_len_ + len > sizeof(rx_buffer_)) {
+    rx_len_ = 0;
+  }
+  std::copy(buf, buf + len, rx_buffer_ + rx_len_);
+  rx_len_ += len;
 
-  this->autoaim_alive = (osKernelSysTick() - this->autoaim_last_read_ms_ < 100);
-  this->control = (rx_data_.mode != 0);
-  this->fire = (rx_data_.mode == 2);
-  this->yaw = rx_data_.yaw;
-  this->yaw_vel = rx_data_.yaw_vel;
-  this->yaw_acc = rx_data_.yaw_acc;
-  this->pitch = rx_data_.pitch;
-  this->pitch_vel = rx_data_.pitch_vel;
-  this->pitch_acc = rx_data_.pitch_acc;
-  this->autoaim_last_read_ms_ = osKernelSysTick();
+  while (rx_len_ >= 2) {
+    if (rx_buffer_[0] == 'S' && rx_buffer_[1] == 'P') {
+      if (rx_len_ >= sizeof(VisionToGimbal)) {
+        if (check_crc16(rx_buffer_, sizeof(VisionToGimbal))) {
+          std::copy(
+            rx_buffer_, rx_buffer_ + sizeof(VisionToGimbal),
+            reinterpret_cast<uint8_t *>(&rx_data_));
+
+          this->autoaim_alive = (osKernelSysTick() - this->autoaim_last_read_ms_ < 100);
+          this->control = (rx_data_.mode != 0);
+          this->fire = (rx_data_.mode == 2);
+          this->yaw = rx_data_.yaw;
+          this->yaw_vel = rx_data_.yaw_vel;
+          this->yaw_acc = rx_data_.yaw_acc;
+          this->pitch = rx_data_.pitch;
+          this->pitch_vel = rx_data_.pitch_vel;
+          this->pitch_acc = rx_data_.pitch_acc;
+          this->autoaim_last_read_ms_ = osKernelSysTick();
+
+          // Shift remaining data forward
+          rx_len_ -= sizeof(VisionToGimbal);
+          if (rx_len_ > 0) std::memmove(rx_buffer_, rx_buffer_ + sizeof(VisionToGimbal), rx_len_);
+        }
+        else {
+          // CRC failed, invalid frame, shift 1 byte forward to re-sync
+          rx_len_--;
+          if (rx_len_ > 0) std::memmove(rx_buffer_, rx_buffer_ + 1, rx_len_);
+        }
+      }
+      else {
+        break;  // Wait for more data
+      }
+    }
+    else if (rx_buffer_[0] == 'S' && rx_buffer_[1] == 'C') {
+      if (rx_len_ >= sizeof(VisionToHanging)) {
+        if (check_crc16(rx_buffer_, sizeof(VisionToHanging))) {
+          std::copy(
+            rx_buffer_, rx_buffer_ + sizeof(VisionToHanging),
+            reinterpret_cast<uint8_t *>(&rx_data_hanging_));
+
+          this->seq = rx_data_hanging_.seq;
+          for (int i = 0; i < 288; i++) this->data[i] = rx_data_hanging_.data[i];
+
+          this->autoaim_last_read_ms_ = osKernelSysTick();
+
+          // Shift remaining data forward
+          rx_len_ -= sizeof(VisionToHanging);
+          if (rx_len_ > 0) std::memmove(rx_buffer_, rx_buffer_ + sizeof(VisionToHanging), rx_len_);
+        }
+        else {
+          // CRC failed, invalid frame, shift 1 byte forward to re-sync
+          rx_len_--;
+          if (rx_len_ > 0) std::memmove(rx_buffer_, rx_buffer_ + 1, rx_len_);
+        }
+      }
+      else {
+        break;  // Wait for more data
+      }
+    }
+    else {
+      // Invalid head, shift 1 byte forward to find next 'S'
+      rx_len_--;
+      if (rx_len_ > 0) std::memmove(rx_buffer_, rx_buffer_ + 1, rx_len_);
+    }
+  }
 }
 
 void Vision::send(

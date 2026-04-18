@@ -40,6 +40,15 @@ struct __attribute__((packed)) GimbalToVision
 
 static_assert(sizeof(GimbalToVision) <= 64);
 
+struct __attribute__((packed)) VisionToHanging
+{
+  uint8_t head[2] = {'S', 'C'};
+  uint8_t seq;
+  uint8_t data[288];
+  uint16_t crc16;
+};
+static_assert(sizeof(VisionToHanging) <= 293);
+
 class Vision
 {
 public:
@@ -53,16 +62,24 @@ public:
   float pitch_acc = 0;
 
   bool autoaim_alive = false;
+
+  uint8_t data[288] = {0};
+  uint8_t seq = 0;
+
   uint32_t autoaim_last_read_ms_ = 0;
   void update(uint8_t * buf, uint32_t len);
   void send(
     uint8_t mode, float q[4], float yaw, float yaw_vel, float pitch, float pitch_vel,
     float bullet_speed, uint16_t bullet_count, float supercap_power_in, float supercap_power_out,
     float supercap_voltage, uint8_t supercap_temperature, uint8_t supercap_status);
+  VisionToHanging rx_data_hanging_;
 
 private:
   VisionToGimbal rx_data_;
   GimbalToVision tx_data_;
+
+  uint8_t rx_buffer_[512] = {0};
+  uint16_t rx_len_ = 0;
 };
 
 }  // namespace sp
