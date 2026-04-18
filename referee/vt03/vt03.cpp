@@ -67,6 +67,7 @@ void VT03::update(uint8_t * frame_start, uint16_t size, uint32_t stamp_ms)
         reinterpret_cast<uint8_t *>(&this->robot));
       break;
 
+    //0x0311 自定义客户端发送给机器人的自定义指令
     case referee::cmd_id::CLIENT_ROBOT_DATA:
       std::fill(this->custom_client.data.begin(), this->custom_client.data.end(), 0);
 
