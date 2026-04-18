@@ -1,60 +1,9 @@
 #include "vt03.hpp"
 
-#include <cstring>
-
 #include "tools/crc/crc.hpp"
 
 namespace sp
 {
-namespace
-{
-bool decode_varint(const uint8_t * data, size_t size, size_t & offset, uint64_t & value)
-{
-  value = 0;
-
-  for (uint8_t shift = 0; shift < 70; shift += 7) {
-    if (offset >= size) return false;
-
-    const uint8_t byte = data[offset++];
-    value |= static_cast<uint64_t>(byte & 0x7F) << shift;
-
-    if ((byte & 0x80) == 0) return true;
-  }
-
-  return false;
-}
-
-bool skip_protobuf_field(
-  const uint8_t * data, size_t size, size_t & offset, uint8_t wire_type)
-{
-  uint64_t field_size = 0;
-
-  switch (wire_type) {
-    case 0:
-      return decode_varint(data, size, offset, field_size);
-
-    case 1:
-      if (size - offset < 8) return false;
-      offset += 8;
-      return true;
-
-    case 2:
-      if (!decode_varint(data, size, offset, field_size)) return false;
-      if (size - offset < field_size) return false;
-      offset += static_cast<size_t>(field_size);
-      return true;
-
-    case 5:
-      if (size - offset < 4) return false;
-      offset += 4;
-      return true;
-
-    default:
-      return false;
-  }
-}
-}  // namespace
-
 VT03::VT03(UART_HandleTypeDef * huart, bool use_dma) : huart(huart), use_dma_(use_dma) {}
 
 bool VT03::is_open() const { return has_read_; }
@@ -78,74 +27,52 @@ void VT03::update(uint8_t * frame_start, uint16_t size, uint32_t stamp_ms)
   has_read_ = true;
   last_read_ms_ = stamp_ms;
 
-  constexpr size_t remote_frame_len = sizeof(VT03RemoteData);
+  if (frame_start[0] == 0xA9 && frame_start[1] == 0x53) {
+    size_t frame_len = sizeof(VT03RemoteData);
 
-  size_t offset = 0;
-  while (offset < size) {
-    uint8_t * cursor = frame_start + offset;
-    size_t remaining = size - offset;
+    if (size < frame_len) return;
+    if (!check_crc16(frame_start, frame_len)) return;
 
-    if (remaining >= remote_frame_len && cursor[0] == 0xA9 && cursor[1] == 0x53) {
-      if (check_crc16(cursor, remote_frame_len)) {
-        update_remote(reinterpret_cast<const VT03RemoteData *>(cursor));
-        offset += remote_frame_len;
-        continue;
-      }
-    }
+    update_remote(reinterpret_cast<VT03RemoteData *>(frame_start));
 
-    if (cursor[0] != referee::SOF) {
-      ++offset;
-      continue;
-    }
-
-    if (remaining < referee::HEAD_LEN) break;
-    if (!check_crc8(cursor, referee::HEAD_LEN)) {
-      ++offset;
-      continue;
-    }
-
-    size_t data_len = (cursor[2] << 8) | cursor[1];
-    size_t frame_len = referee::HEAD_LEN + referee::CMD_ID_LEN + data_len + referee::TAIL_LEN;
-
-    // 帧长异常时按字节滑动重同步，尽量保住后续合法帧。
-    if (frame_len > remaining) {
-      ++offset;
-      continue;
-    }
-
-    if (!check_crc16(cursor, frame_len)) {
-      ++offset;
-      continue;
-    }
-
-    uint16_t cmd_id = (cursor[6] << 8) | cursor[5];
-
-    switch (cmd_id) {
-      // 0x0302 自定义控制器与机器人交互数据
-      case referee::cmd_id::CUSTOM_ROBOT_DATA:
-        std::copy(
-          cursor + referee::DATA_START, cursor + referee::DATA_START + data_len,
-          reinterpret_cast<uint8_t *>(&this->custom));
-        break;
-
-      // 0x0309 自定义控制器与机器人交互数据
-      case referee::cmd_id::ROBOT_CUSTOM_DATA:
-        std::copy(
-          cursor + referee::DATA_START, cursor + referee::DATA_START + data_len,
-          reinterpret_cast<uint8_t *>(&this->robot));
-        break;
-
-      // 0x0311 自定义客户端发送给机器人的自定义指令
-      case referee::cmd_id::CLIENT_ROBOT_DATA:
-        deserialize_custom_client_data(cursor + referee::DATA_START, data_len);
-        break;
-
-      default:
-        break;
-    }
-
-    offset += frame_len;
+    // 递归解析, 因为缓冲区中可能包含多帧裁判系统的数据
+    update(frame_start + frame_len, size - frame_len, stamp_ms);
+    return;
   }
+
+  if (size < referee::HEAD_LEN) return;
+  if (frame_start[0] != referee::SOF) return;
+  if (!check_crc8(frame_start, referee::HEAD_LEN)) return;
+
+  size_t data_len = (frame_start[2] << 8) | frame_start[1];
+  size_t frame_len = referee::HEAD_LEN + referee::CMD_ID_LEN + data_len + referee::TAIL_LEN;
+
+  if (size < frame_len) return;
+  if (!check_crc16(frame_start, frame_len)) return;
+
+  uint16_t cmd_id = (frame_start[6] << 8) | frame_start[5];
+
+  switch (cmd_id) {
+    // 0x0302 自定义控制器与机器人交互数据
+    case referee::cmd_id::CUSTOM_ROBOT_DATA:
+      std::copy(
+        frame_start + referee::DATA_START, frame_start + referee::DATA_START + data_len,
+        reinterpret_cast<uint8_t *>(&this->custom));
+      break;
+
+    // 0x0309 自定义控制器与机器人交互数据
+    case referee::cmd_id::ROBOT_CUSTOM_DATA:
+      std::copy(
+        frame_start + referee::DATA_START, frame_start + referee::DATA_START + data_len,
+        reinterpret_cast<uint8_t *>(&this->robot));
+      break;
+
+    default:
+      break;
+  }
+
+  // 递归解析, 因为缓冲区中可能包含多帧裁判系统的数据
+  update(frame_start + frame_len, size - frame_len, stamp_ms);
 }
 
 void VT03::update_remote(const VT03RemoteData * data)
@@ -188,40 +115,6 @@ void VT03::update_remote(const VT03RemoteData * data)
   this->mode = (data->mode_sw == 2)   ? VT03Mode::S
                : (data->mode_sw == 1) ? VT03Mode::N
                                       : VT03Mode::C;
-}
-
-bool VT03::deserialize_custom_client_data(const uint8_t * protobuf_data, size_t protobuf_size)
-{
-  this->custom_client.size = 0;
-  this->custom_client.is_valid = false;
-  this->custom_client.data.fill(0);
-
-  size_t offset = 0;
-
-  while (offset < protobuf_size) {
-    uint64_t tag = 0;
-    if (!decode_varint(protobuf_data, protobuf_size, offset, tag)) return false;
-
-    const uint64_t field_number = tag >> 3;
-    const uint8_t wire_type = static_cast<uint8_t>(tag & 0x07);
-
-    if (field_number == 1 && wire_type == 2) {
-      uint64_t payload_size = 0;
-      if (!decode_varint(protobuf_data, protobuf_size, offset, payload_size)) return false;
-      if (payload_size > this->custom_client.data.size()) return false;
-      if (protobuf_size - offset < payload_size) return false;
-
-      std::memcpy(
-        this->custom_client.data.data(), protobuf_data + offset, static_cast<size_t>(payload_size));
-      this->custom_client.size = static_cast<uint8_t>(payload_size);
-      this->custom_client.is_valid = true;
-      return true;
-    }
-
-    if (!skip_protobuf_field(protobuf_data, protobuf_size, offset, wire_type)) return false;
-  }
-
-  return false;
 }
 
 void VT03::send_custom_client_data(const CustomByteBlock & custom_data)

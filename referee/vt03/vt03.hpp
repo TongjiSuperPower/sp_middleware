@@ -110,13 +110,6 @@ struct __attribute__((packed)) CustomByteBlock
 
 static_assert(sizeof(CustomByteBlock) == 300, "CustomByteBlock MUST be exactly 300 bytes!");
 
-struct VT03CustomClientData
-{
-  std::array<uint8_t, 30> data{};
-  uint8_t size = 0;
-  bool is_valid = false;
-};
-
 class VT03
 {
 public:
@@ -138,7 +131,6 @@ public:
   RefereeRobotData robot;    // 只读！机器人向自定义控制器发送数据
   VT03MouseData mouse;       // 只读! 鼠标数据
   VT03KeysData keys;         // 只读! 键盘数据
-  VT03CustomClientData custom_client;  // 只读! 0x0311 反序列化后的 bytes data
 
   bool is_open() const;
   bool is_alive(uint32_t now_ms) const;
@@ -160,7 +152,6 @@ private:
 
   void update(uint8_t * frame_start, uint16_t size, uint32_t stamp_ms);
   void update_remote(const VT03RemoteData * data);
-  bool deserialize_custom_client_data(const uint8_t * protobuf_data, size_t protobuf_size);
 };
 
 }  // namespace sp
