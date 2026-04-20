@@ -3,14 +3,9 @@
 #include <cstring>
 
 #include "cmsis_os.h"
-#include "data_interfaces/uart/uart_task.hpp"
-#include "memory"
-#include "referee/vt03/vt03.hpp"
 #include "tools/crc/crc.hpp"
 #include "tools/math_tools/math_tools.hpp"
 #include "usbd_cdc_if.h"
-
-extern sp::VT03 vt03;
 
 namespace sp
 {
