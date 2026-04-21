@@ -52,7 +52,7 @@ namespace sp
 {
 BMI088::BMI088(
   SPI_HandleTypeDef * hspi, GPIO_TypeDef * csb1_port, uint16_t csb1_pin, GPIO_TypeDef * csb2_port,
-  uint16_t csb2_pin, const float r_ab[3][3])
+  uint16_t csb2_pin, const float r_ab[3][3], const float gyro_multipliers[3])
 : hspi_(hspi),
   csb1_port_(csb1_port),
   csb2_port_(csb2_port),
@@ -63,6 +63,18 @@ BMI088::BMI088(
     {r_ab[1][0], r_ab[1][1], r_ab[1][2]},
     {r_ab[2][0], r_ab[2][1], r_ab[2][2]}}
 {
+  // 初始化标度因数
+  if (gyro_multipliers != nullptr) {
+    gyro_multipliers_[0] = gyro_multipliers[0];
+    gyro_multipliers_[1] = gyro_multipliers[1];
+    gyro_multipliers_[2] = gyro_multipliers[2];
+  }
+  else {
+    // 默认不校准
+    gyro_multipliers_[0] = 1.0f;
+    gyro_multipliers_[1] = 1.0f;
+    gyro_multipliers_[2] = 1.0f;
+  }
 }
 
 void BMI088::init()
@@ -220,9 +232,11 @@ void BMI088::gyro_update()
   int16_t gyro_x_int = (rx_buff_[1 + 1] << 8) | rx_buff_[1 + 0];
   int16_t gyro_y_int = (rx_buff_[1 + 3] << 8) | rx_buff_[1 + 2];
   int16_t gyro_z_int = (rx_buff_[1 + 5] << 8) | rx_buff_[1 + 4];
-  float gyro_x = gyro_x_int * BMI088_GYRO_INT_TO_RPS;
-  float gyro_y = gyro_y_int * BMI088_GYRO_INT_TO_RPS;
-  float gyro_z = gyro_z_int * BMI088_GYRO_INT_TO_RPS;
+
+  // 应用传入的标度因数
+  float gyro_x = gyro_x_int * BMI088_GYRO_INT_TO_RPS * gyro_multipliers_[0];
+  float gyro_y = gyro_y_int * BMI088_GYRO_INT_TO_RPS * gyro_multipliers_[1];
+  float gyro_z = gyro_z_int * BMI088_GYRO_INT_TO_RPS * gyro_multipliers_[2];
 
   // 更新公开属性
   this->gyro[0] = r_ab_[0][0] * gyro_x + r_ab_[0][1] * gyro_y + r_ab_[0][2] * gyro_z;

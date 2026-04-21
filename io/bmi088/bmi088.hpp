@@ -14,7 +14,7 @@ public:
   // R_ab: bmi088原始坐标系{b}在机器人坐标系{a}下的坐标矩阵, 详见io/bmi088/readme.md
   BMI088(
     SPI_HandleTypeDef * hspi, GPIO_TypeDef * csb1_port, uint16_t csb1_pin, GPIO_TypeDef * csb2_port,
-    uint16_t csb2_pin, const float r_ab[3][3]);
+    uint16_t csb2_pin, const float r_ab[3][3], const float gyro_multipliers[3] = nullptr);
 
   float acc[3];   // 只读! 单位: m/s^2
   float gyro[3];  // 只读! 单位: rad/s
@@ -33,6 +33,8 @@ private:
 
   uint8_t rx_buff_[16];
   uint8_t tx_buff_[16];
+
+  float gyro_multipliers_[3]; // 存储三轴标度因数
 
   uint8_t acc_init();
   void acc_update();
