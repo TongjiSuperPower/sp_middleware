@@ -10,6 +10,13 @@ bool VT03::is_open() const { return has_read_; }
 
 bool VT03::is_alive(uint32_t now_ms) const { return is_open() && (now_ms - last_read_ms_ < 100); }
 
+bool VT03::custom_2_robot_is_open() const { return custom_2_robot_has_read_; }
+
+bool VT03::custom_2_robotis_alive(uint32_t now_ms) const
+{
+  return custom_2_robot_is_open() && (now_ms - custom_2_robot_last_read_ms_ < 100);
+}
+
 void VT03::request()
 {
   if (use_dma_) {
@@ -58,6 +65,8 @@ void VT03::update(uint8_t * frame_start, uint16_t size, uint32_t stamp_ms)
       std::copy(
         frame_start + referee::DATA_START, frame_start + referee::DATA_START + data_len,
         reinterpret_cast<uint8_t *>(&this->custom));
+      custom_2_robot_last_read_ms_ = stamp_ms;
+      custom_2_robot_has_read_ = true;
       break;
 
     // 0x0309 自定义控制器与机器人交互数据
@@ -110,22 +119,24 @@ void VT03::update_remote(const VT03RemoteData * data)
   this->mouse.middle = data->mouse_middle;
   this->mouse.right = data->mouse_right;
 
-  this->keys.w = (data->keys & 0x0001);
-  this->keys.s = (data->keys & 0x0002);
-  this->keys.a = (data->keys & 0x0004);
-  this->keys.d = (data->keys & 0x0008);
-  this->keys.shift = (data->keys & 0x0010);
-  this->keys.ctrl = (data->keys & 0x0020);
-  this->keys.q = (data->keys & 0x0040);
-  this->keys.e = (data->keys & 0x0080);
-  this->keys.r = (data->keys & 0x0100);
-  this->keys.f = (data->keys & 0x0200);
-  this->keys.g = (data->keys & 0x0400);
-  this->keys.z = (data->keys & 0x0800);
-  this->keys.x = (data->keys & 0x1000);
-  this->keys.c = (data->keys & 0x2000);
-  this->keys.v = (data->keys & 0x4000);
-  this->keys.b = (data->keys & 0x8000);
+  this->keyboard_value = data->keys;
+
+  this->keys.w = ((this->keyboard_value & VT03_KEY_W_MASK) != 0);
+  this->keys.s = ((this->keyboard_value & VT03_KEY_S_MASK) != 0);
+  this->keys.a = ((this->keyboard_value & VT03_KEY_A_MASK) != 0);
+  this->keys.d = ((this->keyboard_value & VT03_KEY_D_MASK) != 0);
+  this->keys.shift = ((this->keyboard_value & VT03_KEY_SHIFT_MASK) != 0);
+  this->keys.ctrl = ((this->keyboard_value & VT03_KEY_CTRL_MASK) != 0);
+  this->keys.q = ((this->keyboard_value & VT03_KEY_Q_MASK) != 0);
+  this->keys.e = ((this->keyboard_value & VT03_KEY_E_MASK) != 0);
+  this->keys.r = ((this->keyboard_value & VT03_KEY_R_MASK) != 0);
+  this->keys.f = ((this->keyboard_value & VT03_KEY_F_MASK) != 0);
+  this->keys.g = ((this->keyboard_value & VT03_KEY_G_MASK) != 0);
+  this->keys.z = ((this->keyboard_value & VT03_KEY_Z_MASK) != 0);
+  this->keys.x = ((this->keyboard_value & VT03_KEY_X_MASK) != 0);
+  this->keys.c = ((this->keyboard_value & VT03_KEY_C_MASK) != 0);
+  this->keys.v = ((this->keyboard_value & VT03_KEY_V_MASK) != 0);
+  this->keys.b = ((this->keyboard_value & VT03_KEY_B_MASK) != 0);
 
   this->mode = (data->mode_sw == 2)   ? VT03Mode::S
                : (data->mode_sw == 1) ? VT03Mode::N

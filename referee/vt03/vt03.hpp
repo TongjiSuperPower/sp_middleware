@@ -9,17 +9,33 @@
 
 namespace sp
 {
+
+constexpr uint16_t VT03_KEY_W_MASK = 0x0001;
+constexpr uint16_t VT03_KEY_S_MASK = 0x0002;
+constexpr uint16_t VT03_KEY_A_MASK = 0x0004;
+constexpr uint16_t VT03_KEY_D_MASK = 0x0008;
+constexpr uint16_t VT03_KEY_SHIFT_MASK = 0x0010;
+constexpr uint16_t VT03_KEY_CTRL_MASK = 0x0020;
+constexpr uint16_t VT03_KEY_Q_MASK = 0x0040;
+constexpr uint16_t VT03_KEY_E_MASK = 0x0080;
+constexpr uint16_t VT03_KEY_R_MASK = 0x0100;
+constexpr uint16_t VT03_KEY_F_MASK = 0x0200;
+constexpr uint16_t VT03_KEY_G_MASK = 0x0400;
+constexpr uint16_t VT03_KEY_Z_MASK = 0x0800;
+constexpr uint16_t VT03_KEY_X_MASK = 0x1000;
+constexpr uint16_t VT03_KEY_C_MASK = 0x2000;
+constexpr uint16_t VT03_KEY_V_MASK = 0x4000;
+constexpr uint16_t VT03_KEY_B_MASK = 0x8000;
+
 struct __attribute__((packed)) RefereeCustomData
 {
-  float yaw;
-  float roll;
-  float pitch;
-  float roll2;
-  float x;
-  float y;
-  float z;
-  bool button;
-  uint8_t reserved;  //保留位
+  float j0;
+  float j1;
+  float j2;
+  float j3;
+  float j4;
+  float j5;
+  uint8_t reserved[6];  //保留位
 };
 
 struct __attribute__((packed)) RefereeRobotData
@@ -139,8 +155,12 @@ public:
   VT03KeysData keys;                   // 只读! 键盘数据
   VT03CustomClientData custom_client;  // 只读! 自定义客户端向机器人发送的数据 0x0311
 
+  uint16_t keyboard_value;  // 只读! 键盘16位原始值
+
   bool is_open() const;
   bool is_alive(uint32_t now_ms) const;
+  bool custom_2_robot_is_open() const;
+  bool custom_2_robotis_alive(uint32_t now_ms) const;
 
   void request();
   void update(uint16_t size, uint32_t stamp_ms);
@@ -154,6 +174,8 @@ private:
 
   bool has_read_ = false;
   uint32_t last_read_ms_;
+  bool custom_2_robot_has_read_ = false;
+  uint32_t custom_2_robot_last_read_ms_;
 
   uint8_t seq_ = 0;  // 发送序列号，随每次发送递增
 
