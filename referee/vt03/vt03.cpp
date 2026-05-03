@@ -62,6 +62,9 @@ void VT03::update(uint16_t size, uint32_t stamp_ms)
     }
 
     // 重新开启 DMA，等待下一帧数据流入
+    this->huart->ReceptionType = HAL_UART_RECEPTION_TOIDLE;
+    __HAL_UART_ENABLE_IT(this->huart, UART_IT_IDLE);
+    SET_BIT(this->huart->Instance->CR3, USART_CR3_DMAR);
     __HAL_DMA_ENABLE(this->huart->hdmarx);
   }
   else {

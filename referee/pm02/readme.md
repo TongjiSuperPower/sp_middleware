@@ -25,7 +25,6 @@ extern "C" void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef * huart, uint16_t 
 {
   if (huart == pm02.huart) {
     pm02.update(Size);
-    pm02.request();
   }
 }
 
