@@ -1,6 +1,8 @@
 #ifndef SP__PM02_HPP
 #define SP__PM02_HPP
 
+#include <array>
+
 #include "referee/referee_protocol/referee_protocol.hpp"
 #include "usart.h"
 
@@ -47,8 +49,8 @@ public:
   // 0x0307 选手端小地图接收哨兵数据 选手端接收
   // 0x0308 选手端小地图接收机器人数据 选手端接收
   // 0x0309 自定义控制器接收机器人数据 图传链路
-  referee::RobotToClientData robot_to_client; // 0x0310
-  referee::ClientToRobotData client_to_robot; // 0x0311
+  referee::RobotToClientData robot_to_client;  // 0x0310
+  referee::ClientToRobotData client_to_robot;  // 0x0311
 
   void request();
   void update(uint16_t size);
@@ -60,6 +62,10 @@ private:
   const bool use_dma_;
 
   uint8_t buff_[PM02_BUFF_SIZE];
+  std::array<std::array<uint8_t, PM02_BUFF_SIZE>, 2> multi_buff_;
+
+  static constexpr uint32_t DMA_NDTR_SIZE = PM02_BUFF_SIZE * 2;
+
   void update(uint8_t * frame_start, uint16_t size);
 };
 
