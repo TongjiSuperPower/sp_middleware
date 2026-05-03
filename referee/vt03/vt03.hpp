@@ -171,6 +171,10 @@ public:
 private:
   const bool use_dma_;
   std::array<uint8_t, 255> buff_;
+  std::array<std::array<uint8_t, 255>, 2> multi_buff_;
+
+  static constexpr uint32_t RX_BUF_SIZE = 255;
+  static constexpr uint32_t DMA_NDTR_SIZE = RX_BUF_SIZE * 2;
 
   bool has_read_ = false;
   uint32_t last_read_ms_;
