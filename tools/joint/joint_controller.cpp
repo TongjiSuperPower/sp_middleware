@@ -26,6 +26,8 @@ void JointMotorController<MotorType>::disable()
 {
   mode_ = ControlMode::DISABLE;
   set_ = pos;
+  v_set_ = 0;
+  t_set_ = 0;
 }
 
 template <typename MotorType>
@@ -151,12 +153,14 @@ void JointMotorController<MotorType>::control()
   this->torque_fdb = sign_ * motor_.torque;
 
   if (mode_ == ControlMode::DISABLE) {
+    torque_cmd = 0.0f;
     motor_.cmd(0);
     return;
   }
 
   if (mode_ == ControlMode::TORQUE) {
-    motor_.cmd(t_set_);
+    torque_cmd = t_set_;
+    motor_.cmd(torque_cmd);
   }
   else {
     if (mode_ == ControlMode::POSITION) {
