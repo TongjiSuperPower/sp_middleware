@@ -4,7 +4,33 @@
 
 namespace sp
 {
-VT03::VT03(UART_HandleTypeDef * huart, bool use_dma) : huart(huart), use_dma_(use_dma) {}
+VT03::VT03(UART_HandleTypeDef * huart, bool use_dma)
+  : huart(huart),
+    mode(VT03Mode::C),
+    ch_rh(0.0f),
+    ch_rv(0.0f),
+    ch_lh(0.0f),
+    ch_lv(0.0f),
+    wheel(0.0f),
+    fn_l(false),
+    fn_r(false),
+    pause(false),
+    trigger(false),
+    custom(),
+    robot(),
+    mouse{0.0f, 0.0f, 0.0f, false, false, false},
+    keys(),
+    custom_client(),
+    keyboard_value(0),
+    use_dma_(use_dma),
+    has_read_(false),
+    last_read_ms_(0),
+    custom_2_robot_has_read_(false),
+    custom_2_robot_last_read_ms_(0),
+    seq_(0)
+{
+  std::fill(buff_.begin(), buff_.end(), 0);
+}
 
 bool VT03::is_open() const { return has_read_; }
 
@@ -19,79 +45,22 @@ bool VT03::custom_2_robotis_alive(uint32_t now_ms) const
 
 void VT03::request()
 {
-  HAL_UART_AbortReceive(this->huart);
-
   if (use_dma_) {
-    this->huart->ReceptionType = HAL_UART_RECEPTION_TOIDLE;
-    this->huart->RxEventType = HAL_UART_RXEVENT_IDLE;
-
-    this->huart->RxXferSize = DMA_NDTR_SIZE;
-
-    SET_BIT(this->huart->Instance->CR3, USART_CR3_DMAR);
-
-    __HAL_UART_ENABLE_IT(this->huart, UART_IT_IDLE);
-
-    HAL_DMAEx_MultiBufferStart(
-      this->huart->hdmarx, (uint32_t)&this->huart->Instance->RDR, (uint32_t)multi_buff_[0].data(),
-      (uint32_t)multi_buff_[1].data(), DMA_NDTR_SIZE);
+    HAL_UARTEx_ReceiveToIdle_DMA(this->huart, buff_.data(), buff_.size());
+    // ref: https://github.com/HNUYueLuRM/basic_framework/blob/master/bsp/usart/bsp_usart.c
+    __HAL_DMA_DISABLE_IT(this->huart->hdmarx, DMA_IT_HT);
   }
   else {
     HAL_UARTEx_ReceiveToIdle_IT(this->huart, buff_.data(), buff_.size());
   }
 }
 
-void VT03::update(uint16_t size, uint32_t stamp_ms)
-{
-  if (use_dma_) {
-    DMA_Stream_TypeDef * dma_stream = (DMA_Stream_TypeDef *)this->huart->hdmarx->Instance;
-
-    if ((dma_stream->CR & DMA_SxCR_CT) == RESET) {
-      __HAL_DMA_DISABLE(this->huart->hdmarx);  // 暂停 DMA 传输
-      dma_stream->CR |= DMA_SxCR_CT;           // 置 1 CT位，将下一次写入目标切换至 Memory 1
-      __HAL_DMA_SET_COUNTER(this->huart->hdmarx, DMA_NDTR_SIZE);  // 重置计数器为双倍长度
-
-      // 重新开启 DMA，等待下一帧数据流入
-      this->huart->ReceptionType = HAL_UART_RECEPTION_TOIDLE;
-      __HAL_UART_ENABLE_IT(this->huart, UART_IT_IDLE);
-      SET_BIT(this->huart->Instance->CR3, USART_CR3_DMAR);
-      __HAL_DMA_ENABLE(this->huart->hdmarx);
-
-      // 提取 Memory 0 的数据进行解析
-      update(multi_buff_[0].data(), size, stamp_ms);
-    }
-    else {
-      // 此时 CT = 1，数据刚刚被写入 Memory 1
-      __HAL_DMA_DISABLE(this->huart->hdmarx);  // 暂停 DMA 传输
-      dma_stream->CR &= ~(DMA_SxCR_CT);        // 清零 CT位，将下一次写入目标切换至 Memory 0
-      __HAL_DMA_SET_COUNTER(this->huart->hdmarx, DMA_NDTR_SIZE);  // 重置计数器为双倍长度
-
-      // 重新开启 DMA，等待下一帧数据流入
-      this->huart->ReceptionType = HAL_UART_RECEPTION_TOIDLE;
-      __HAL_UART_ENABLE_IT(this->huart, UART_IT_IDLE);
-      SET_BIT(this->huart->Instance->CR3, USART_CR3_DMAR);
-      __HAL_DMA_ENABLE(this->huart->hdmarx);
-
-      // 提取 Memory 1 的数据进行解析
-      update(multi_buff_[1].data(), size, stamp_ms);
-    }
-
-    // // 重新开启 DMA，等待下一帧数据流入
-    // this->huart->ReceptionType = HAL_UART_RECEPTION_TOIDLE;
-    // __HAL_UART_ENABLE_IT(this->huart, UART_IT_IDLE);
-    // SET_BIT(this->huart->Instance->CR3, USART_CR3_DMAR);
-    // __HAL_DMA_ENABLE(this->huart->hdmarx);
-  }
-  else {
-    HAL_UARTEx_ReceiveToIdle_IT(this->huart, buff_.data(), buff_.size());
-    update(buff_.data(), size, stamp_ms);
-  }
-}
+void VT03::update(uint16_t size, uint32_t stamp_ms) { update(buff_.data(), size, stamp_ms); }
 
 void VT03::update(uint8_t * frame_start, uint16_t size, uint32_t stamp_ms)
 {
   has_read_ = true;
   last_read_ms_ = stamp_ms;
-
   if (frame_start[0] == 0xA9 && frame_start[1] == 0x53) {
     size_t frame_len = sizeof(VT03RemoteData);
 
@@ -120,18 +89,20 @@ void VT03::update(uint8_t * frame_start, uint16_t size, uint32_t stamp_ms)
   switch (cmd_id) {
     // 0x0302 自定义控制器与机器人交互数据
     case referee::cmd_id::CUSTOM_ROBOT_DATA:
-      std::copy(
-        frame_start + referee::DATA_START, frame_start + referee::DATA_START + data_len,
-        reinterpret_cast<uint8_t *>(&this->custom));
+      if (data_len != sizeof(this->custom)) break;
+      std::memcpy(
+        reinterpret_cast<uint8_t *>(&this->custom), frame_start + referee::DATA_START,
+        sizeof(this->custom));
       custom_2_robot_last_read_ms_ = stamp_ms;
       custom_2_robot_has_read_ = true;
       break;
 
     // 0x0309 自定义控制器与机器人交互数据
     case referee::cmd_id::ROBOT_CUSTOM_DATA:
-      std::copy(
-        frame_start + referee::DATA_START, frame_start + referee::DATA_START + data_len,
-        reinterpret_cast<uint8_t *>(&this->robot));
+      if (data_len != sizeof(this->robot)) break;
+      std::memcpy(
+        reinterpret_cast<uint8_t *>(&this->robot), frame_start + referee::DATA_START,
+        sizeof(this->robot));
       break;
 
     //0x0311 自定义客户端发送给机器人的自定义指令
