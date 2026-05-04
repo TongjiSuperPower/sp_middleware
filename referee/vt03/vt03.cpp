@@ -19,6 +19,8 @@ bool VT03::custom_2_robotis_alive(uint32_t now_ms) const
 
 void VT03::request()
 {
+  HAL_UART_AbortReceive(this->huart);
+
   if (use_dma_) {
     this->huart->ReceptionType = HAL_UART_RECEPTION_TOIDLE;
     this->huart->RxEventType = HAL_UART_RXEVENT_IDLE;
@@ -48,6 +50,12 @@ void VT03::update(uint16_t size, uint32_t stamp_ms)
       dma_stream->CR |= DMA_SxCR_CT;           // 置 1 CT位，将下一次写入目标切换至 Memory 1
       __HAL_DMA_SET_COUNTER(this->huart->hdmarx, DMA_NDTR_SIZE);  // 重置计数器为双倍长度
 
+      // 重新开启 DMA，等待下一帧数据流入
+      this->huart->ReceptionType = HAL_UART_RECEPTION_TOIDLE;
+      __HAL_UART_ENABLE_IT(this->huart, UART_IT_IDLE);
+      SET_BIT(this->huart->Instance->CR3, USART_CR3_DMAR);
+      __HAL_DMA_ENABLE(this->huart->hdmarx);
+
       // 提取 Memory 0 的数据进行解析
       update(multi_buff_[0].data(), size, stamp_ms);
     }
@@ -57,15 +65,21 @@ void VT03::update(uint16_t size, uint32_t stamp_ms)
       dma_stream->CR &= ~(DMA_SxCR_CT);        // 清零 CT位，将下一次写入目标切换至 Memory 0
       __HAL_DMA_SET_COUNTER(this->huart->hdmarx, DMA_NDTR_SIZE);  // 重置计数器为双倍长度
 
+      // 重新开启 DMA，等待下一帧数据流入
+      this->huart->ReceptionType = HAL_UART_RECEPTION_TOIDLE;
+      __HAL_UART_ENABLE_IT(this->huart, UART_IT_IDLE);
+      SET_BIT(this->huart->Instance->CR3, USART_CR3_DMAR);
+      __HAL_DMA_ENABLE(this->huart->hdmarx);
+
       // 提取 Memory 1 的数据进行解析
       update(multi_buff_[1].data(), size, stamp_ms);
     }
 
-    // 重新开启 DMA，等待下一帧数据流入
-    this->huart->ReceptionType = HAL_UART_RECEPTION_TOIDLE;
-    __HAL_UART_ENABLE_IT(this->huart, UART_IT_IDLE);
-    SET_BIT(this->huart->Instance->CR3, USART_CR3_DMAR);
-    __HAL_DMA_ENABLE(this->huart->hdmarx);
+    // // 重新开启 DMA，等待下一帧数据流入
+    // this->huart->ReceptionType = HAL_UART_RECEPTION_TOIDLE;
+    // __HAL_UART_ENABLE_IT(this->huart, UART_IT_IDLE);
+    // SET_BIT(this->huart->Instance->CR3, USART_CR3_DMAR);
+    // __HAL_DMA_ENABLE(this->huart->hdmarx);
   }
   else {
     HAL_UARTEx_ReceiveToIdle_IT(this->huart, buff_.data(), buff_.size());
