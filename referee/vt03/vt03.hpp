@@ -29,24 +29,24 @@ constexpr uint16_t VT03_KEY_B_MASK = 0x8000;
 
 struct __attribute__((packed)) RefereeCustomData
 {
-  float j0;
-  float j1;
-  float j2;
-  float j3;
-  float j4;
-  float j5;
+  float j0 = 0.0f;
+  float j1 = 0.0f;
+  float j2 = 0.0f;
+  float j3 = 0.0f;
+  float j4 = 0.0f;
+  float j5 = 0.0f;
   uint8_t reserved[6];  //保留位
 };
 
 struct __attribute__((packed)) RefereeRobotData
 {
-  float mode;
-  float j0_pos;
-  float j1_pos;
-  float j2_pos;
-  float j0_vel;
-  float j1_vel;
-  float j2_vel;
+  float mode = 0.0f;
+  float j0_pos = 0.0f;
+  float j1_pos = 0.0f;
+  float j2_pos = 0.0f;
+  float j0_vel = 0.0f;
+  float j1_vel = 0.0f;
+  float j2_vel = 0.0f;
   uint8_t reserved[2];  //保留位 2位
 };
 
