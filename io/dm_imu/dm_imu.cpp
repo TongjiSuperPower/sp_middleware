@@ -5,8 +5,16 @@
 namespace sp
 {
 
-DM_IMU::DM_IMU(uint32_t tx_id, uint32_t rx_id)
-: tx_id(tx_id), rx_id(rx_id), temp(0), has_read_(false), last_read_ms_(0)
+DM_IMU::DM_IMU(uint32_t tx_id, uint32_t rx_id, const float r_ab[3][3])
+: tx_id(tx_id),
+  rx_id(rx_id),
+  temp(0),
+  has_read_(false),
+  last_read_ms_(0),
+  r_ab_{
+    {r_ab[0][0], r_ab[0][1], r_ab[0][2]},
+    {r_ab[1][0], r_ab[1][1], r_ab[1][2]},
+    {r_ab[2][0], r_ab[2][1], r_ab[2][2]}}
 {
   for (int i = 0; i < 3; ++i) {
     acc[i] = 0.0f;
@@ -58,9 +66,14 @@ void DM_IMU::read(uint8_t * data, uint32_t stamp_ms)
       uint16_t acc_y_int = (data[5] << 8) | data[4];
       uint16_t acc_z_int = (data[7] << 8) | data[6];
 
-      acc[0] = uint_to_float(acc_x_int, DM_IMU_ACCEL_MIN, DM_IMU_ACCEL_MAX, 16);
-      acc[1] = uint_to_float(acc_y_int, DM_IMU_ACCEL_MIN, DM_IMU_ACCEL_MAX, 16);
-      acc[2] = uint_to_float(acc_z_int, DM_IMU_ACCEL_MIN, DM_IMU_ACCEL_MAX, 16);
+      float acc_x = uint_to_float(acc_x_int, DM_IMU_ACCEL_MIN, DM_IMU_ACCEL_MAX, 16);
+      float acc_y = uint_to_float(acc_y_int, DM_IMU_ACCEL_MIN, DM_IMU_ACCEL_MAX, 16);
+      float acc_z = uint_to_float(acc_z_int, DM_IMU_ACCEL_MIN, DM_IMU_ACCEL_MAX, 16);
+
+      // 应用旋转矩阵
+      acc[0] = r_ab_[0][0] * acc_x + r_ab_[0][1] * acc_y + r_ab_[0][2] * acc_z;
+      acc[1] = r_ab_[1][0] * acc_x + r_ab_[1][1] * acc_y + r_ab_[1][2] * acc_z;
+      acc[2] = r_ab_[2][0] * acc_x + r_ab_[2][1] * acc_y + r_ab_[2][2] * acc_z;
       break;
     }
     case DM_IMU_REG_GYRO: {
@@ -68,9 +81,14 @@ void DM_IMU::read(uint8_t * data, uint32_t stamp_ms)
       uint16_t gyro_y_int = (data[5] << 8) | data[4];
       uint16_t gyro_z_int = (data[7] << 8) | data[6];
 
-      gyro[0] = uint_to_float(gyro_x_int, DM_IMU_GYRO_MIN, DM_IMU_GYRO_MAX, 16);
-      gyro[1] = uint_to_float(gyro_y_int, DM_IMU_GYRO_MIN, DM_IMU_GYRO_MAX, 16);
-      gyro[2] = uint_to_float(gyro_z_int, DM_IMU_GYRO_MIN, DM_IMU_GYRO_MAX, 16);
+      float gyro_x = uint_to_float(gyro_x_int, DM_IMU_GYRO_MIN, DM_IMU_GYRO_MAX, 16);
+      float gyro_y = uint_to_float(gyro_y_int, DM_IMU_GYRO_MIN, DM_IMU_GYRO_MAX, 16);
+      float gyro_z = uint_to_float(gyro_z_int, DM_IMU_GYRO_MIN, DM_IMU_GYRO_MAX, 16);
+
+      // 应用旋转矩阵
+      gyro[0] = r_ab_[0][0] * gyro_x + r_ab_[0][1] * gyro_y + r_ab_[0][2] * gyro_z;
+      gyro[1] = r_ab_[1][0] * gyro_x + r_ab_[1][1] * gyro_y + r_ab_[1][2] * gyro_z;
+      gyro[2] = r_ab_[2][0] * gyro_x + r_ab_[2][1] * gyro_y + r_ab_[2][2] * gyro_z;
       break;
     }
     case DM_IMU_REG_EULER: {
