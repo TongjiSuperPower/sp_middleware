@@ -4,6 +4,7 @@
 #include "motor/dm_motor/dm_motor.hpp"
 #include "motor/rm_motor/rm_motor.hpp"
 #include "tools/joint/control_mode.hpp"
+#include "tools/low_pass_filter/low_pass_filter.hpp"
 #include "tools/pid/pid.hpp"
 
 class JointControllerBase
@@ -13,6 +14,8 @@ public:
 
   float pos = 0;
   float vel = 0;
+  float pos_filtered = 0;
+  float vel_filtered = 0;
   float torque_fdb = 0;
   float torque_cmd = 0;
 
@@ -35,7 +38,7 @@ public:
   JointMotorController(
     float mid, float min, float max, float min_m, float max_m, float max_v, bool reverse,
     MotorType & motor, sp::PID & pid, sp::PID & motor_speed_pid, bool feedforward = false,
-    bool limited = true);
+    bool limited = true, float pos_filter = 1.0f, float vel_filter = 1.0f);
 
   void disable() override;
   void add(float value) override;
@@ -75,6 +78,10 @@ public:
 private:
   const bool feedforward_;
   bool limited_;
+  const float pos_filter_;
+  const float vel_filter_;
+  sp::LowPassFilter motor_pos_filter_{pos_filter_};
+  sp::LowPassFilter motor_vel_filter_{vel_filter_};
 };
 
 #endif  // JOINT_CONTROLLER_HPP

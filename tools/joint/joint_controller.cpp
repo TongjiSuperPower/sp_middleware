@@ -5,7 +5,8 @@
 template <typename MotorType>
 JointMotorController<MotorType>::JointMotorController(
   float mid, float min, float max, float min_m, float max_m, float max_v, bool reverse,
-  MotorType & motor, sp::PID & pid, sp::PID & motor_speed_pid, bool feedforward, bool limited)
+  MotorType & motor, sp::PID & pid, sp::PID & motor_speed_pid, bool feedforward, bool limited,
+  float pos_filter, float vel_filter)
 : mid_(mid),
   min_(min),
   max_(max),
@@ -17,7 +18,9 @@ JointMotorController<MotorType>::JointMotorController(
   pid_(pid),
   motor_speed_pid_(motor_speed_pid),
   feedforward_(feedforward),
-  limited_(limited)
+  limited_(limited),
+  pos_filter_(pos_filter),
+  vel_filter_(vel_filter)
 {
 }
 
@@ -144,12 +147,16 @@ template <typename MotorType>
 void JointMotorController<MotorType>::control()
 {
   this->pos = sign_ * motor_.angle - mid_ - init_angle_;
+  motor_pos_filter_.update(this->pos);
+  this->pos_filtered = motor_pos_filter_.out;
   if (limited_) {
     if (this->pos > max_m_) this->pos -= 2 * sp::SP_PI;
     if (this->pos < min_m_) this->pos += 2 * sp::SP_PI;
   }
 
   this->vel = sign_ * motor_.speed;
+  motor_vel_filter_.update(this->vel);
+  this->vel_filtered = motor_vel_filter_.out;
   this->torque_fdb = sign_ * motor_.torque;
 
   if (mode_ == ControlMode::DISABLE) {
@@ -164,11 +171,11 @@ void JointMotorController<MotorType>::control()
   }
   else {
     if (mode_ == ControlMode::POSITION) {
-      pid_.calc(set_, this->pos);
-      motor_speed_pid_.calc(pid_.out, this->vel);
+      pid_.calc(set_, this->pos_filtered);
+      motor_speed_pid_.calc(pid_.out, this->vel_filtered);
     }
     else if (mode_ == ControlMode::VELOCITY) {
-      motor_speed_pid_.calc(v_set_, this->vel);
+      motor_speed_pid_.calc(v_set_, this->vel_filtered);
     }
 
     torque_cmd =
