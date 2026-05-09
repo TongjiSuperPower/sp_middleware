@@ -147,13 +147,13 @@ template <typename MotorType>
 void JointMotorController<MotorType>::control()
 {
   this->pos = sign_ * motor_.angle - mid_ - init_angle_;
-  motor_pos_filter_.update(this->pos);
-  this->pos_filtered = motor_pos_filter_.out;
   if (limited_) {
     if (this->pos > max_m_) this->pos -= 2 * sp::SP_PI;
     if (this->pos < min_m_) this->pos += 2 * sp::SP_PI;
   }
-
+  motor_pos_filter_.update(this->pos);
+  this->pos_filtered = motor_pos_filter_.out;
+  
   this->vel = sign_ * motor_.speed;
   motor_vel_filter_.update(this->vel);
   this->vel_filtered = motor_vel_filter_.out;
