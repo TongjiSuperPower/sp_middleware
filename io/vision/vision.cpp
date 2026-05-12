@@ -38,6 +38,7 @@ void Vision::update(uint8_t * buf, uint32_t len)
           this->pitch = rx_data_.pitch;
           this->pitch_vel = rx_data_.pitch_vel;
           this->pitch_acc = rx_data_.pitch_acc;
+          this->auto_aim_target = rx_data_.target;
           this->autoaim_last_read_ms_ = osKernelSysTick();
 
           // Shift remaining data forward

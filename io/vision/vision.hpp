@@ -15,6 +15,7 @@ struct __attribute__((packed)) VisionToGimbal
   float pitch;
   float pitch_vel;
   float pitch_acc;
+  uint8_t target;  //0:英雄,1:工程,2:3号步兵,3:4号步兵,4:5号步兵,5:哨兵,6:前哨,7:基地,8:无目标
   uint16_t crc16;
 };
 static_assert(sizeof(VisionToGimbal) <= 64);
@@ -60,6 +61,7 @@ public:
   float pitch = 0;
   float pitch_vel = 0;
   float pitch_acc = 0;
+  uint8_t auto_aim_target = 8;  //默认无目标
 
   bool autoaim_alive = false;
 
