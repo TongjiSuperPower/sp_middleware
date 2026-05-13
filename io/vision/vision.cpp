@@ -7,6 +7,10 @@
 #include "tools/math_tools/math_tools.hpp"
 #include "usbd_cdc_if.h"
 
+#ifndef CDC_Transmit_HS
+#define CDC_Transmit_HS CDC_Transmit_FS
+#endif
+
 namespace sp
 {
 
