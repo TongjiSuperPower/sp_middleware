@@ -243,7 +243,6 @@ struct __attribute__((packed)) PowerHeatData
   float reserved_3;
   uint16_t buffer_energy;               // 缓冲能量（单位：J）
   uint16_t shooter_17mm_1_barrel_heat;  // 第 1 个 17mm 发射机构的射击热量
-  uint16_t shooter_17mm_2_barrel_heat;  // 第 2 个 17mm 发射机构的射击热量
   uint16_t shooter_42mm_barrel_heat;    // 42mm 发射机构的射击热量
 };
 
