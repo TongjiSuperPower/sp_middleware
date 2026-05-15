@@ -120,4 +120,32 @@ void Vision::send(
   CDC_Transmit_HS(reinterpret_cast<uint8_t *>(&tx_data_), sizeof(tx_data_));
 }
 
+void Vision::send(
+  uint8_t mode, float q[4], float yaw, float yaw_vel, float pitch, float pitch_vel,
+  float bullet_speed, uint16_t bullet_count, float supercap_power_in, float supercap_power_out,
+  float supercap_voltage, uint8_t supercap_temperature, uint8_t supercap_status,
+  uint8_t game_progress)
+{
+  tx_data_.mode = mode;
+  tx_data_.q[0] = q[0];
+  tx_data_.q[1] = q[1];
+  tx_data_.q[2] = q[2];
+  tx_data_.q[3] = q[3];
+  tx_data_.yaw = yaw;
+  tx_data_.yaw_vel = yaw_vel;
+  tx_data_.pitch = pitch;
+  tx_data_.pitch_vel = pitch_vel;
+  tx_data_.bullet_speed = bullet_speed;
+  tx_data_.bullet_count = bullet_count;
+  tx_data_.supercap_power_in = supercap_power_in;
+  tx_data_.supercap_power_out = supercap_power_out;
+  tx_data_.supercap_voltage = supercap_voltage;
+  tx_data_.supercap_temperature = supercap_temperature;
+  tx_data_.supercap_status = supercap_status;
+  tx_data_.game_progress = game_progress;
+  tx_data_.crc16 =
+    get_crc16(reinterpret_cast<uint8_t *>(&tx_data_), sizeof(tx_data_) - sizeof(tx_data_.crc16));
+
+  CDC_Transmit_FS(reinterpret_cast<uint8_t *>(&tx_data_), sizeof(tx_data_));
+}
 }  // namespace sp

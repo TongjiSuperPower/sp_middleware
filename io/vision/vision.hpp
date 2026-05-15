@@ -36,6 +36,7 @@ struct __attribute__((packed)) GimbalToVision
   float supercap_voltage;
   uint8_t supercap_temperature;
   uint8_t supercap_status;
+  uint8_t game_progress;
   uint16_t crc16;
 };
 
@@ -74,6 +75,11 @@ public:
     uint8_t mode, float q[4], float yaw, float yaw_vel, float pitch, float pitch_vel,
     float bullet_speed, uint16_t bullet_count, float supercap_power_in, float supercap_power_out,
     float supercap_voltage, uint8_t supercap_temperature, uint8_t supercap_status);
+  void send(
+    uint8_t mode, float q[4], float yaw, float yaw_vel, float pitch, float pitch_vel,
+    float bullet_speed, uint16_t bullet_count, float supercap_power_in, float supercap_power_out,
+    float supercap_voltage, uint8_t supercap_temperature, uint8_t supercap_status,
+    uint8_t game_progress);
   VisionToHanging rx_data_hanging_;
 
 private:
