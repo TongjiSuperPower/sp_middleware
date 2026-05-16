@@ -7,9 +7,33 @@
 #include "tools/math_tools/math_tools.hpp"
 #include "usbd_cdc_if.h"
 
-#ifndef CDC_Transmit_HS
-#define CDC_Transmit_HS CDC_Transmit_FS
+extern "C" {
+#if defined(__GNUC__)
+uint8_t CDC_Transmit_HS(uint8_t* Buf, uint16_t Len) __attribute__((weak));
+uint8_t CDC_Transmit_FS(uint8_t* Buf, uint16_t Len) __attribute__((weak));
+#else
+/* For non-GNU toolchains, declare without weak attribute; the project
+  should ensure one of these is provided. */
+uint8_t CDC_Transmit_HS(uint8_t* Buf, uint16_t Len);
+uint8_t CDC_Transmit_FS(uint8_t* Buf, uint16_t Len);
 #endif
+}
+
+static inline uint8_t CDC_Transmit_Select(uint8_t* Buf, uint16_t Len)
+{
+#if defined(__GNUC__)
+  if (CDC_Transmit_HS) return CDC_Transmit_HS(Buf, Len);
+  if (CDC_Transmit_FS) return CDC_Transmit_FS(Buf, Len);
+  return 0xFF; /* no implementation available */
+#else
+  /* Prefer HS when both declared; fall back to FS. Linker will error
+    if neither is provided for non-GNU toolchains. */
+  extern uint8_t CDC_Transmit_HS(uint8_t*, uint16_t);
+  extern uint8_t CDC_Transmit_FS(uint8_t*, uint16_t);
+  /* Try HS first */
+  return CDC_Transmit_HS ? CDC_Transmit_HS(Buf, Len) : CDC_Transmit_FS(Buf, Len);
+#endif
+}
 
 namespace sp
 {
@@ -117,7 +141,7 @@ void Vision::send(
   tx_data_.crc16 =
     get_crc16(reinterpret_cast<uint8_t *>(&tx_data_), sizeof(tx_data_) - sizeof(tx_data_.crc16));
 
-  CDC_Transmit_HS(reinterpret_cast<uint8_t *>(&tx_data_), sizeof(tx_data_));
+  CDC_Transmit_Select(reinterpret_cast<uint8_t *>(&tx_data_), sizeof(tx_data_));
 }
 
 void Vision::send(
@@ -146,6 +170,6 @@ void Vision::send(
   tx_data_.crc16 =
     get_crc16(reinterpret_cast<uint8_t *>(&tx_data_), sizeof(tx_data_) - sizeof(tx_data_.crc16));
 
-  CDC_Transmit_FS(reinterpret_cast<uint8_t *>(&tx_data_), sizeof(tx_data_));
+  CDC_Transmit_Select(reinterpret_cast<uint8_t *>(&tx_data_), sizeof(tx_data_));
 }
 }  // namespace sp
