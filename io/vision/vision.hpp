@@ -36,11 +36,32 @@ struct __attribute__((packed)) GimbalToVision
   float supercap_voltage;
   uint8_t supercap_temperature;
   uint8_t supercap_status;
-  uint8_t game_progress;
   uint16_t crc16;
 };
 
 static_assert(sizeof(GimbalToVision) <= 64);
+
+struct __attribute__((packed)) GimbalToVisionHero
+{
+  uint8_t head[2] = {'S', 'P'};
+  uint8_t mode;  // 0: 空闲, 1: 自瞄, 2: 小符, 3: 大符
+  float q[4];    // wxyz顺序
+  float yaw;
+  float yaw_vel;
+  float pitch;
+  float pitch_vel;
+  float bullet_speed;
+  uint16_t bullet_count;  // 子弹累计发送次数
+  float supercap_power_in;
+  float supercap_power_out;
+  float supercap_voltage;
+  uint8_t supercap_temperature;
+  uint8_t supercap_status;
+  uint8_t game_progress;
+  uint16_t crc16;
+};
+
+static_assert(sizeof(GimbalToVisionHero) <= 64);
 
 struct __attribute__((packed)) VisionToHanging
 {
@@ -85,6 +106,7 @@ public:
 private:
   VisionToGimbal rx_data_;
   GimbalToVision tx_data_;
+  GimbalToVisionHero tx_data_with_game_progress_;
 
   uint8_t rx_buffer_[512] = {0};
   uint16_t rx_len_ = 0;

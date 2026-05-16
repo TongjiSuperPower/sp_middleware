@@ -9,17 +9,17 @@
 
 extern "C" {
 #if defined(__GNUC__)
-uint8_t CDC_Transmit_HS(uint8_t* Buf, uint16_t Len) __attribute__((weak));
-uint8_t CDC_Transmit_FS(uint8_t* Buf, uint16_t Len) __attribute__((weak));
+uint8_t CDC_Transmit_HS(uint8_t * Buf, uint16_t Len) __attribute__((weak));
+uint8_t CDC_Transmit_FS(uint8_t * Buf, uint16_t Len) __attribute__((weak));
 #else
 /* For non-GNU toolchains, declare without weak attribute; the project
   should ensure one of these is provided. */
-uint8_t CDC_Transmit_HS(uint8_t* Buf, uint16_t Len);
-uint8_t CDC_Transmit_FS(uint8_t* Buf, uint16_t Len);
+uint8_t CDC_Transmit_HS(uint8_t * Buf, uint16_t Len);
+uint8_t CDC_Transmit_FS(uint8_t * Buf, uint16_t Len);
 #endif
 }
 
-static inline uint8_t CDC_Transmit_Select(uint8_t* Buf, uint16_t Len)
+static inline uint8_t CDC_Transmit_Select(uint8_t * Buf, uint16_t Len)
 {
 #if defined(__GNUC__)
   if (CDC_Transmit_HS) return CDC_Transmit_HS(Buf, Len);
@@ -28,8 +28,8 @@ static inline uint8_t CDC_Transmit_Select(uint8_t* Buf, uint16_t Len)
 #else
   /* Prefer HS when both declared; fall back to FS. Linker will error
     if neither is provided for non-GNU toolchains. */
-  extern uint8_t CDC_Transmit_HS(uint8_t*, uint16_t);
-  extern uint8_t CDC_Transmit_FS(uint8_t*, uint16_t);
+  extern uint8_t CDC_Transmit_HS(uint8_t *, uint16_t);
+  extern uint8_t CDC_Transmit_FS(uint8_t *, uint16_t);
   /* Try HS first */
   return CDC_Transmit_HS ? CDC_Transmit_HS(Buf, Len) : CDC_Transmit_FS(Buf, Len);
 #endif
@@ -150,26 +150,28 @@ void Vision::send(
   float supercap_voltage, uint8_t supercap_temperature, uint8_t supercap_status,
   uint8_t game_progress)
 {
-  tx_data_.mode = mode;
-  tx_data_.q[0] = q[0];
-  tx_data_.q[1] = q[1];
-  tx_data_.q[2] = q[2];
-  tx_data_.q[3] = q[3];
-  tx_data_.yaw = yaw;
-  tx_data_.yaw_vel = yaw_vel;
-  tx_data_.pitch = pitch;
-  tx_data_.pitch_vel = pitch_vel;
-  tx_data_.bullet_speed = bullet_speed;
-  tx_data_.bullet_count = bullet_count;
-  tx_data_.supercap_power_in = supercap_power_in;
-  tx_data_.supercap_power_out = supercap_power_out;
-  tx_data_.supercap_voltage = supercap_voltage;
-  tx_data_.supercap_temperature = supercap_temperature;
-  tx_data_.supercap_status = supercap_status;
-  tx_data_.game_progress = game_progress;
-  tx_data_.crc16 =
-    get_crc16(reinterpret_cast<uint8_t *>(&tx_data_), sizeof(tx_data_) - sizeof(tx_data_.crc16));
+  tx_data_with_game_progress_.mode = mode;
+  tx_data_with_game_progress_.q[0] = q[0];
+  tx_data_with_game_progress_.q[1] = q[1];
+  tx_data_with_game_progress_.q[2] = q[2];
+  tx_data_with_game_progress_.q[3] = q[3];
+  tx_data_with_game_progress_.yaw = yaw;
+  tx_data_with_game_progress_.yaw_vel = yaw_vel;
+  tx_data_with_game_progress_.pitch = pitch;
+  tx_data_with_game_progress_.pitch_vel = pitch_vel;
+  tx_data_with_game_progress_.bullet_speed = bullet_speed;
+  tx_data_with_game_progress_.bullet_count = bullet_count;
+  tx_data_with_game_progress_.supercap_power_in = supercap_power_in;
+  tx_data_with_game_progress_.supercap_power_out = supercap_power_out;
+  tx_data_with_game_progress_.supercap_voltage = supercap_voltage;
+  tx_data_with_game_progress_.supercap_temperature = supercap_temperature;
+  tx_data_with_game_progress_.supercap_status = supercap_status;
+  tx_data_with_game_progress_.game_progress = game_progress;
+  tx_data_with_game_progress_.crc16 = get_crc16(
+    reinterpret_cast<uint8_t *>(&tx_data_with_game_progress_),
+    sizeof(tx_data_with_game_progress_) - sizeof(tx_data_with_game_progress_.crc16));
 
-  CDC_Transmit_Select(reinterpret_cast<uint8_t *>(&tx_data_), sizeof(tx_data_));
+  CDC_Transmit_Select(
+    reinterpret_cast<uint8_t *>(&tx_data_with_game_progress_), sizeof(tx_data_with_game_progress_));
 }
 }  // namespace sp
