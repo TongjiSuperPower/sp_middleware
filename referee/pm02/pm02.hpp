@@ -40,18 +40,13 @@ public:
   referee::RadarMarkData radar_mark;                  // 只读! 0x020C 雷达标记进度数据
   referee::SentryInfo sentry_info;                    // 只读! 0x020D 哨兵自主决策信息同步
   referee::RadarInfo radar_info;                      // 只读! 0x020E 雷达自主决策信息同步
-
-  // 0x0301 机器人交互数据 TODO
-  // 0x0302 自定义控制器与机器人交互数据 图传链路
-  referee::MapCommand map_command;  // 只读! 0x0303 选手端小地图交互数据
-  // 0x0305 选手端小地图接收雷达数据 选手端接收
-  // 0x0306 自定义控制器与选手端交互数据 选手端接收
-  // 0x0307 选手端小地图接收哨兵数据 选手端接收
-  // 0x0308 选手端小地图接收机器人数据 选手端接收
-  // 0x0309 自定义控制器接收机器人数据 图传链路
-  referee::RobotToClientData robot_to_client;  // 0x0310
-  referee::ClientToRobotData client_to_robot;  // 0x0311
-
+  //todo
+  // referee::RobotInteractionData robot_interaction;  // 只读! 0x0301 机器人交互数据
+  referee::MapCommand map_command;                  // 只读! 0x0303 选手端小地图交互数据
+  referee::MapRobotData map_robot_data;             // 只读! 0x0305 选手端小地图接收雷达数据
+  // referee::CustomClientData custom_client_data;     // 只读! 0x0306 自定义控制器与选手端交互数据
+  referee::MapData map_data;                        // 只读! 0x0307 选手端小地图接收哨兵数据
+  referee::CustomInfo custom_info;                  // 只读! 0x0308 选手端小地图接收机器人数据
   void request();
   void update(uint16_t size);
   void send(const uint8_t * data, size_t size);
