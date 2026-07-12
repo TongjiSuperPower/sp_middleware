@@ -57,6 +57,7 @@ private:
   const float alpha_;
   const bool angular_;  // 是否为角度控制
   const bool dynamic_;  // 是否为变速积分
+  bool dout_ready_ = false;
 };
 
 }  // namespace sp

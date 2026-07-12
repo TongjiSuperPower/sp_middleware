@@ -19,10 +19,15 @@ PID::PID(
 
 void PID::calc(float set, float fdb)
 {
-  // 微分先行
-  this->data.dbuf[2] = this->data.dbuf[1];
-  this->data.dbuf[1] = this->data.dbuf[0];
-  this->data.dbuf[0] = angular_ ? limit_angle((this->data.fdb - fdb)) : (this->data.fdb - fdb);
+  if (dout_ready_ == true) {
+    // 微分先行
+    this->data.dbuf[2] = this->data.dbuf[1];
+    this->data.dbuf[1] = this->data.dbuf[0];
+    this->data.dbuf[0] = angular_ ? limit_angle((this->data.fdb - fdb)) : (this->data.fdb - fdb);
+  }
+  else {
+    dout_ready_ = true;
+  }
 
   // 滤波
   this->data.dbuf[0] = alpha_ * this->data.dbuf[0] + (1 - alpha_) * this->data.dbuf[1];
@@ -70,10 +75,15 @@ void PID::calc(float set, float fdb, float set_dot, float fdb_dot)
 
 void PID::calc(float set, float fdb, float integral_pause_threshold)
 {
-  // 微分先行
-  this->data.dbuf[2] = this->data.dbuf[1];
-  this->data.dbuf[1] = this->data.dbuf[0];
-  this->data.dbuf[0] = angular_ ? limit_angle((this->data.fdb - fdb)) : (this->data.fdb - fdb);
+  if (dout_ready_ == true) {
+    // 微分先行
+    this->data.dbuf[2] = this->data.dbuf[1];
+    this->data.dbuf[1] = this->data.dbuf[0];
+    this->data.dbuf[0] = angular_ ? limit_angle((this->data.fdb - fdb)) : (this->data.fdb - fdb);
+  }
+  else {
+    dout_ready_ = true;
+  }
 
   // 滤波
   this->data.dbuf[0] = alpha_ * this->data.dbuf[0] + (1 - alpha_) * this->data.dbuf[1];
@@ -115,6 +125,7 @@ void PID::clear()
 {
   this->data = {};   // 清空所有的中间状态和缓存数组
   this->out = 0.0f;  // 清空输出
+  this->dout_ready_ = false;
 }
 
 }  // namespace sp
