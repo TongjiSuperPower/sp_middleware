@@ -441,11 +441,27 @@ struct __attribute__((packed)) SentryInfo
   //       0：在战 1：脱战
   uint16_t ammo_exchange_allowance : 11;   // bit 1-11：队伍 17mm 允许发弹量的剩余可兑换数
   uint16_t sentry_pose : 2;                // bit 12-13：哨兵当前姿态，1 进攻，2 防御，3 移动
+  
   uint16_t energy_mechanism_status : 1;    // bit 14：己方能量机关是否可进入激活状态
   //       0：不可激活 1：可激活
   uint16_t sentry_pose_boosted : 1;        // bit 15：哨兵当前姿态是否存在增益
   //       0：无增益 1：有增益
-  uint64_t sentry_info_3;                  // 2026 协议新增的哨兵信息 3，按协议位域使用
+  // ===== 2026 协议新增 sentry_info_3 =====
+  uint64_t attack_pose_duration : 8;                // bit 0-7：进攻姿态剩余持续时间
+
+  uint64_t defense_pose_duration : 8;               // bit 8-15：防御姿态剩余持续时间
+
+  uint64_t move_pose_duration : 8;                  // bit 16-23：移动姿态剩余持续时间
+
+  uint64_t reserved2 : 8;                           // bit 24-31：保留
+
+  uint64_t enhanced_attack_pose_duration : 8;       // bit 32-39：强化进攻姿态剩余持续时间
+
+  uint64_t enhanced_defense_pose_duration : 8;      // bit 40-47：强化防御姿态剩余持续时间
+
+  uint64_t enhanced_move_pose_duration : 8;         // bit 48-55：强化移动姿态剩余持续时间
+
+  uint64_t reserved3 : 8;                           // bit 56-63：保留
 };
 
 // 0x020E 雷达自主决策信息同步
