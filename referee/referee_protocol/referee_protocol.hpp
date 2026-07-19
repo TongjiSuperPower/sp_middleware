@@ -96,6 +96,7 @@ constexpr uint16_t INQUIRY_IMAGE_TRANSFER = 0x0F02;  // 查询图传出图信道
 
 namespace sp::referee::data_cmd_id
 {
+constexpr uint16_t RADAR_TO_SENTRY_ROBOT_STATUS = 0x0200;
 // 0x0200~0x02FF 机器人之间通信 TODO
 constexpr uint16_t INTERACTION_LAYER_DELETE = 0x0100;     // 选手端删除图层
 constexpr uint16_t INTERACTION_FIGURE = 0x0101;           // 选手端绘制一个图形
@@ -462,6 +463,68 @@ struct __attribute__((packed)) RadarInfo
   uint8_t reserved : 2;                        // bit 6-7：保留
 };
 
+// 0x0A05 雷达站发送增益点状态数据（无线链路）
+struct __attribute__((packed)) RadarBuffStatus
+{
+  uint8_t buff_status[35];
+  uint8_t enemy_sentry_pose;
+  uint8_t enemy_hero_main_status;
+  uint8_t enemy_engineer_main_status;
+  uint8_t enemy_infantry_3_main_status;
+  uint8_t enemy_infantry_4_main_status;
+  uint8_t enemy_sentry_main_status;
+};
+
+// 自定义 0x0301/0x0200 用户数据。每台机器人的状态保持 0x0A05 原值：
+// 0=存活，1=战亡，2=无敌但不虚弱，3=无敌且虚弱。
+namespace robot_main_status
+{
+constexpr uint8_t ALIVE = 0;
+constexpr uint8_t DEAD = 1;
+constexpr uint8_t INVINCIBLE = 2;
+constexpr uint8_t INVINCIBLE_AND_VULNERABLE = 3;
+}  // namespace robot_main_status
+
+struct __attribute__((packed)) RadarToSentryRobotStatus
+{
+  uint8_t enemy_hero;
+  uint8_t enemy_engineer;
+  uint8_t enemy_infantry_3;
+  uint8_t enemy_infantry_4;
+  uint8_t enemy_sentry;
+};
+
+constexpr bool radar_main_status_valid(uint8_t status)
+{
+  return status <= robot_main_status::INVINCIBLE_AND_VULNERABLE;
+}
+
+inline bool radar_buff_status_valid(const RadarBuffStatus & status)
+{
+  return radar_main_status_valid(status.enemy_hero_main_status) &&
+         radar_main_status_valid(status.enemy_engineer_main_status) &&
+         radar_main_status_valid(status.enemy_infantry_3_main_status) &&
+         radar_main_status_valid(status.enemy_infantry_4_main_status) &&
+         radar_main_status_valid(status.enemy_sentry_main_status);
+}
+
+inline RadarToSentryRobotStatus make_enemy_robot_status(const RadarBuffStatus & status)
+{
+  return {
+    status.enemy_hero_main_status, status.enemy_engineer_main_status,
+    status.enemy_infantry_3_main_status, status.enemy_infantry_4_main_status,
+    status.enemy_sentry_main_status};
+}
+
+inline bool radar_to_sentry_robot_status_valid(const RadarToSentryRobotStatus & status)
+{
+  return radar_main_status_valid(status.enemy_hero) &&
+         radar_main_status_valid(status.enemy_engineer) &&
+         radar_main_status_valid(status.enemy_infantry_3) &&
+         radar_main_status_valid(status.enemy_infantry_4) &&
+         radar_main_status_valid(status.enemy_sentry);
+}
+
 // 0x0301 机器人交互数据
 struct __attribute__((packed)) RobotInteractionData
 {
@@ -686,6 +749,8 @@ static_assert(sizeof(GroundRobotPosition) == 40);
 static_assert(sizeof(RadarMarkData) == 2);
 static_assert(sizeof(SentryInfo) == 14);
 static_assert(sizeof(RadarInfo) == 1);
+static_assert(sizeof(RadarBuffStatus) == 41);
+static_assert(sizeof(RadarToSentryRobotStatus) == 5);
 static_assert(sizeof(RobotInteractionData) == 118);
 static_assert(sizeof(InteractionLayerDelete) == 2);
 static_assert(sizeof(InteractionFigure) == 15);

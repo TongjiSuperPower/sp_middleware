@@ -6,12 +6,32 @@
 
 namespace
 {
+constexpr size_t INTERACTION_HEADER_LEN = 6;
+
 template <typename T>
 void copy_fixed(T & dst, const uint8_t * data, size_t size)
 {
   // 固定长度协议帧必须和结构体大小一致，避免异常长度导致 memcpy 越界。
   if (size != sizeof(T)) return;
   std::memcpy(&dst, data, sizeof(T));
+}
+
+uint16_t read_u16_le(const uint8_t * data)
+{
+  return static_cast<uint16_t>(data[0]) | (static_cast<uint16_t>(data[1]) << 8U);
+}
+
+bool sentry_to_radar_ids(uint16_t sentry_id, uint16_t & radar_id)
+{
+  if (sentry_id == sp::referee::robot_id::RED_SENTRY) {
+    radar_id = sp::referee::robot_id::RED_RADAR;
+    return true;
+  }
+  if (sentry_id == sp::referee::robot_id::BLUE_SENTRY) {
+    radar_id = sp::referee::robot_id::BLUE_RADAR;
+    return true;
+  }
+  return false;
 }
 
 }  // namespace
@@ -143,10 +163,40 @@ void PM02::update(uint8_t * frame_start, uint16_t size)
     case referee::cmd_id::RADAR_INFO:
       copy_fixed(this->radar_info, data, data_len);
       break;
+    // 0x0A05 雷达站增益点状态数据（雷达侧可据此生成无敌掩码）
+    case referee::cmd_id::RADAR_BUFF_STATUS:
+      if (data_len == sizeof(this->radar_buff_status)) {
+        copy_fixed(this->radar_buff_status, data, data_len);
+        this->radar_buff_status_valid = referee::radar_buff_status_valid(this->radar_buff_status);
+      }
+      else {
+        this->radar_buff_status_valid = false;
+      }
+      break;
     // 0x0301 机器人交互数据
-    // case referee::cmd_id::ROBOT_INTERACTION_DATA:
-    //   copy_fixed(this->robot_interaction, data, data_len);
-    //   break;
+    case referee::cmd_id::ROBOT_INTERACTION_DATA:
+      if (data_len == INTERACTION_HEADER_LEN + sizeof(referee::RadarToSentryRobotStatus)) {
+        const uint16_t data_cmd_id = read_u16_le(data);
+        const uint16_t sender_id = read_u16_le(data + 2);
+        const uint16_t receiver_id = read_u16_le(data + 4);
+        uint16_t expected_radar_id = 0;
+        referee::RadarToSentryRobotStatus received_status{};
+        std::memcpy(&received_status, data + INTERACTION_HEADER_LEN, sizeof(received_status));
+
+        const bool valid_route =
+          sentry_to_radar_ids(this->robot_status.robot_id, expected_radar_id) &&
+          sender_id == expected_radar_id && receiver_id == this->robot_status.robot_id;
+        const bool valid_payload = referee::radar_to_sentry_robot_status_valid(received_status);
+
+        if (
+          data_cmd_id == referee::data_cmd_id::RADAR_TO_SENTRY_ROBOT_STATUS && valid_route &&
+          valid_payload) {
+          this->enemy_robot_status = received_status;
+          this->enemy_robot_status_valid = true;
+          this->enemy_robot_status_last_update_ms = HAL_GetTick();
+        }
+      }
+      break;
     // 0x0303 选手端小地图交互数据
     case referee::cmd_id::MAP_COMMAND:
       copy_fixed(this->map_command, data, data_len);
@@ -183,6 +233,12 @@ void PM02::send(const uint8_t * data, size_t size)
   else {
     HAL_UART_Transmit(this->huart, data, size, 0xFF);
   }
+}
+
+bool PM02::enemy_robot_status_fresh(uint32_t now_ms, uint32_t timeout_ms) const
+{
+  return this->enemy_robot_status_valid &&
+         static_cast<uint32_t>(now_ms - this->enemy_robot_status_last_update_ms) <= timeout_ms;
 }
 
 }  // namespace sp
