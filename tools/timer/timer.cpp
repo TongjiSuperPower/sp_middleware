@@ -7,17 +7,15 @@
 #define DEM_CR_TRCENA (1 << 24)                    // Trace enable bit
 #define DWT_CTRL_CYCCNTENA (1 << 0)                // Cycle count enable bit
 
-// STM32F407 系统时钟频率（根据实际配置修改）
-#ifndef SYSTEM_CORE_CLOCK
-#define SYSTEM_CORE_CLOCK 168000000UL  // 168 MHz
-#endif
+// STM32 HAL 提供的系统时钟变量（由 SystemClock_Config() 更新）
+extern "C" uint32_t SystemCoreClock;
 
 namespace sp
 {
 
 // 静态成员初始化
 bool Timer::initialized_ = false;
-float Timer::us_per_tick_ = 1.0f / (SYSTEM_CORE_CLOCK / 1000000.0f);  // 168MHz -> ~0.00595 us/tick
+float Timer::us_per_tick_ = 0.0f;
 
 Timer::Timer(bool auto_init)
 : start_tick_(0), stop_tick_(0), min_delta_us_(1e9f), max_delta_us_(0.0f), count_(0)
@@ -44,6 +42,8 @@ bool Timer::init()
 
   // 验证是否使能成功
   if (DWT_CTRL & DWT_CTRL_CYCCNTENA) {
+    // 根据实际系统时钟频率计算 us_per_tick_
+    us_per_tick_ = 1.0f / (static_cast<float>(SystemCoreClock) / 1000000.0f);
     initialized_ = true;
     return true;
   }

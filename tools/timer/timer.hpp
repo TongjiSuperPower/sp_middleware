@@ -8,7 +8,7 @@ namespace sp
 
 /**
  * @brief 微秒级计时器类（基于 DWT 硬件计数器）
- * @note  用于测量代码执行时间，精度可达 1/SystemCoreClock 秒（168MHz 下约 6ns）
+ * @note  用于测量代码执行时间，精度 = 1/SystemCoreClock 秒
  *
  * 使用示例：
  * @code
@@ -72,7 +72,6 @@ public:
   /**
    * @brief 获取当前时刻（微秒，从系统启动开始）
    * @return float 当前时刻，单位：us
-   * @note  约 25 秒溢出一次（32位计数器 @ 168MHz）
    */
   static float now_us();
 
