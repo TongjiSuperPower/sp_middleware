@@ -1,0 +1,48 @@
+#ifndef ICM42688_DEFS_H
+#define ICM42688_DEFS_H
+
+// ICM42688 寄存器地址及其存放的内容
+#define ICM42688_DEVICE_CONFIG 0x11
+#define ICM42688_SOFT_RESET_VALUE 0x01
+
+#define ICM42688_PWR_MGMT0 0x4E
+#define ICM42688_PWR_LN_MODE 0x0F // 加速度计和陀螺仪开启低噪声模式 (Low Noise Mode)
+
+#define ICM42688_WHO_AM_I 0x75
+#define ICM42688_CHIP_ID_VALUE 0x47
+
+// 寄存器配置宏
+#define ICM42688_ACCEL_CONFIG0 0x50
+#define ICM42688_GYRO_CONFIG0 0x4F
+
+// 量程设置宏 (位移已经计算好，直接或运算即可)
+#define ICM42688_ACC_RANGE_16G (0x00 << 5)
+#define ICM42688_ACC_RANGE_8G  (0x01 << 5)
+#define ICM42688_ACC_RANGE_4G  (0x02 << 5)
+#define ICM42688_ACC_RANGE_2G  (0x03 << 5)
+
+#define ICM42688_GYRO_RANGE_2000DPS (0x00 << 5)
+#define ICM42688_GYRO_RANGE_1000DPS (0x01 << 5)
+#define ICM42688_GYRO_RANGE_500DPS  (0x02 << 5)
+#define ICM42688_GYRO_RANGE_250DPS  (0x03 << 5)
+
+// 输出速率 ODR (Output Data Rate)
+#define ICM42688_ODR_32KHZ 0x01
+#define ICM42688_ODR_16KHZ 0x02
+#define ICM42688_ODR_8KHZ  0x03
+#define ICM42688_ODR_4KHZ  0x04
+#define ICM42688_ODR_2KHZ  0x05
+#define ICM42688_ODR_1KHZ  0x06  // 我们采用 1000Hz 满足要求
+#define ICM42688_ODR_200HZ 0x07
+
+// 数据寄存器起始地址 (突发读取起始点)
+#define ICM42688_TEMP_DATA1 0x1D
+
+// ICM42688 错误码
+#define ICM42688_NO_ERROR 0x00
+#define ICM42688_PWR_MGMT_ERROR 0x01
+#define ICM42688_ACCEL_CONF_ERROR 0x02
+#define ICM42688_GYRO_CONF_ERROR 0x03
+#define ICM42688_NO_SENSOR 0xFF
+
+#endif  // ICM42688_DEFS_H
