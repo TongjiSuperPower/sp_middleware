@@ -175,25 +175,44 @@ void PM02::update(uint8_t * frame_start, uint16_t size)
       break;
     // 0x0301 机器人交互数据
     case referee::cmd_id::ROBOT_INTERACTION_DATA:
-      if (data_len == INTERACTION_HEADER_LEN + sizeof(referee::RadarToSentryRobotStatus)) {
+      if (data_len >= INTERACTION_HEADER_LEN) {
         const uint16_t data_cmd_id = read_u16_le(data);
         const uint16_t sender_id = read_u16_le(data + 2);
         const uint16_t receiver_id = read_u16_le(data + 4);
         uint16_t expected_radar_id = 0;
-        referee::RadarToSentryRobotStatus received_status{};
-        std::memcpy(&received_status, data + INTERACTION_HEADER_LEN, sizeof(received_status));
 
         const bool valid_route =
           sentry_to_radar_ids(this->robot_status.robot_id, expected_radar_id) &&
           sender_id == expected_radar_id && receiver_id == this->robot_status.robot_id;
-        const bool valid_payload = referee::radar_to_sentry_robot_status_valid(received_status);
 
-        if (
-          data_cmd_id == referee::data_cmd_id::RADAR_TO_SENTRY_ROBOT_STATUS && valid_route &&
-          valid_payload) {
-          this->enemy_robot_status = received_status;
-          this->enemy_robot_status_valid = true;
-          this->enemy_robot_status_last_update_ms = HAL_GetTick();
+        if (data_cmd_id == referee::data_cmd_id::RADAR_SENTRY_BUFF_CMD && valid_route) {
+          // 雷达当前发送格式：6 字节交互头 + 完整 41 字节 0x0A05 数据。
+          if (data_len == INTERACTION_HEADER_LEN + sizeof(referee::RadarBuffStatus)) {
+            referee::RadarBuffStatus received_buff{};
+            std::memcpy(&received_buff, data + INTERACTION_HEADER_LEN, sizeof(received_buff));
+
+            if (referee::radar_buff_status_valid(received_buff)) {
+              this->radar_buff_status = received_buff;
+              this->radar_buff_status_valid = true;
+              this->enemy_robot_status = referee::make_enemy_robot_status(received_buff);
+              this->enemy_robot_status_valid = true;
+              this->enemy_robot_status_last_update_ms = HAL_GetTick();
+            }
+          }
+          // 兼容旧格式：6 字节交互头 + 5 字节主要状态。
+          else if (
+            data_len == INTERACTION_HEADER_LEN +
+                          sizeof(referee::RadarToSentryRobotStatus)) {
+            referee::RadarToSentryRobotStatus received_status{};
+            std::memcpy(
+              &received_status, data + INTERACTION_HEADER_LEN, sizeof(received_status));
+
+            if (referee::radar_to_sentry_robot_status_valid(received_status)) {
+              this->enemy_robot_status = received_status;
+              this->enemy_robot_status_valid = true;
+              this->enemy_robot_status_last_update_ms = HAL_GetTick();
+            }
+          }
         }
       }
       break;

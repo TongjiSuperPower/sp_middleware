@@ -96,7 +96,10 @@ constexpr uint16_t INQUIRY_IMAGE_TRANSFER = 0x0F02;  // 查询图传出图信道
 
 namespace sp::referee::data_cmd_id
 {
-constexpr uint16_t RADAR_TO_SENTRY_ROBOT_STATUS = 0x0200;
+// 雷达向己方哨兵转发完整 0x0A05 数据。
+constexpr uint16_t RADAR_SENTRY_BUFF_CMD = 0x0211;
+// 保留旧名称，兼容之前只发送五个主要状态的代码。
+constexpr uint16_t RADAR_TO_SENTRY_ROBOT_STATUS = RADAR_SENTRY_BUFF_CMD;
 // 0x0200~0x02FF 机器人之间通信 TODO
 constexpr uint16_t INTERACTION_LAYER_DELETE = 0x0100;     // 选手端删除图层
 constexpr uint16_t INTERACTION_FIGURE = 0x0101;           // 选手端绘制一个图形
@@ -482,16 +485,45 @@ struct __attribute__((packed)) RadarInfo
 // 0x0A05 雷达站发送增益点状态数据（无线链路）
 struct __attribute__((packed)) RadarBuffStatus
 {
-  uint8_t buff_status[35];
-  uint8_t enemy_sentry_pose;
-  uint8_t enemy_hero_main_status;
-  uint8_t enemy_engineer_main_status;
-  uint8_t enemy_infantry_3_main_status;
-  uint8_t enemy_infantry_4_main_status;
-  uint8_t enemy_sentry_main_status;
+  uint8_t hero_heal;
+  uint16_t hero_cool;
+  uint8_t hero_def;
+  uint8_t hero_vuln;
+  uint16_t hero_atk;
+
+  uint8_t engineer_heal;
+  uint16_t engineer_cool;
+  uint8_t engineer_def;
+  uint8_t engineer_vuln;
+  uint16_t engineer_atk;
+
+  uint8_t infantry3_heal;
+  uint16_t infantry3_cool;
+  uint8_t infantry3_def;
+  uint8_t infantry3_vuln;
+  uint16_t infantry3_atk;
+
+  uint8_t infantry4_heal;
+  uint16_t infantry4_cool;
+  uint8_t infantry4_def;
+  uint8_t infantry4_vuln;
+  uint16_t infantry4_atk;
+
+  uint8_t sentry_heal;
+  uint16_t sentry_cool;
+  uint8_t sentry_def;
+  uint8_t sentry_vuln;
+  uint16_t sentry_atk;
+
+  uint8_t sentry_posture;
+  uint8_t hero_status;
+  uint8_t engineer_status;
+  uint8_t infantry3_status;
+  uint8_t infantry4_status;
+  uint8_t sentry_status;
 };
 
-// 自定义 0x0301/0x0200 用户数据。每台机器人的状态保持 0x0A05 原值：
+// 自定义 0x0301/0x0211 用户数据。每台机器人的状态保持 0x0A05 原值：
 // 0=存活，1=战亡，2=无敌但不虚弱，3=无敌且虚弱。
 namespace robot_main_status
 {
@@ -517,19 +549,18 @@ constexpr bool radar_main_status_valid(uint8_t status)
 
 inline bool radar_buff_status_valid(const RadarBuffStatus & status)
 {
-  return radar_main_status_valid(status.enemy_hero_main_status) &&
-         radar_main_status_valid(status.enemy_engineer_main_status) &&
-         radar_main_status_valid(status.enemy_infantry_3_main_status) &&
-         radar_main_status_valid(status.enemy_infantry_4_main_status) &&
-         radar_main_status_valid(status.enemy_sentry_main_status);
+  return radar_main_status_valid(status.hero_status) &&
+         radar_main_status_valid(status.engineer_status) &&
+         radar_main_status_valid(status.infantry3_status) &&
+         radar_main_status_valid(status.infantry4_status) &&
+         radar_main_status_valid(status.sentry_status);
 }
 
 inline RadarToSentryRobotStatus make_enemy_robot_status(const RadarBuffStatus & status)
 {
   return {
-    status.enemy_hero_main_status, status.enemy_engineer_main_status,
-    status.enemy_infantry_3_main_status, status.enemy_infantry_4_main_status,
-    status.enemy_sentry_main_status};
+    status.hero_status, status.engineer_status, status.infantry3_status,
+    status.infantry4_status, status.sentry_status};
 }
 
 inline bool radar_to_sentry_robot_status_valid(const RadarToSentryRobotStatus & status)
