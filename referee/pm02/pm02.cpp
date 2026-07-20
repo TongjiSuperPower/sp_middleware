@@ -168,6 +168,9 @@ void PM02::update(uint8_t * frame_start, uint16_t size)
       if (data_len == sizeof(this->radar_buff_status)) {
         copy_fixed(this->radar_buff_status, data, data_len);
         this->radar_buff_status_valid = referee::radar_buff_status_valid(this->radar_buff_status);
+        if (this->radar_buff_status_valid) {
+          this->radar_buff_status_last_update_ms = HAL_GetTick();
+        }
       }
       else {
         this->radar_buff_status_valid = false;
@@ -194,6 +197,7 @@ void PM02::update(uint8_t * frame_start, uint16_t size)
             if (referee::radar_buff_status_valid(received_buff)) {
               this->radar_buff_status = received_buff;
               this->radar_buff_status_valid = true;
+              this->radar_buff_status_last_update_ms = HAL_GetTick();
               this->enemy_robot_status = referee::make_enemy_robot_status(received_buff);
               this->enemy_robot_status_valid = true;
               this->enemy_robot_status_last_update_ms = HAL_GetTick();
@@ -213,6 +217,16 @@ void PM02::update(uint8_t * frame_start, uint16_t size)
               this->enemy_robot_status_last_update_ms = HAL_GetTick();
             }
           }
+        }
+        else if (
+          data_cmd_id == referee::data_cmd_id::RADAR_SENTRY_POSITION_CMD && valid_route &&
+          data_len == INTERACTION_HEADER_LEN + sizeof(referee::RadarSentryPosition)) {
+          referee::RadarSentryPosition received_position{};
+          std::memcpy(
+            &received_position, data + INTERACTION_HEADER_LEN, sizeof(received_position));
+          this->enemy_robot_position = received_position;
+          this->enemy_robot_position_valid = true;
+          this->enemy_robot_position_last_update_ms = HAL_GetTick();
         }
       }
       break;
@@ -258,6 +272,18 @@ bool PM02::enemy_robot_status_fresh(uint32_t now_ms, uint32_t timeout_ms) const
 {
   return this->enemy_robot_status_valid &&
          static_cast<uint32_t>(now_ms - this->enemy_robot_status_last_update_ms) <= timeout_ms;
+}
+
+bool PM02::radar_buff_status_fresh(uint32_t now_ms, uint32_t timeout_ms) const
+{
+  return this->radar_buff_status_valid &&
+         static_cast<uint32_t>(now_ms - this->radar_buff_status_last_update_ms) <= timeout_ms;
+}
+
+bool PM02::enemy_robot_position_fresh(uint32_t now_ms, uint32_t timeout_ms) const
+{
+  return this->enemy_robot_position_valid &&
+         static_cast<uint32_t>(now_ms - this->enemy_robot_position_last_update_ms) <= timeout_ms;
 }
 
 }  // namespace sp

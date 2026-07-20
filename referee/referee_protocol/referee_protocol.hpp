@@ -98,6 +98,7 @@ namespace sp::referee::data_cmd_id
 {
 // 雷达向己方哨兵转发完整 0x0A05 数据。
 constexpr uint16_t RADAR_SENTRY_BUFF_CMD = 0x0211;
+constexpr uint16_t RADAR_SENTRY_POSITION_CMD = 0x0212;
 // 保留旧名称，兼容之前只发送五个主要状态的代码。
 constexpr uint16_t RADAR_TO_SENTRY_ROBOT_STATUS = RADAR_SENTRY_BUFF_CMD;
 // 0x0200~0x02FF 机器人之间通信 TODO
@@ -542,6 +543,24 @@ struct __attribute__((packed)) RadarToSentryRobotStatus
   uint8_t enemy_sentry;
 };
 
+// 自定义 0x0301/0x0212 用户数据。坐标保持雷达 0x0A01 解析结果的 int16 原值。
+struct __attribute__((packed)) RadarSentryPosition
+{
+  uint8_t source;
+  int16_t hero_x;
+  int16_t hero_y;
+  int16_t engineer_x;
+  int16_t engineer_y;
+  int16_t infantry3_x;
+  int16_t infantry3_y;
+  int16_t infantry4_x;
+  int16_t infantry4_y;
+  int16_t aerial_x;
+  int16_t aerial_y;
+  int16_t sentry_x;
+  int16_t sentry_y;
+};
+
 constexpr bool radar_main_status_valid(uint8_t status)
 {
   return status <= robot_main_status::INVINCIBLE_AND_VULNERABLE;
@@ -798,6 +817,7 @@ static_assert(sizeof(SentryInfo) == 14);
 static_assert(sizeof(RadarInfo) == 1);
 static_assert(sizeof(RadarBuffStatus) == 41);
 static_assert(sizeof(RadarToSentryRobotStatus) == 5);
+static_assert(sizeof(RadarSentryPosition) == 25);
 static_assert(sizeof(RobotInteractionData) == 118);
 static_assert(sizeof(InteractionLayerDelete) == 2);
 static_assert(sizeof(InteractionFigure) == 15);

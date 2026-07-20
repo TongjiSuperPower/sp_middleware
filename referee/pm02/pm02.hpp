@@ -51,16 +51,23 @@ public:
   // 只读! 雷达通过 0x0301/0x0211 转发的完整 0x0A05 数据（也兼容直接解析 0x0A05）
   referee::RadarBuffStatus radar_buff_status{};
   bool radar_buff_status_valid = false;
+  uint32_t radar_buff_status_last_update_ms = 0;
 
   referee::RadarToSentryRobotStatus enemy_robot_status{};  // 只读! 0x0301/0x0211
   bool enemy_robot_status_valid = false;
   uint32_t enemy_robot_status_last_update_ms = 0;
+
+  referee::RadarSentryPosition enemy_robot_position{};  // 只读! 0x0301/0x0212
+  bool enemy_robot_position_valid = false;
+  uint32_t enemy_robot_position_last_update_ms = 0;
 
   void request();
   void update(uint16_t size);
   void send(const uint8_t * data, size_t size);
 
   bool enemy_robot_status_fresh(uint32_t now_ms, uint32_t timeout_ms = 300U) const;
+  bool radar_buff_status_fresh(uint32_t now_ms, uint32_t timeout_ms = 300U) const;
+  bool enemy_robot_position_fresh(uint32_t now_ms, uint32_t timeout_ms = 300U) const;
 
   // TODO UI
 
