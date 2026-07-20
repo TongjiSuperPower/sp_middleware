@@ -48,7 +48,7 @@ public:
   referee::MapData map_data;                        // 只读! 0x0307 选手端小地图接收哨兵数据
   referee::CustomInfo custom_info;                  // 只读! 0x0308 选手端小地图接收机器人数据
 
-  // 只读! 雷达通过 0x0301/0x0211 转发的完整 0x0A05 数据（也兼容直接解析 0x0A05）
+  // 只读! 雷达通过 0x0301 转发的完整 0x0A05 数据（也兼容直接解析 0x0A05）
   referee::RadarBuffStatus radar_buff_status{};
   bool radar_buff_status_valid = false;
   uint32_t radar_buff_status_last_update_ms = 0;
