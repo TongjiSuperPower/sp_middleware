@@ -198,23 +198,6 @@ void PM02::update(uint8_t * frame_start, uint16_t size)
               this->radar_buff_status = received_buff;
               this->radar_buff_status_valid = true;
               this->radar_buff_status_last_update_ms = HAL_GetTick();
-              this->enemy_robot_status = referee::make_enemy_robot_status(received_buff);
-              this->enemy_robot_status_valid = true;
-              this->enemy_robot_status_last_update_ms = HAL_GetTick();
-            }
-          }
-          // 兼容旧格式：6 字节交互头 + 5 字节主要状态。
-          else if (
-            data_len == INTERACTION_HEADER_LEN +
-                          sizeof(referee::RadarToSentryRobotStatus)) {
-            referee::RadarToSentryRobotStatus received_status{};
-            std::memcpy(
-              &received_status, data + INTERACTION_HEADER_LEN, sizeof(received_status));
-
-            if (referee::radar_to_sentry_robot_status_valid(received_status)) {
-              this->enemy_robot_status = received_status;
-              this->enemy_robot_status_valid = true;
-              this->enemy_robot_status_last_update_ms = HAL_GetTick();
             }
           }
         }
@@ -266,12 +249,6 @@ void PM02::send(const uint8_t * data, size_t size)
   else {
     HAL_UART_Transmit(this->huart, data, size, 0xFF);
   }
-}
-
-bool PM02::enemy_robot_status_fresh(uint32_t now_ms, uint32_t timeout_ms) const
-{
-  return this->enemy_robot_status_valid &&
-         static_cast<uint32_t>(now_ms - this->enemy_robot_status_last_update_ms) <= timeout_ms;
 }
 
 bool PM02::radar_buff_status_fresh(uint32_t now_ms, uint32_t timeout_ms) const

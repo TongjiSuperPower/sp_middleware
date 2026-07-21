@@ -99,8 +99,6 @@ namespace sp::referee::data_cmd_id
 // 雷达向己方哨兵转发完整 0x0A05 数据。
 constexpr uint16_t RADAR_SENTRY_BUFF_CMD = 0x0211;
 constexpr uint16_t RADAR_SENTRY_POSITION_CMD = 0x0212;
-// 保留旧名称，兼容之前只发送五个主要状态的代码。
-constexpr uint16_t RADAR_TO_SENTRY_ROBOT_STATUS = RADAR_SENTRY_BUFF_CMD;
 // 0x0200~0x02FF 机器人之间通信 TODO
 constexpr uint16_t INTERACTION_LAYER_DELETE = 0x0100;     // 选手端删除图层
 constexpr uint16_t INTERACTION_FIGURE = 0x0101;           // 选手端绘制一个图形
@@ -534,15 +532,6 @@ constexpr uint8_t INVINCIBLE = 2;
 constexpr uint8_t INVINCIBLE_AND_VULNERABLE = 3;
 }  // namespace robot_main_status
 
-struct __attribute__((packed)) RadarToSentryRobotStatus
-{
-  uint8_t enemy_hero;
-  uint8_t enemy_engineer;
-  uint8_t enemy_infantry_3;
-  uint8_t enemy_infantry_4;
-  uint8_t enemy_sentry;
-};
-
 // 自定义 0x0301/0x0212 用户数据。坐标保持雷达 0x0A01 解析结果的 int16 原值。
 struct __attribute__((packed)) RadarSentryPosition
 {
@@ -573,22 +562,6 @@ inline bool radar_buff_status_valid(const RadarBuffStatus & status)
          radar_main_status_valid(status.infantry3_status) &&
          radar_main_status_valid(status.infantry4_status) &&
          radar_main_status_valid(status.sentry_status);
-}
-
-inline RadarToSentryRobotStatus make_enemy_robot_status(const RadarBuffStatus & status)
-{
-  return {
-    status.hero_status, status.engineer_status, status.infantry3_status,
-    status.infantry4_status, status.sentry_status};
-}
-
-inline bool radar_to_sentry_robot_status_valid(const RadarToSentryRobotStatus & status)
-{
-  return radar_main_status_valid(status.enemy_hero) &&
-         radar_main_status_valid(status.enemy_engineer) &&
-         radar_main_status_valid(status.enemy_infantry_3) &&
-         radar_main_status_valid(status.enemy_infantry_4) &&
-         radar_main_status_valid(status.enemy_sentry);
 }
 
 // 0x0301 机器人交互数据
@@ -816,7 +789,6 @@ static_assert(sizeof(RadarMarkData) == 2);
 static_assert(sizeof(SentryInfo) == 14);
 static_assert(sizeof(RadarInfo) == 1);
 static_assert(sizeof(RadarBuffStatus) == 41);
-static_assert(sizeof(RadarToSentryRobotStatus) == 5);
 static_assert(sizeof(RadarSentryPosition) == 25);
 static_assert(sizeof(RobotInteractionData) == 118);
 static_assert(sizeof(InteractionLayerDelete) == 2);
