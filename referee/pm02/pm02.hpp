@@ -48,7 +48,7 @@ public:
   referee::MapData map_data;                        // 只读! 0x0307 选手端小地图接收哨兵数据
   referee::CustomInfo custom_info;                  // 只读! 0x0308 选手端小地图接收机器人数据
 
-  // 只读! 0x0301/0x0210；当前雷达发送列表默认不包含哨兵，保留接收能力。
+  // 只读! 雷达发给哨兵的 0x0301/0x0210 敌方飞镖预警。
   referee::RadarEnemyDartWarning radar_enemy_dart_warning{};
   bool radar_enemy_dart_warning_valid = false;
   uint32_t radar_enemy_dart_warning_last_update_ms = 0;
