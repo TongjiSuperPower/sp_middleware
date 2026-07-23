@@ -46,6 +46,7 @@ public:
   void calc(float set, float fdb, float integral_pause_threshold);
 
   void calc(float set, float fdb, float set_dot, float fdb_dot);
+  void calc(float set, float fdb, float set_dot, float fdb_dot, float integral_pause_threshold);
 
   // 清零PID的所有状态（输出与缓存等）
   void clear();
