@@ -73,6 +73,40 @@ void PID::calc(float set, float fdb, float set_dot, float fdb_dot)
   this->out = limit_max(this->data.pout + this->data.iout + this->data.dout, max_out_);
 }
 
+void PID::calc(float set, float fdb, float set_dot, float fdb_dot, float integral_pause_threshold)
+{
+  this->data.err[2] = this->data.err[1];
+  this->data.err[1] = this->data.err[0];
+  this->data.err[0] = angular_ ? limit_angle(set - fdb) : (set - fdb);
+
+  // Kp
+  this->data.pout = kp_ * this->data.err[0];
+
+  // 积分分离
+  // 当P项输出的绝对值已经很大时，暂停积分累积
+  if (std::abs(this->data.pout) > integral_pause_threshold) {
+    // 将本次的积分增量设为0
+    this->data.trapezoid = 0.0f;
+  }
+  else {
+    // 只有当P项输出在可接受范围内时，才正常计算积分增量
+    this->data.trapezoid = (this->data.err[0] + this->data.err[1]) / 2 * dt_;  // 梯形积分
+  }
+
+  // Ki
+  // 此处完全同步了你第二个函数中动态 Ki (dynamic_ki) 的逻辑
+  this->data.dynamic_ki = ki_ / (1 + std::abs(this->data.err[0]));
+  // 如果触发了暂停条件，trapezoid为0，iout的值将保持不变。
+  this->data.iout = limit_max(
+    this->data.iout + (dynamic_ ? this->data.dynamic_ki : ki_) * this->data.trapezoid, max_iout_);
+
+  // Kd
+  // 保持第一个函数原有的前馈微分计算方式
+  this->data.dout = kd_ * (set_dot - fdb_dot);
+
+  this->out = limit_max(this->data.pout + this->data.iout + this->data.dout, max_out_);
+}
+
 void PID::calc(float set, float fdb, float integral_pause_threshold)
 {
   if (dout_ready_ == true) {
