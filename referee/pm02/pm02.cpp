@@ -6,12 +6,32 @@
 
 namespace
 {
+constexpr size_t INTERACTION_HEADER_LEN = 6;
+
 template <typename T>
 void copy_fixed(T & dst, const uint8_t * data, size_t size)
 {
   // 固定长度协议帧必须和结构体大小一致，避免异常长度导致 memcpy 越界。
   if (size != sizeof(T)) return;
   std::memcpy(&dst, data, sizeof(T));
+}
+
+uint16_t read_u16_le(const uint8_t * data)
+{
+  return static_cast<uint16_t>(data[0]) | (static_cast<uint16_t>(data[1]) << 8U);
+}
+
+bool sentry_to_radar_ids(uint16_t sentry_id, uint16_t & radar_id)
+{
+  if (sentry_id == sp::referee::robot_id::RED_SENTRY) {
+    radar_id = sp::referee::robot_id::RED_RADAR;
+    return true;
+  }
+  if (sentry_id == sp::referee::robot_id::BLUE_SENTRY) {
+    radar_id = sp::referee::robot_id::BLUE_RADAR;
+    return true;
+  }
+  return false;
 }
 
 }  // namespace
@@ -143,10 +163,109 @@ void PM02::update(uint8_t * frame_start, uint16_t size)
     case referee::cmd_id::RADAR_INFO:
       copy_fixed(this->radar_info, data, data_len);
       break;
-    // 0x0301 机器人交互数据
-    // case referee::cmd_id::ROBOT_INTERACTION_DATA:
-    //   copy_fixed(this->robot_interaction, data, data_len);
-    //   break;
+    // 0x0A05 雷达站增益点状态数据（雷达侧可据此生成无敌掩码）
+    case referee::cmd_id::RADAR_BUFF_STATUS:
+      if (data_len == sizeof(this->radar_buff_status)) {
+        copy_fixed(this->radar_buff_status, data, data_len);
+        this->radar_buff_status_valid = referee::radar_buff_status_valid(this->radar_buff_status);
+        if (this->radar_buff_status_valid) {
+          this->radar_buff_status_last_update_ms = HAL_GetTick();
+        }
+      }
+      else {
+        this->radar_buff_status_valid = false;
+      }
+      break;
+    // 0x0301 雷达自定义子编码：0x0210~0x0215。
+    case referee::cmd_id::ROBOT_INTERACTION_DATA: {
+      if (data_len < INTERACTION_HEADER_LEN) break;
+
+      const uint16_t data_cmd_id = read_u16_le(data);
+      const uint16_t sender_id = read_u16_le(data + 2);
+      const uint16_t receiver_id = read_u16_le(data + 4);
+      uint16_t expected_radar_id = 0;
+
+      const bool valid_route =
+        sentry_to_radar_ids(this->robot_status.robot_id, expected_radar_id) &&
+        sender_id == expected_radar_id && receiver_id == this->robot_status.robot_id;
+      if (!valid_route) break;
+
+      const uint8_t * payload = data + INTERACTION_HEADER_LEN;
+      const size_t payload_len = data_len - INTERACTION_HEADER_LEN;
+      const uint32_t now_ms = HAL_GetTick();
+
+      switch (data_cmd_id) {
+        case referee::data_cmd_id::RADAR_ENEMY_DART_WARNING_CMD:
+          this->radar_enemy_dart_warning_valid = false;
+          if (payload_len == sizeof(referee::RadarEnemyDartWarning)) {
+            referee::RadarEnemyDartWarning received{};
+            std::memcpy(&received, payload, sizeof(received));
+            if (received.dart_gate_status <= 1U) {
+              this->radar_enemy_dart_warning = received;
+              this->radar_enemy_dart_warning_valid = true;
+              this->radar_enemy_dart_warning_last_update_ms = now_ms;
+            }
+          }
+          break;
+
+        case referee::data_cmd_id::RADAR_SENTRY_POSITION_CMD:
+          this->enemy_robot_position_valid = false;
+          if (payload_len == sizeof(referee::RadarSentryPosition)) {
+            referee::RadarSentryPosition received{};
+            std::memcpy(&received, payload, sizeof(received));
+            if (received.source <= 1U) {
+              this->enemy_robot_position = received;
+              this->enemy_robot_position_valid = true;
+              this->enemy_robot_position_last_update_ms = now_ms;
+            }
+          }
+          break;
+
+        case referee::data_cmd_id::RADAR_ALLY_HP_CMD:
+          this->radar_ally_hp_valid = false;
+          if (payload_len == sizeof(referee::RadarAllyHp)) {
+            std::memcpy(&this->radar_ally_hp, payload, sizeof(this->radar_ally_hp));
+            this->radar_ally_hp_valid = true;
+            this->radar_ally_hp_last_update_ms = now_ms;
+          }
+          break;
+
+        case referee::data_cmd_id::RADAR_ALLY_AMMO_CMD:
+          this->radar_ally_ammo_valid = false;
+          if (payload_len == sizeof(referee::RadarAllyAmmo)) {
+            std::memcpy(&this->radar_ally_ammo, payload, sizeof(this->radar_ally_ammo));
+            this->radar_ally_ammo_valid = true;
+            this->radar_ally_ammo_last_update_ms = now_ms;
+          }
+          break;
+
+        case referee::data_cmd_id::RADAR_ALLY_FIELD_CMD:
+          this->radar_ally_field_valid = false;
+          if (payload_len == sizeof(referee::RadarAllyField)) {
+            std::memcpy(&this->radar_ally_field, payload, sizeof(this->radar_ally_field));
+            this->radar_ally_field_valid = true;
+            this->radar_ally_field_last_update_ms = now_ms;
+          }
+          break;
+
+        case referee::data_cmd_id::RADAR_ALLY_BUFF_CMD:
+          this->radar_buff_status_valid = false;
+          if (payload_len == sizeof(referee::RadarBuffStatus)) {
+            referee::RadarBuffStatus received{};
+            std::memcpy(&received, payload, sizeof(received));
+            if (referee::radar_buff_status_valid(received)) {
+              this->radar_buff_status = received;
+              this->radar_buff_status_valid = true;
+              this->radar_buff_status_last_update_ms = now_ms;
+            }
+          }
+          break;
+
+        default:
+          break;
+      }
+      break;
+    }
     // 0x0303 选手端小地图交互数据
     case referee::cmd_id::MAP_COMMAND:
       copy_fixed(this->map_command, data, data_len);
@@ -183,6 +302,43 @@ void PM02::send(const uint8_t * data, size_t size)
   else {
     HAL_UART_Transmit(this->huart, data, size, 0xFF);
   }
+}
+
+bool PM02::radar_enemy_dart_warning_fresh(uint32_t now_ms, uint32_t timeout_ms) const
+{
+  return this->radar_enemy_dart_warning_valid &&
+         static_cast<uint32_t>(now_ms - this->radar_enemy_dart_warning_last_update_ms) <=
+           timeout_ms;
+}
+
+bool PM02::enemy_robot_position_fresh(uint32_t now_ms, uint32_t timeout_ms) const
+{
+  return this->enemy_robot_position_valid &&
+         static_cast<uint32_t>(now_ms - this->enemy_robot_position_last_update_ms) <= timeout_ms;
+}
+
+bool PM02::radar_ally_hp_fresh(uint32_t now_ms, uint32_t timeout_ms) const
+{
+  return this->radar_ally_hp_valid &&
+         static_cast<uint32_t>(now_ms - this->radar_ally_hp_last_update_ms) <= timeout_ms;
+}
+
+bool PM02::radar_ally_ammo_fresh(uint32_t now_ms, uint32_t timeout_ms) const
+{
+  return this->radar_ally_ammo_valid &&
+         static_cast<uint32_t>(now_ms - this->radar_ally_ammo_last_update_ms) <= timeout_ms;
+}
+
+bool PM02::radar_ally_field_fresh(uint32_t now_ms, uint32_t timeout_ms) const
+{
+  return this->radar_ally_field_valid &&
+         static_cast<uint32_t>(now_ms - this->radar_ally_field_last_update_ms) <= timeout_ms;
+}
+
+bool PM02::radar_buff_status_fresh(uint32_t now_ms, uint32_t timeout_ms) const
+{
+  return this->radar_buff_status_valid &&
+         static_cast<uint32_t>(now_ms - this->radar_buff_status_last_update_ms) <= timeout_ms;
 }
 
 }  // namespace sp

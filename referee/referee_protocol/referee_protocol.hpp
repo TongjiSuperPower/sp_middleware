@@ -96,6 +96,13 @@ constexpr uint16_t INQUIRY_IMAGE_TRANSFER = 0x0F02;  // 查询图传出图信道
 
 namespace sp::referee::data_cmd_id
 {
+// 雷达通过 0x0301 发送的自定义子编码。
+constexpr uint16_t RADAR_ENEMY_DART_WARNING_CMD = 0x0210;
+constexpr uint16_t RADAR_SENTRY_POSITION_CMD = 0x0211;
+constexpr uint16_t RADAR_ALLY_HP_CMD = 0x0212;
+constexpr uint16_t RADAR_ALLY_AMMO_CMD = 0x0213;
+constexpr uint16_t RADAR_ALLY_FIELD_CMD = 0x0214;
+constexpr uint16_t RADAR_ALLY_BUFF_CMD = 0x0215;
 // 0x0200~0x02FF 机器人之间通信 TODO
 constexpr uint16_t INTERACTION_LAYER_DELETE = 0x0100;     // 选手端删除图层
 constexpr uint16_t INTERACTION_FIGURE = 0x0101;           // 选手端绘制一个图形
@@ -441,11 +448,27 @@ struct __attribute__((packed)) SentryInfo
   //       0：在战 1：脱战
   uint16_t ammo_exchange_allowance : 11;   // bit 1-11：队伍 17mm 允许发弹量的剩余可兑换数
   uint16_t sentry_pose : 2;                // bit 12-13：哨兵当前姿态，1 进攻，2 防御，3 移动
+  
   uint16_t energy_mechanism_status : 1;    // bit 14：己方能量机关是否可进入激活状态
   //       0：不可激活 1：可激活
   uint16_t sentry_pose_boosted : 1;        // bit 15：哨兵当前姿态是否存在增益
   //       0：无增益 1：有增益
-  uint64_t sentry_info_3;                  // 2026 协议新增的哨兵信息 3，按协议位域使用
+  // ===== 2026 协议新增 sentry_info_3 =====
+  uint64_t attack_pose_duration : 8;                // bit 0-7：进攻姿态剩余持续时间
+
+  uint64_t defense_pose_duration : 8;               // bit 8-15：防御姿态剩余持续时间
+
+  uint64_t move_pose_duration : 8;                  // bit 16-23：移动姿态剩余持续时间
+
+  uint64_t reserved2 : 8;                           // bit 24-31：保留
+
+  uint64_t enhanced_attack_pose_duration : 8;       // bit 32-39：强化进攻姿态剩余持续时间
+
+  uint64_t enhanced_defense_pose_duration : 8;      // bit 40-47：强化防御姿态剩余持续时间
+
+  uint64_t enhanced_move_pose_duration : 8;         // bit 48-55：强化移动姿态剩余持续时间
+
+  uint64_t reserved3 : 8;                           // bit 56-63：保留
 };
 
 // 0x020E 雷达自主决策信息同步
@@ -461,6 +484,131 @@ struct __attribute__((packed)) RadarInfo
   //       0：不可修改 1：可修改
   uint8_t reserved : 2;                        // bit 6-7：保留
 };
+
+// 0x0A05 雷达站发送增益点状态数据（无线链路）
+struct __attribute__((packed)) RadarBuffStatus
+{
+  uint8_t hero_heal;
+  uint16_t hero_cool;
+  uint8_t hero_def;
+  uint8_t hero_vuln;
+  uint16_t hero_atk;
+
+  uint8_t engineer_heal;
+  uint16_t engineer_cool;
+  uint8_t engineer_def;
+  uint8_t engineer_vuln;
+  uint16_t engineer_atk;
+
+  uint8_t infantry3_heal;
+  uint16_t infantry3_cool;
+  uint8_t infantry3_def;
+  uint8_t infantry3_vuln;
+  uint16_t infantry3_atk;
+
+  uint8_t infantry4_heal;
+  uint16_t infantry4_cool;
+  uint8_t infantry4_def;
+  uint8_t infantry4_vuln;
+  uint16_t infantry4_atk;
+
+  uint8_t sentry_heal;
+  uint16_t sentry_cool;
+  uint8_t sentry_def;
+  uint8_t sentry_vuln;
+  uint16_t sentry_atk;
+
+  uint8_t sentry_posture;
+  uint8_t hero_status;
+  uint8_t engineer_status;
+  uint8_t infantry3_status;
+  uint8_t infantry4_status;
+  uint8_t sentry_status;
+};
+
+// 自定义 0x0301/0x0215 用户数据。每台机器人的状态保持 0x0A05 原值：
+// 0=存活，1=战亡，2=无敌但不虚弱，3=无敌且虚弱。
+namespace robot_main_status
+{
+constexpr uint8_t ALIVE = 0;
+constexpr uint8_t DEAD = 1;
+constexpr uint8_t INVINCIBLE = 2;
+constexpr uint8_t INVINCIBLE_AND_VULNERABLE = 3;
+}  // namespace robot_main_status
+
+// 自定义 0x0301/0x0210 用户数据（不含 6 字节交互头）。
+struct __attribute__((packed)) RadarEnemyDartWarning
+{
+  uint8_t dart_gate_status;
+};
+
+// 自定义 0x0301/0x0211 用户数据（不含 6 字节交互头）。
+// 坐标保持雷达发送的 int16 原值，不在中间件内进行单位换算。
+struct __attribute__((packed)) RadarSentryPosition
+{
+  uint8_t source;
+  int16_t hero_x;
+  int16_t hero_y;
+  int16_t engineer_x;
+  int16_t engineer_y;
+  int16_t infantry3_x;
+  int16_t infantry3_y;
+  int16_t infantry4_x;
+  int16_t infantry4_y;
+  int16_t aerial_x;
+  int16_t aerial_y;
+  int16_t sentry_x;
+  int16_t sentry_y;
+};
+
+// 自定义 0x0301/0x0212 用户数据（不含 6 字节交互头）。
+struct __attribute__((packed)) RadarAllyHp
+{
+  uint16_t hero_hp;
+  uint16_t engineer_hp;
+  uint16_t infantry3_hp;
+  uint16_t infantry4_hp;
+  uint16_t sentry_hp;
+};
+
+// 自定义 0x0301/0x0213 用户数据（不含 6 字节交互头）。
+struct __attribute__((packed)) RadarAllyAmmo
+{
+  uint16_t hero_ammo;
+  uint16_t infantry3_ammo;
+  uint16_t infantry4_ammo;
+  uint16_t aerial_ammo;
+  uint16_t sentry_ammo;
+};
+
+// 自定义 0x0301/0x0214 用户数据（不含 6 字节交互头）。
+struct __attribute__((packed)) RadarAllyField
+{
+  uint16_t remain_coins;
+  uint16_t total_coins;
+  uint32_t status_flags;
+};
+
+static_assert(sizeof(RadarEnemyDartWarning) == 1U);
+static_assert(sizeof(RadarSentryPosition) == 25U);
+static_assert(sizeof(RadarAllyHp) == 10U);
+static_assert(sizeof(RadarAllyAmmo) == 10U);
+static_assert(sizeof(RadarAllyField) == 8U);
+static_assert(sizeof(RadarBuffStatus) == 41U);
+
+constexpr bool radar_main_status_valid(uint8_t status)
+{
+  return status <= robot_main_status::INVINCIBLE_AND_VULNERABLE;
+}
+
+inline bool radar_buff_status_valid(const RadarBuffStatus & status)
+{
+  return radar_main_status_valid(status.hero_status) &&
+         radar_main_status_valid(status.engineer_status) &&
+         radar_main_status_valid(status.infantry3_status) &&
+         radar_main_status_valid(status.infantry4_status) &&
+         radar_main_status_valid(status.sentry_status);
+}
 
 // 0x0301 机器人交互数据
 struct __attribute__((packed)) RobotInteractionData
@@ -686,6 +834,8 @@ static_assert(sizeof(GroundRobotPosition) == 40);
 static_assert(sizeof(RadarMarkData) == 2);
 static_assert(sizeof(SentryInfo) == 14);
 static_assert(sizeof(RadarInfo) == 1);
+static_assert(sizeof(RadarBuffStatus) == 41);
+static_assert(sizeof(RadarSentryPosition) == 25);
 static_assert(sizeof(RobotInteractionData) == 118);
 static_assert(sizeof(InteractionLayerDelete) == 2);
 static_assert(sizeof(InteractionFigure) == 15);

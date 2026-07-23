@@ -47,9 +47,47 @@ public:
   // referee::CustomClientData custom_client_data;     // 只读! 0x0306 自定义控制器与选手端交互数据
   referee::MapData map_data;                        // 只读! 0x0307 选手端小地图接收哨兵数据
   referee::CustomInfo custom_info;                  // 只读! 0x0308 选手端小地图接收机器人数据
+
+  // 只读! 0x0301/0x0210；当前雷达发送列表默认不包含哨兵，保留接收能力。
+  referee::RadarEnemyDartWarning radar_enemy_dart_warning{};
+  bool radar_enemy_dart_warning_valid = false;
+  uint32_t radar_enemy_dart_warning_last_update_ms = 0;
+
+  // 只读! 0x0301/0x0211
+  referee::RadarSentryPosition enemy_robot_position{};
+  bool enemy_robot_position_valid = false;
+  uint32_t enemy_robot_position_last_update_ms = 0;
+
+  // 只读! 0x0301/0x0212
+  referee::RadarAllyHp radar_ally_hp{};
+  bool radar_ally_hp_valid = false;
+  uint32_t radar_ally_hp_last_update_ms = 0;
+
+  // 只读! 0x0301/0x0213
+  referee::RadarAllyAmmo radar_ally_ammo{};
+  bool radar_ally_ammo_valid = false;
+  uint32_t radar_ally_ammo_last_update_ms = 0;
+
+  // 只读! 0x0301/0x0214
+  referee::RadarAllyField radar_ally_field{};
+  bool radar_ally_field_valid = false;
+  uint32_t radar_ally_field_last_update_ms = 0;
+
+  // 只读! 0x0301/0x0215 的完整 Buff 数据（也兼容直接解析 0x0A05）
+  referee::RadarBuffStatus radar_buff_status{};
+  bool radar_buff_status_valid = false;
+  uint32_t radar_buff_status_last_update_ms = 0;
+
   void request();
   void update(uint16_t size);
   void send(const uint8_t * data, size_t size);
+
+  bool radar_enemy_dart_warning_fresh(uint32_t now_ms, uint32_t timeout_ms = 300U) const;
+  bool enemy_robot_position_fresh(uint32_t now_ms, uint32_t timeout_ms = 300U) const;
+  bool radar_ally_hp_fresh(uint32_t now_ms, uint32_t timeout_ms = 300U) const;
+  bool radar_ally_ammo_fresh(uint32_t now_ms, uint32_t timeout_ms = 300U) const;
+  bool radar_ally_field_fresh(uint32_t now_ms, uint32_t timeout_ms = 300U) const;
+  bool radar_buff_status_fresh(uint32_t now_ms, uint32_t timeout_ms = 300U) const;
 
   // TODO UI
 
