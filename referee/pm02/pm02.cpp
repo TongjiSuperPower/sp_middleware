@@ -21,13 +21,17 @@ uint16_t read_u16_le(const uint8_t * data)
   return static_cast<uint16_t>(data[0]) | (static_cast<uint16_t>(data[1]) << 8U);
 }
 
-bool sentry_to_radar_ids(uint16_t sentry_id, uint16_t & radar_id)
+bool robot_to_team_radar_id(uint16_t robot_id, uint16_t & radar_id)
 {
-  if (sentry_id == sp::referee::robot_id::RED_SENTRY) {
+  if (
+    robot_id >= sp::referee::robot_id::RED_HERO &&
+    robot_id <= sp::referee::robot_id::RED_OUTPOST) {
     radar_id = sp::referee::robot_id::RED_RADAR;
     return true;
   }
-  if (sentry_id == sp::referee::robot_id::BLUE_SENTRY) {
+  if (
+    robot_id >= sp::referee::robot_id::BLUE_HERO &&
+    robot_id <= sp::referee::robot_id::BLUE_OUTPOST) {
     radar_id = sp::referee::robot_id::BLUE_RADAR;
     return true;
   }
@@ -186,7 +190,7 @@ void PM02::update(uint8_t * frame_start, uint16_t size)
       uint16_t expected_radar_id = 0;
 
       const bool valid_route =
-        sentry_to_radar_ids(this->robot_status.robot_id, expected_radar_id) &&
+        robot_to_team_radar_id(this->robot_status.robot_id, expected_radar_id) &&
         sender_id == expected_radar_id && receiver_id == this->robot_status.robot_id;
       if (!valid_route) break;
 
