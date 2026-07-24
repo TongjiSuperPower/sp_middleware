@@ -88,8 +88,7 @@ private:
   float max_delta_us_;   ///< 最大耗时（微秒）
   uint32_t count_;       ///< 测量次数
 
-  static bool initialized_;   ///< DWT 是否已初始化
-  static float us_per_tick_;  ///< 每个 tick 对应的微秒数
+  static bool initialized_;  ///< DWT 是否已初始化
 };
 
 }  // namespace sp
