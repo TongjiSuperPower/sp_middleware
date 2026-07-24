@@ -15,7 +15,6 @@ namespace sp
 
 // 静态成员初始化
 bool Timer::initialized_ = false;
-float Timer::us_per_tick_ = 0.0f;
 
 Timer::Timer(bool auto_init)
 : start_tick_(0), stop_tick_(0), min_delta_us_(1e9f), max_delta_us_(0.0f), count_(0)
@@ -42,8 +41,6 @@ bool Timer::init()
 
   // 验证是否使能成功
   if (DWT_CTRL & DWT_CTRL_CYCCNTENA) {
-    // 根据实际系统时钟频率计算 us_per_tick_
-    us_per_tick_ = 1.0f / (static_cast<float>(SystemCoreClock) / 1000000.0f);
     initialized_ = true;
     return true;
   }
@@ -68,7 +65,7 @@ float Timer::delta_us() const
 {
   // 处理溢出（32位计数器会回绕）
   uint32_t ticks = stop_tick_ - start_tick_;
-  return static_cast<float>(ticks) * us_per_tick_;
+  return static_cast<float>(ticks) * 1000000.0f / static_cast<float>(SystemCoreClock);
 }
 
 float Timer::delta_ms() const { return delta_us() / 1000.0f; }
@@ -77,7 +74,10 @@ float Timer::delta_s() const { return delta_us() / 1000000.0f; }
 
 uint32_t Timer::delta_tick() const { return stop_tick_ - start_tick_; }
 
-float Timer::now_us() { return static_cast<float>(DWT_CYCCNT) * us_per_tick_; }
+float Timer::now_us()
+{
+  return static_cast<float>(DWT_CYCCNT) * 1000000.0f / static_cast<float>(SystemCoreClock);
+}
 
 void Timer::reset_stats()
 {
