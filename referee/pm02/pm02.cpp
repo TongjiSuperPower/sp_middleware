@@ -21,23 +21,6 @@ uint16_t read_u16_le(const uint8_t * data)
   return static_cast<uint16_t>(data[0]) | (static_cast<uint16_t>(data[1]) << 8U);
 }
 
-bool robot_to_team_radar_id(uint16_t robot_id, uint16_t & radar_id)
-{
-  if (
-    robot_id >= sp::referee::robot_id::RED_HERO &&
-    robot_id <= sp::referee::robot_id::RED_OUTPOST) {
-    radar_id = sp::referee::robot_id::RED_RADAR;
-    return true;
-  }
-  if (
-    robot_id >= sp::referee::robot_id::BLUE_HERO &&
-    robot_id <= sp::referee::robot_id::BLUE_OUTPOST) {
-    radar_id = sp::referee::robot_id::BLUE_RADAR;
-    return true;
-  }
-  return false;
-}
-
 }  // namespace
 
 namespace sp
@@ -185,14 +168,9 @@ void PM02::update(uint8_t * frame_start, uint16_t size)
       if (data_len < INTERACTION_HEADER_LEN) break;
 
       const uint16_t data_cmd_id = read_u16_le(data);
-      const uint16_t sender_id = read_u16_le(data + 2);
       const uint16_t receiver_id = read_u16_le(data + 4);
-      uint16_t expected_radar_id = 0;
 
-      const bool valid_route =
-        robot_to_team_radar_id(this->robot_status.robot_id, expected_radar_id) &&
-        sender_id == expected_radar_id && receiver_id == this->robot_status.robot_id;
-      if (!valid_route) break;
+      if (receiver_id != this->robot_status.robot_id) break;
 
       const uint8_t * payload = data + INTERACTION_HEADER_LEN;
       const size_t payload_len = data_len - INTERACTION_HEADER_LEN;
