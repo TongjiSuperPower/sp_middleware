@@ -21,6 +21,137 @@ uint16_t read_u16_le(const uint8_t * data)
   return static_cast<uint16_t>(data[0]) | (static_cast<uint16_t>(data[1]) << 8U);
 }
 
+template <typename T>
+T value_or_default(T value, uint32_t default_value)
+{
+  return value == static_cast<T>(-1) ? static_cast<T>(default_value) : value;
+}
+
+sp::referee::RadarEnemyDartWarning default_radar_enemy_dart_warning()
+{
+  return {};
+}
+
+sp::referee::RadarSentryPosition default_radar_position()
+{
+  return {};
+}
+
+sp::referee::RadarAllyHp default_radar_hp()
+{
+  sp::referee::RadarAllyHp data{};
+  data.hero_hp = 999U;
+  data.engineer_hp = 999U;
+  data.infantry3_hp = 999U;
+  data.infantry4_hp = 999U;
+  data.sentry_hp = 999U;
+  return data;
+}
+
+sp::referee::RadarAllyAmmo default_radar_ammo()
+{
+  sp::referee::RadarAllyAmmo data{};
+  data.hero_ammo = 999U;
+  data.infantry3_ammo = 999U;
+  data.infantry4_ammo = 999U;
+  data.aerial_ammo = 999U;
+  data.sentry_ammo = 999U;
+  return data;
+}
+
+sp::referee::RadarAllyField default_radar_field()
+{
+  sp::referee::RadarAllyField data{};
+  data.remain_coins = 9999U;
+  data.total_coins = 9999U;
+  data.status_flags = 0U;
+  return data;
+}
+
+sp::referee::RadarBuffStatus default_radar_buff_status()
+{
+  sp::referee::RadarBuffStatus data{};
+  data.sentry_posture = 3U;
+  return data;
+}
+
+void normalize_radar_position(sp::referee::RadarSentryPosition & data)
+{
+  data.source = value_or_default(data.source, 0U);
+  data.hero_x = value_or_default(data.hero_x, 0);
+  data.hero_y = value_or_default(data.hero_y, 0);
+  data.engineer_x = value_or_default(data.engineer_x, 0);
+  data.engineer_y = value_or_default(data.engineer_y, 0);
+  data.infantry3_x = value_or_default(data.infantry3_x, 0);
+  data.infantry3_y = value_or_default(data.infantry3_y, 0);
+  data.infantry4_x = value_or_default(data.infantry4_x, 0);
+  data.infantry4_y = value_or_default(data.infantry4_y, 0);
+  data.aerial_x = value_or_default(data.aerial_x, 0);
+  data.aerial_y = value_or_default(data.aerial_y, 0);
+  data.sentry_x = value_or_default(data.sentry_x, 0);
+  data.sentry_y = value_or_default(data.sentry_y, 0);
+}
+
+void normalize_radar_hp(sp::referee::RadarAllyHp & data)
+{
+  data.hero_hp = value_or_default(data.hero_hp, 999U);
+  data.engineer_hp = value_or_default(data.engineer_hp, 999U);
+  data.infantry3_hp = value_or_default(data.infantry3_hp, 999U);
+  data.infantry4_hp = value_or_default(data.infantry4_hp, 999U);
+  data.sentry_hp = value_or_default(data.sentry_hp, 999U);
+}
+
+void normalize_radar_ammo(sp::referee::RadarAllyAmmo & data)
+{
+  data.hero_ammo = value_or_default(data.hero_ammo, 999U);
+  data.infantry3_ammo = value_or_default(data.infantry3_ammo, 999U);
+  data.infantry4_ammo = value_or_default(data.infantry4_ammo, 999U);
+  data.aerial_ammo = value_or_default(data.aerial_ammo, 999U);
+  data.sentry_ammo = value_or_default(data.sentry_ammo, 999U);
+}
+
+void normalize_radar_field(sp::referee::RadarAllyField & data)
+{
+  data.remain_coins = value_or_default(data.remain_coins, 9999U);
+  data.total_coins = value_or_default(data.total_coins, 9999U);
+  data.status_flags = value_or_default(data.status_flags, 0U);
+}
+
+void normalize_radar_buff_status(sp::referee::RadarBuffStatus & data)
+{
+  data.hero_heal = value_or_default(data.hero_heal, 0U);
+  data.hero_cool = value_or_default(data.hero_cool, 0U);
+  data.hero_def = value_or_default(data.hero_def, 0U);
+  data.hero_vuln = value_or_default(data.hero_vuln, 0U);
+  data.hero_atk = value_or_default(data.hero_atk, 0U);
+  data.engineer_heal = value_or_default(data.engineer_heal, 0U);
+  data.engineer_cool = value_or_default(data.engineer_cool, 0U);
+  data.engineer_def = value_or_default(data.engineer_def, 0U);
+  data.engineer_vuln = value_or_default(data.engineer_vuln, 0U);
+  data.engineer_atk = value_or_default(data.engineer_atk, 0U);
+  data.infantry3_heal = value_or_default(data.infantry3_heal, 0U);
+  data.infantry3_cool = value_or_default(data.infantry3_cool, 0U);
+  data.infantry3_def = value_or_default(data.infantry3_def, 0U);
+  data.infantry3_vuln = value_or_default(data.infantry3_vuln, 0U);
+  data.infantry3_atk = value_or_default(data.infantry3_atk, 0U);
+  data.infantry4_heal = value_or_default(data.infantry4_heal, 0U);
+  data.infantry4_cool = value_or_default(data.infantry4_cool, 0U);
+  data.infantry4_def = value_or_default(data.infantry4_def, 0U);
+  data.infantry4_vuln = value_or_default(data.infantry4_vuln, 0U);
+  data.infantry4_atk = value_or_default(data.infantry4_atk, 0U);
+  data.sentry_heal = value_or_default(data.sentry_heal, 0U);
+  data.sentry_cool = value_or_default(data.sentry_cool, 0U);
+  data.sentry_def = value_or_default(data.sentry_def, 0U);
+  data.sentry_vuln = value_or_default(data.sentry_vuln, 0U);
+  data.sentry_atk = value_or_default(data.sentry_atk, 0U);
+  data.sentry_posture = value_or_default(data.sentry_posture, 3U);
+  data.hero_status = value_or_default(data.hero_status, 0U);
+  data.engineer_status = value_or_default(data.engineer_status, 0U);
+  data.infantry3_status = value_or_default(data.infantry3_status, 0U);
+  data.infantry4_status = value_or_default(data.infantry4_status, 0U);
+  data.sentry_status = value_or_default(data.sentry_status, 0U);
+}
+
 }  // namespace
 
 namespace sp
@@ -37,6 +168,13 @@ PM02::PM02(UART_HandleTypeDef * huart, bool use_dma) : huart(huart), use_dma_(us
   for (auto & mb : this->multi_buff_) {
     std::memset(mb.data(), 0, mb.size());
   }
+
+  this->radar_enemy_dart_warning = default_radar_enemy_dart_warning();
+  this->enemy_robot_position = default_radar_position();
+  this->radar_ally_hp = default_radar_hp();
+  this->radar_ally_ammo = default_radar_ammo();
+  this->radar_ally_field = default_radar_field();
+  this->radar_buff_status = default_radar_buff_status();
 }
 
 void PM02::request()
@@ -54,7 +192,11 @@ void PM02::request()
   }
 }
 
-void PM02::update(uint16_t size) { update(buff_, size); }
+void PM02::update(uint16_t size)
+{
+  update_radar_data_timeout(HAL_GetTick());
+  update(buff_, size);
+}
 
 void PM02::update(uint8_t * frame_start, uint16_t size)
 {
@@ -153,13 +295,15 @@ void PM02::update(uint8_t * frame_start, uint16_t size)
     // 0x0A05 雷达站增益点状态数据（雷达侧可据此生成无敌掩码）
     case referee::cmd_id::RADAR_BUFF_STATUS:
       if (data_len == sizeof(this->radar_buff_status)) {
-        copy_fixed(this->radar_buff_status, data, data_len);
-        this->radar_buff_status_valid = referee::radar_buff_status_valid(this->radar_buff_status);
-        if (this->radar_buff_status_valid) {
-          this->radar_buff_status_last_update_ms = HAL_GetTick();
-        }
+        referee::RadarBuffStatus received{};
+        std::memcpy(&received, data, sizeof(received));
+        normalize_radar_buff_status(received);
+        this->radar_buff_status = received;
+        this->radar_buff_status_valid = true;
+        this->radar_buff_status_last_update_ms = HAL_GetTick();
       }
       else {
+        this->radar_buff_status = default_radar_buff_status();
         this->radar_buff_status_valid = false;
       }
       break;
@@ -182,11 +326,13 @@ void PM02::update(uint8_t * frame_start, uint16_t size)
           if (payload_len == sizeof(referee::RadarEnemyDartWarning)) {
             referee::RadarEnemyDartWarning received{};
             std::memcpy(&received, payload, sizeof(received));
-            if (received.dart_gate_status <= 1U) {
-              this->radar_enemy_dart_warning = received;
-              this->radar_enemy_dart_warning_valid = true;
-              this->radar_enemy_dart_warning_last_update_ms = now_ms;
-            }
+            received.dart_gate_status = value_or_default(received.dart_gate_status, 0U);
+            this->radar_enemy_dart_warning = received;
+            this->radar_enemy_dart_warning_valid = true;
+            this->radar_enemy_dart_warning_last_update_ms = now_ms;
+          }
+          else {
+            this->radar_enemy_dart_warning = default_radar_enemy_dart_warning();
           }
           break;
 
@@ -195,11 +341,13 @@ void PM02::update(uint8_t * frame_start, uint16_t size)
           if (payload_len == sizeof(referee::RadarSentryPosition)) {
             referee::RadarSentryPosition received{};
             std::memcpy(&received, payload, sizeof(received));
-            if (received.source <= 1U) {
-              this->enemy_robot_position = received;
-              this->enemy_robot_position_valid = true;
-              this->enemy_robot_position_last_update_ms = now_ms;
-            }
+            normalize_radar_position(received);
+            this->enemy_robot_position = received;
+            this->enemy_robot_position_valid = true;
+            this->enemy_robot_position_last_update_ms = now_ms;
+          }
+          else {
+            this->enemy_robot_position = default_radar_position();
           }
           break;
 
@@ -212,7 +360,13 @@ void PM02::update(uint8_t * frame_start, uint16_t size)
             referee::RadarCombinedData received{};
             std::memcpy(&received, payload, sizeof(received));
 
-            // 中间件只负责按线序拆包，雷达的全 1 无效标记由具体业务层处理。
+            // 0x0212 的四组数据分别清洗。某组或某字段为全 1 时，
+            // 只替换对应字段，不影响同一帧中其他正确数据。
+            normalize_radar_hp(received.hp);
+            normalize_radar_ammo(received.ammo);
+            normalize_radar_field(received.field);
+            normalize_radar_buff_status(received.buff);
+
             this->radar_ally_hp = received.hp;
             this->radar_ally_ammo = received.ammo;
             this->radar_ally_field = received.field;
@@ -227,6 +381,12 @@ void PM02::update(uint8_t * frame_start, uint16_t size)
             this->radar_ally_ammo_last_update_ms = now_ms;
             this->radar_ally_field_last_update_ms = now_ms;
             this->radar_buff_status_last_update_ms = now_ms;
+          }
+          else {
+            this->radar_ally_hp = default_radar_hp();
+            this->radar_ally_ammo = default_radar_ammo();
+            this->radar_ally_field = default_radar_field();
+            this->radar_buff_status = default_radar_buff_status();
           }
           break;
 
@@ -270,6 +430,39 @@ void PM02::send(const uint8_t * data, size_t size)
   }
   else {
     HAL_UART_Transmit(this->huart, data, size, 0xFF);
+  }
+}
+
+void PM02::update_radar_data_timeout(uint32_t now_ms, uint32_t timeout_ms)
+{
+  if (!radar_enemy_dart_warning_fresh(now_ms, timeout_ms)) {
+    this->radar_enemy_dart_warning = default_radar_enemy_dart_warning();
+    this->radar_enemy_dart_warning_valid = false;
+  }
+
+  if (!enemy_robot_position_fresh(now_ms, timeout_ms)) {
+    this->enemy_robot_position = default_radar_position();
+    this->enemy_robot_position_valid = false;
+  }
+
+  if (!radar_ally_hp_fresh(now_ms, timeout_ms)) {
+    this->radar_ally_hp = default_radar_hp();
+    this->radar_ally_hp_valid = false;
+  }
+
+  if (!radar_ally_ammo_fresh(now_ms, timeout_ms)) {
+    this->radar_ally_ammo = default_radar_ammo();
+    this->radar_ally_ammo_valid = false;
+  }
+
+  if (!radar_ally_field_fresh(now_ms, timeout_ms)) {
+    this->radar_ally_field = default_radar_field();
+    this->radar_ally_field_valid = false;
+  }
+
+  if (!radar_buff_status_fresh(now_ms, timeout_ms)) {
+    this->radar_buff_status = default_radar_buff_status();
+    this->radar_buff_status_valid = false;
   }
 }
 

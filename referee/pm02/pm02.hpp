@@ -80,10 +80,12 @@ public:
 
   void request();
   void update(uint16_t size);
+  // 周期调用。对应 0x0301 子命令超过 timeout_ms 未更新时，将数据恢复为安全默认值。
+  void update_radar_data_timeout(uint32_t now_ms, uint32_t timeout_ms = 1500U);
   void send(const uint8_t * data, size_t size);
 
   bool radar_enemy_dart_warning_fresh(uint32_t now_ms, uint32_t timeout_ms = 1500U) const;
-  bool enemy_robot_position_fresh(uint32_t now_ms, uint32_t timeout_ms = 300U) const;
+  bool enemy_robot_position_fresh(uint32_t now_ms, uint32_t timeout_ms = 1500U) const;
   bool radar_ally_hp_fresh(uint32_t now_ms, uint32_t timeout_ms = 1500U) const;
   bool radar_ally_ammo_fresh(uint32_t now_ms, uint32_t timeout_ms = 1500U) const;
   bool radar_ally_field_fresh(uint32_t now_ms, uint32_t timeout_ms = 1500U) const;
