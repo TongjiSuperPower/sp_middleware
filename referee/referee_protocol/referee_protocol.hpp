@@ -99,10 +99,7 @@ namespace sp::referee::data_cmd_id
 // 雷达通过 0x0301 发送的自定义子编码。
 constexpr uint16_t RADAR_ENEMY_DART_WARNING_CMD = 0x0210;
 constexpr uint16_t RADAR_SENTRY_POSITION_CMD = 0x0211;
-constexpr uint16_t RADAR_ALLY_HP_CMD = 0x0212;
-constexpr uint16_t RADAR_ALLY_AMMO_CMD = 0x0213;
-constexpr uint16_t RADAR_ALLY_FIELD_CMD = 0x0214;
-constexpr uint16_t RADAR_ALLY_BUFF_CMD = 0x0215;
+constexpr uint16_t RADAR_COMBINED_DATA_CMD = 0x0212;
 // 0x0200~0x02FF 机器人之间通信 TODO
 constexpr uint16_t INTERACTION_LAYER_DELETE = 0x0100;     // 选手端删除图层
 constexpr uint16_t INTERACTION_FIGURE = 0x0101;           // 选手端绘制一个图形
@@ -526,7 +523,7 @@ struct __attribute__((packed)) RadarBuffStatus
   uint8_t sentry_status;
 };
 
-// 自定义 0x0301/0x0215 用户数据。每台机器人的状态保持 0x0A05 原值：
+// 自定义 0x0301/0x0212 合并数据中的机器人状态保持 0x0A05 原值：
 // 0=存活，1=战亡，2=无敌但不虚弱，3=无敌且虚弱。
 namespace robot_main_status
 {
@@ -561,7 +558,7 @@ struct __attribute__((packed)) RadarSentryPosition
   int16_t sentry_y;
 };
 
-// 自定义 0x0301/0x0212 用户数据（不含 6 字节交互头）。
+// 自定义 0x0301/0x0212 合并数据中的 HP 部分。
 struct __attribute__((packed)) RadarAllyHp
 {
   uint16_t hero_hp;
@@ -571,7 +568,7 @@ struct __attribute__((packed)) RadarAllyHp
   uint16_t sentry_hp;
 };
 
-// 自定义 0x0301/0x0213 用户数据（不含 6 字节交互头）。
+// 自定义 0x0301/0x0212 合并数据中的弹药部分。
 struct __attribute__((packed)) RadarAllyAmmo
 {
   uint16_t hero_ammo;
@@ -581,12 +578,22 @@ struct __attribute__((packed)) RadarAllyAmmo
   uint16_t sentry_ammo;
 };
 
-// 自定义 0x0301/0x0214 用户数据（不含 6 字节交互头）。
+// 自定义 0x0301/0x0212 合并数据中的场地部分。
 struct __attribute__((packed)) RadarAllyField
 {
   uint16_t remain_coins;
   uint16_t total_coins;
   uint32_t status_flags;
+};
+
+// 自定义 0x0301/0x0212 合并数据（不含 6 字节交互头）。
+// 线序固定为 HP、弹药、场地、Buff；用户载荷 69 字节，连同交互头共 75 字节。
+struct __attribute__((packed)) RadarCombinedData
+{
+  RadarAllyHp hp;
+  RadarAllyAmmo ammo;
+  RadarAllyField field;
+  RadarBuffStatus buff;
 };
 
 static_assert(sizeof(RadarEnemyDartWarning) == 1U);
@@ -595,6 +602,11 @@ static_assert(sizeof(RadarAllyHp) == 10U);
 static_assert(sizeof(RadarAllyAmmo) == 10U);
 static_assert(sizeof(RadarAllyField) == 8U);
 static_assert(sizeof(RadarBuffStatus) == 41U);
+static_assert(sizeof(RadarCombinedData) == 69U);
+static_assert(offsetof(RadarCombinedData, hp) == 0U);
+static_assert(offsetof(RadarCombinedData, ammo) == 10U);
+static_assert(offsetof(RadarCombinedData, field) == 20U);
+static_assert(offsetof(RadarCombinedData, buff) == 28U);
 
 constexpr bool radar_main_status_valid(uint8_t status)
 {
@@ -608,6 +620,11 @@ inline bool radar_buff_status_valid(const RadarBuffStatus & status)
          radar_main_status_valid(status.infantry3_status) &&
          radar_main_status_valid(status.infantry4_status) &&
          radar_main_status_valid(status.sentry_status);
+}
+
+inline bool radar_combined_data_valid(const RadarCombinedData & data)
+{
+  return radar_buff_status_valid(data.buff);
 }
 
 // 0x0301 机器人交互数据

@@ -48,7 +48,7 @@ public:
   referee::MapData map_data;                        // 只读! 0x0307 选手端小地图接收哨兵数据
   referee::CustomInfo custom_info;                  // 只读! 0x0308 选手端小地图接收机器人数据
 
-  // 只读! 雷达发给哨兵的 0x0301/0x0210 敌方飞镖预警。
+  // 只读! 0x0301/0x0210 敌方飞镖预警。
   referee::RadarEnemyDartWarning radar_enemy_dart_warning{};
   bool radar_enemy_dart_warning_valid = false;
   uint32_t radar_enemy_dart_warning_last_update_ms = 0;
@@ -58,22 +58,22 @@ public:
   bool enemy_robot_position_valid = false;
   uint32_t enemy_robot_position_last_update_ms = 0;
 
-  // 只读! 0x0301/0x0212
+  // 只读! 0x0301/0x0212 合并数据中的 HP。
   referee::RadarAllyHp radar_ally_hp{};
   bool radar_ally_hp_valid = false;
   uint32_t radar_ally_hp_last_update_ms = 0;
 
-  // 只读! 0x0301/0x0213
+  // 只读! 0x0301/0x0212 合并数据中的弹药。
   referee::RadarAllyAmmo radar_ally_ammo{};
   bool radar_ally_ammo_valid = false;
   uint32_t radar_ally_ammo_last_update_ms = 0;
 
-  // 只读! 0x0301/0x0214
+  // 只读! 0x0301/0x0212 合并数据中的场地信息。
   referee::RadarAllyField radar_ally_field{};
   bool radar_ally_field_valid = false;
   uint32_t radar_ally_field_last_update_ms = 0;
 
-  // 只读! 0x0301/0x0215 的完整 Buff 数据（也兼容直接解析 0x0A05）
+  // 只读! 0x0301/0x0212 合并数据中的 Buff，也兼容裁判系统直接下发的 0x0A05。
   referee::RadarBuffStatus radar_buff_status{};
   bool radar_buff_status_valid = false;
   uint32_t radar_buff_status_last_update_ms = 0;
@@ -84,10 +84,10 @@ public:
 
   bool radar_enemy_dart_warning_fresh(uint32_t now_ms, uint32_t timeout_ms = 300U) const;
   bool enemy_robot_position_fresh(uint32_t now_ms, uint32_t timeout_ms = 300U) const;
-  bool radar_ally_hp_fresh(uint32_t now_ms, uint32_t timeout_ms = 300U) const;
-  bool radar_ally_ammo_fresh(uint32_t now_ms, uint32_t timeout_ms = 300U) const;
-  bool radar_ally_field_fresh(uint32_t now_ms, uint32_t timeout_ms = 300U) const;
-  bool radar_buff_status_fresh(uint32_t now_ms, uint32_t timeout_ms = 300U) const;
+  bool radar_ally_hp_fresh(uint32_t now_ms, uint32_t timeout_ms = 1500U) const;
+  bool radar_ally_ammo_fresh(uint32_t now_ms, uint32_t timeout_ms = 1500U) const;
+  bool radar_ally_field_fresh(uint32_t now_ms, uint32_t timeout_ms = 1500U) const;
+  bool radar_buff_status_fresh(uint32_t now_ms, uint32_t timeout_ms = 1500U) const;
 
   // TODO UI
 

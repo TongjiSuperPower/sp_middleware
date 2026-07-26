@@ -163,7 +163,7 @@ void PM02::update(uint8_t * frame_start, uint16_t size)
         this->radar_buff_status_valid = false;
       }
       break;
-    // 0x0301 雷达自定义子编码：0x0210~0x0215。
+    // 0x0301 雷达自定义子编码：0x0210~0x0212。
     case referee::cmd_id::ROBOT_INTERACTION_DATA: {
       if (data_len < INTERACTION_HEADER_LEN) break;
 
@@ -203,41 +203,28 @@ void PM02::update(uint8_t * frame_start, uint16_t size)
           }
           break;
 
-        case referee::data_cmd_id::RADAR_ALLY_HP_CMD:
+        case referee::data_cmd_id::RADAR_COMBINED_DATA_CMD:
           this->radar_ally_hp_valid = false;
-          if (payload_len == sizeof(referee::RadarAllyHp)) {
-            std::memcpy(&this->radar_ally_hp, payload, sizeof(this->radar_ally_hp));
-            this->radar_ally_hp_valid = true;
-            this->radar_ally_hp_last_update_ms = now_ms;
-          }
-          break;
-
-        case referee::data_cmd_id::RADAR_ALLY_AMMO_CMD:
           this->radar_ally_ammo_valid = false;
-          if (payload_len == sizeof(referee::RadarAllyAmmo)) {
-            std::memcpy(&this->radar_ally_ammo, payload, sizeof(this->radar_ally_ammo));
-            this->radar_ally_ammo_valid = true;
-            this->radar_ally_ammo_last_update_ms = now_ms;
-          }
-          break;
-
-        case referee::data_cmd_id::RADAR_ALLY_FIELD_CMD:
           this->radar_ally_field_valid = false;
-          if (payload_len == sizeof(referee::RadarAllyField)) {
-            std::memcpy(&this->radar_ally_field, payload, sizeof(this->radar_ally_field));
-            this->radar_ally_field_valid = true;
-            this->radar_ally_field_last_update_ms = now_ms;
-          }
-          break;
-
-        case referee::data_cmd_id::RADAR_ALLY_BUFF_CMD:
           this->radar_buff_status_valid = false;
-          if (payload_len == sizeof(referee::RadarBuffStatus)) {
-            referee::RadarBuffStatus received{};
+          if (payload_len == sizeof(referee::RadarCombinedData)) {
+            referee::RadarCombinedData received{};
             std::memcpy(&received, payload, sizeof(received));
-            if (referee::radar_buff_status_valid(received)) {
-              this->radar_buff_status = received;
+            if (referee::radar_combined_data_valid(received)) {
+              this->radar_ally_hp = received.hp;
+              this->radar_ally_ammo = received.ammo;
+              this->radar_ally_field = received.field;
+              this->radar_buff_status = received.buff;
+
+              this->radar_ally_hp_valid = true;
+              this->radar_ally_ammo_valid = true;
+              this->radar_ally_field_valid = true;
               this->radar_buff_status_valid = true;
+
+              this->radar_ally_hp_last_update_ms = now_ms;
+              this->radar_ally_ammo_last_update_ms = now_ms;
+              this->radar_ally_field_last_update_ms = now_ms;
               this->radar_buff_status_last_update_ms = now_ms;
             }
           }
