@@ -211,22 +211,22 @@ void PM02::update(uint8_t * frame_start, uint16_t size)
           if (payload_len == sizeof(referee::RadarCombinedData)) {
             referee::RadarCombinedData received{};
             std::memcpy(&received, payload, sizeof(received));
-            if (referee::radar_combined_data_valid(received)) {
-              this->radar_ally_hp = received.hp;
-              this->radar_ally_ammo = received.ammo;
-              this->radar_ally_field = received.field;
-              this->radar_buff_status = received.buff;
 
-              this->radar_ally_hp_valid = true;
-              this->radar_ally_ammo_valid = true;
-              this->radar_ally_field_valid = true;
-              this->radar_buff_status_valid = true;
+            // 中间件只负责按线序拆包，雷达的全 1 无效标记由具体业务层处理。
+            this->radar_ally_hp = received.hp;
+            this->radar_ally_ammo = received.ammo;
+            this->radar_ally_field = received.field;
+            this->radar_buff_status = received.buff;
 
-              this->radar_ally_hp_last_update_ms = now_ms;
-              this->radar_ally_ammo_last_update_ms = now_ms;
-              this->radar_ally_field_last_update_ms = now_ms;
-              this->radar_buff_status_last_update_ms = now_ms;
-            }
+            this->radar_ally_hp_valid = true;
+            this->radar_ally_ammo_valid = true;
+            this->radar_ally_field_valid = true;
+            this->radar_buff_status_valid = true;
+
+            this->radar_ally_hp_last_update_ms = now_ms;
+            this->radar_ally_ammo_last_update_ms = now_ms;
+            this->radar_ally_field_last_update_ms = now_ms;
+            this->radar_buff_status_last_update_ms = now_ms;
           }
           break;
 

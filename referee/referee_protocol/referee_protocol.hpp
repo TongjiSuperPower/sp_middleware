@@ -622,11 +622,6 @@ inline bool radar_buff_status_valid(const RadarBuffStatus & status)
          radar_main_status_valid(status.sentry_status);
 }
 
-inline bool radar_combined_data_valid(const RadarCombinedData & data)
-{
-  return radar_buff_status_valid(data.buff);
-}
-
 // 0x0301 机器人交互数据
 struct __attribute__((packed)) RobotInteractionData
 {
