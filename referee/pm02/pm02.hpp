@@ -42,11 +42,11 @@ public:
   referee::RadarInfo radar_info;                      // 只读! 0x020E 雷达自主决策信息同步
   //todo
   // referee::RobotInteractionData robot_interaction;  // 只读! 0x0301 机器人交互数据
-  referee::MapCommand map_command;                  // 只读! 0x0303 选手端小地图交互数据
-  referee::MapRobotData map_robot_data;             // 只读! 0x0305 选手端小地图接收雷达数据
+  referee::MapCommand map_command;       // 只读! 0x0303 选手端小地图交互数据
+  referee::MapRobotData map_robot_data;  // 只读! 0x0305 选手端小地图接收雷达数据
   // referee::CustomClientData custom_client_data;     // 只读! 0x0306 自定义控制器与选手端交互数据
-  referee::MapData map_data;                        // 只读! 0x0307 选手端小地图接收哨兵数据
-  referee::CustomInfo custom_info;                  // 只读! 0x0308 选手端小地图接收机器人数据
+  referee::MapData map_data;        // 只读! 0x0307 选手端小地图接收哨兵数据
+  referee::CustomInfo custom_info;  // 只读! 0x0308 选手端小地图接收机器人数据
 
   // 只读! 0x0301/0x0210 敌方飞镖预警。
   referee::RadarEnemyDartWarning radar_enemy_dart_warning{};
@@ -82,7 +82,7 @@ public:
   void update(uint16_t size);
   void send(const uint8_t * data, size_t size);
 
-  bool radar_enemy_dart_warning_fresh(uint32_t now_ms, uint32_t timeout_ms = 300U) const;
+  bool radar_enemy_dart_warning_fresh(uint32_t now_ms, uint32_t timeout_ms = 1500U) const;
   bool enemy_robot_position_fresh(uint32_t now_ms, uint32_t timeout_ms = 300U) const;
   bool radar_ally_hp_fresh(uint32_t now_ms, uint32_t timeout_ms = 1500U) const;
   bool radar_ally_ammo_fresh(uint32_t now_ms, uint32_t timeout_ms = 1500U) const;
