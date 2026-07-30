@@ -444,14 +444,13 @@ void PM02::update(uint8_t * frame_start, uint16_t size)
   update(frame_start + frame_len, size - frame_len);
 }
 
-void PM02::send(const uint8_t * data, size_t size)
+HAL_StatusTypeDef PM02::send(const uint8_t * data, size_t size)
 {
   if (use_dma_) {
-    HAL_UART_Transmit_DMA(this->huart, data, size);
+    return HAL_UART_Transmit_DMA(this->huart, data, size);
   }
-  else {
-    HAL_UART_Transmit(this->huart, data, size, 0xFF);
-  }
+
+  return HAL_UART_Transmit(this->huart, data, size, 0xFF);
 }
 
 void PM02::update_radar_data_timeout(uint32_t now_ms, uint32_t timeout_ms)

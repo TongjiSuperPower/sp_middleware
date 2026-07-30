@@ -87,7 +87,7 @@ public:
   void update(uint16_t size);
   // 周期调用。对应 0x0301 子命令超过 timeout_ms 未更新时，将数据恢复为安全默认值。
   void update_radar_data_timeout(uint32_t now_ms, uint32_t timeout_ms = 1500U);
-  void send(const uint8_t * data, size_t size);
+  HAL_StatusTypeDef send(const uint8_t * data, size_t size);
 
   bool radar_enemy_dart_warning_fresh(uint32_t now_ms, uint32_t timeout_ms = 1500U) const;
   bool radar_aerial_countered_fresh(uint32_t now_ms, uint32_t timeout_ms = 1500U) const;

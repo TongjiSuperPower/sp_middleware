@@ -151,6 +151,8 @@ void UI_Manager::copy(const ui::Element * e, size_t i)
 
 void UI_Manager::apply_crc()
 {
+  frame_.head.seq++;
+
   // 先计算crc8
   frame_.head.crc8 = get_crc8(data(), 4);
 
