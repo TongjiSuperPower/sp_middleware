@@ -32,6 +32,11 @@ sp::referee::RadarEnemyDartWarning default_radar_enemy_dart_warning()
   return {};
 }
 
+sp::referee::RadarAerialCountered default_radar_aerial_countered()
+{
+  return {};
+}
+
 sp::referee::RadarSentryPosition default_radar_position()
 {
   return {};
@@ -170,6 +175,7 @@ PM02::PM02(UART_HandleTypeDef * huart, bool use_dma) : huart(huart), use_dma_(us
   }
 
   this->radar_enemy_dart_warning = default_radar_enemy_dart_warning();
+  this->radar_aerial_countered = default_radar_aerial_countered();
   this->enemy_robot_position = default_radar_position();
   this->radar_ally_hp = default_radar_hp();
   this->radar_ally_ammo = default_radar_ammo();
@@ -307,7 +313,7 @@ void PM02::update(uint8_t * frame_start, uint16_t size)
         this->radar_buff_status_valid = false;
       }
       break;
-    // 0x0301 雷达自定义子编码：0x0210~0x0212。
+    // 0x0301 雷达自定义子编码：0x0210~0x0213。
     case referee::cmd_id::ROBOT_INTERACTION_DATA: {
       if (data_len < INTERACTION_HEADER_LEN) break;
 
@@ -390,6 +396,21 @@ void PM02::update(uint8_t * frame_start, uint16_t size)
           }
           break;
 
+        case referee::data_cmd_id::RADAR_AERIAL_COUNTERED_CMD:
+          this->radar_aerial_countered_valid = false;
+          if (payload_len == sizeof(referee::RadarAerialCountered)) {
+            referee::RadarAerialCountered received{};
+            std::memcpy(&received, payload, sizeof(received));
+            received.aerial_countered = value_or_default(received.aerial_countered, 0U);
+            this->radar_aerial_countered = received;
+            this->radar_aerial_countered_valid = true;
+            this->radar_aerial_countered_last_update_ms = now_ms;
+          }
+          else {
+            this->radar_aerial_countered = default_radar_aerial_countered();
+          }
+          break;
+
         default:
           break;
       }
@@ -440,6 +461,11 @@ void PM02::update_radar_data_timeout(uint32_t now_ms, uint32_t timeout_ms)
     this->radar_enemy_dart_warning_valid = false;
   }
 
+  if (!radar_aerial_countered_fresh(now_ms, timeout_ms)) {
+    this->radar_aerial_countered = default_radar_aerial_countered();
+    this->radar_aerial_countered_valid = false;
+  }
+
   if (!enemy_robot_position_fresh(now_ms, timeout_ms)) {
     this->enemy_robot_position = default_radar_position();
     this->enemy_robot_position_valid = false;
@@ -471,6 +497,12 @@ bool PM02::radar_enemy_dart_warning_fresh(uint32_t now_ms, uint32_t timeout_ms) 
   return this->radar_enemy_dart_warning_valid &&
          static_cast<uint32_t>(now_ms - this->radar_enemy_dart_warning_last_update_ms) <=
            timeout_ms;
+}
+
+bool PM02::radar_aerial_countered_fresh(uint32_t now_ms, uint32_t timeout_ms) const
+{
+  return this->radar_aerial_countered_valid &&
+         static_cast<uint32_t>(now_ms - this->radar_aerial_countered_last_update_ms) <= timeout_ms;
 }
 
 bool PM02::enemy_robot_position_fresh(uint32_t now_ms, uint32_t timeout_ms) const

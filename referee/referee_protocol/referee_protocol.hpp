@@ -100,6 +100,7 @@ namespace sp::referee::data_cmd_id
 constexpr uint16_t RADAR_ENEMY_DART_WARNING_CMD = 0x0210;
 constexpr uint16_t RADAR_SENTRY_POSITION_CMD = 0x0211;
 constexpr uint16_t RADAR_COMBINED_DATA_CMD = 0x0212;
+constexpr uint16_t RADAR_AERIAL_COUNTERED_CMD = 0x0213;
 // 0x0200~0x02FF 机器人之间通信 TODO
 constexpr uint16_t INTERACTION_LAYER_DELETE = 0x0100;     // 选手端删除图层
 constexpr uint16_t INTERACTION_FIGURE = 0x0101;           // 选手端绘制一个图形
@@ -539,6 +540,12 @@ struct __attribute__((packed)) RadarEnemyDartWarning
   uint8_t dart_gate_status;
 };
 
+// 自定义 0x0301/0x0213 用户数据（不含 6 字节交互头）。
+struct __attribute__((packed)) RadarAerialCountered
+{
+  uint8_t aerial_countered;
+};
+
 // 自定义 0x0301/0x0211 用户数据（不含 6 字节交互头）。
 // 坐标保持雷达发送的 int16 原值，不在中间件内进行单位换算。
 struct __attribute__((packed)) RadarSentryPosition
@@ -597,6 +604,7 @@ struct __attribute__((packed)) RadarCombinedData
 };
 
 static_assert(sizeof(RadarEnemyDartWarning) == 1U);
+static_assert(sizeof(RadarAerialCountered) == 1U);
 static_assert(sizeof(RadarSentryPosition) == 25U);
 static_assert(sizeof(RadarAllyHp) == 10U);
 static_assert(sizeof(RadarAllyAmmo) == 10U);

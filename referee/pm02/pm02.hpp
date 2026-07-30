@@ -53,6 +53,11 @@ public:
   bool radar_enemy_dart_warning_valid = false;
   uint32_t radar_enemy_dart_warning_last_update_ms = 0;
 
+  // 只读! 0x0301/0x0213 对方空中机器人反制状态。
+  referee::RadarAerialCountered radar_aerial_countered{};
+  bool radar_aerial_countered_valid = false;
+  uint32_t radar_aerial_countered_last_update_ms = 0;
+
   // 只读! 0x0301/0x0211
   referee::RadarSentryPosition enemy_robot_position{};
   bool enemy_robot_position_valid = false;
@@ -85,6 +90,7 @@ public:
   void send(const uint8_t * data, size_t size);
 
   bool radar_enemy_dart_warning_fresh(uint32_t now_ms, uint32_t timeout_ms = 1500U) const;
+  bool radar_aerial_countered_fresh(uint32_t now_ms, uint32_t timeout_ms = 1500U) const;
   bool enemy_robot_position_fresh(uint32_t now_ms, uint32_t timeout_ms = 1500U) const;
   bool radar_ally_hp_fresh(uint32_t now_ms, uint32_t timeout_ms = 1500U) const;
   bool radar_ally_ammo_fresh(uint32_t now_ms, uint32_t timeout_ms = 1500U) const;
