@@ -16,7 +16,7 @@ enum class SuperCapMode
 class SuperCap
 {
 public:
-  const uint16_t super_cap_tx_id = 0x300;   // 超级电容控制帧ID
+  const uint16_t tx_id = 0x300;             // 超级电容和缓冲电容控制帧ID
   const uint16_t super_cap_rx_id = 0x301;   // 超级电容反馈帧ID
   const uint16_t buffer_cap_rx_id = 0x302;  // 缓冲电容反馈帧ID
 
