@@ -35,7 +35,7 @@ class Gimbal
 public:
   Gimbal(
     float yaw0 = 0.0f, float pitch0 = 0.0f, bool reverse_yaw = false, bool reverse_pitch = false,
-    float dt = 1e-3f, float install_roll = 0.0f,
+    float dt = 1e-3f, float install_roll = 0.0f, float gimbal_roll0 = 0.0f,
     const GimbalFilterConfig & filter_config = GimbalFilterConfig{});
 
   //单imu更新函数，输入云台姿态和电机角度
@@ -168,8 +168,9 @@ public:
   float base_roll_in_world;   //只读！ 底盘系相对于地面系的roll角，单位：rad
 
 private:
-  float yaw0_;    //云台yaw轴码盘零点位置，单位：rad
-  float pitch0_;  //云台pitch轴码盘零点位置，单位：rad
+  float yaw0_;          //云台yaw轴码盘零点位置，单位：rad
+  float pitch0_;        //云台pitch轴码盘零点位置，单位：rad
+  float gimbal_roll0_;  //云台imu安装roll,直接读云台imu.roll，单位：rad
   float sign_yaw_;
   float sign_pitch_;
   float dt_;                                            //控制周期

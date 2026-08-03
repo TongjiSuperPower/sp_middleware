@@ -9,7 +9,7 @@ namespace sp
 
 Gimbal::Gimbal(
   float yaw0, float pitch0, bool reverse_yaw, bool reverse_pitch, float dt, float install_roll,
-  const GimbalFilterConfig & fc)
+  float gimbal_roll0, const GimbalFilterConfig & fc)
 : yaw0_(yaw0),
   pitch0_(pitch0),
   sign_yaw_((reverse_yaw) ? -1.0f : 1.0f),
@@ -31,6 +31,7 @@ Gimbal::Gimbal(
   pitch_motor_target_acc_filter(fc.pitch_target_acc),
   yaw_motor_target_acc_filter(fc.yaw_target_acc),
   dt_(dt),
+  gimbal_roll0_(gimbal_roll0),
   install_roll_(install_roll)
 {
   this->yaw_fdb_in_joint = 0.0f;
@@ -53,7 +54,7 @@ void Gimbal::update_all_single(
   const sp::Mahony & gimbal_imu, const float & yaw_angle, const float & pitch_angle)
 {
   //更新电机角度和底盘姿态及角速度
-  update_q_chassis2world(gimbal_imu, yaw_angle, pitch_angle);
+  update_q_chassis2world(gimbal_imu, yaw_angle, pitch_angle, this->gimbal_roll0_);
   //转换出底盘姿态欧拉角
   quaternion_to_euler(this->q_chassis2world, this->chassis_euler_in_world);
   //更新底盘的角加速度,并换到云台系表示
@@ -158,30 +159,70 @@ void Gimbal::calc_all_target(
 
   pitch_target_relative_angle = asinf(-gun_target_vector_in_chassisframe[2]);
 
+  if (fabs(cosf(this->pitch_rel)) < 1e-5) {
+    return;
+    //防止除零爆炸,只更新目标角度,冻结其他目标值沿用上一帧
+  }
   //解算云台相对于底盘目标欧拉角变化率
   pitch_target_relative_speed =
     cosf(this->roll_rel - gimbal_imu.roll) *
-      (vpitch_set_in_world - this->w_chassis_in_gimbalframe[1] * cosf(gimbal_imu.roll) +
+      (0.0f - this->w_chassis_in_gimbalframe[1] * cosf(gimbal_imu.roll) +
        this->w_chassis_in_gimbalframe[2] * sinf(gimbal_imu.roll)) +
     sinf(this->roll_rel - gimbal_imu.roll) *
-      (this->w_chassis_in_gimbalframe[2] * cosf(gimbal_imu.roll) -
-       vyaw_set_in_world * cosf(gimbal_imu.pitch) +
+      (this->w_chassis_in_gimbalframe[2] * cosf(gimbal_imu.roll) - 0.0f * cosf(gimbal_imu.pitch) +
        this->w_chassis_in_gimbalframe[1] * sinf(gimbal_imu.roll));
   pitch_target_relative_speed_filter.update(pitch_target_relative_speed);
   pitch_target_relative_speed = pitch_target_relative_speed_filter.out;
+  pitch_target_relative_speed +=
+    cosf(this->roll_rel - gimbal_imu.roll) *
+      (vpitch_set_in_world - 0.0f * cosf(gimbal_imu.roll) + 0.0f * sinf(gimbal_imu.roll)) +
+    sinf(this->roll_rel - gimbal_imu.roll) *
+      (0.0f * cosf(gimbal_imu.roll) - vyaw_set_in_world * cosf(gimbal_imu.pitch) +
+       0.0f * sinf(gimbal_imu.roll));
 
   yaw_target_relative_speed =
     (sinf(this->roll_rel - gimbal_imu.roll) *
-     (vpitch_set_in_world - this->w_chassis_in_gimbalframe[1] * cosf(gimbal_imu.roll) +
+     (0.0f - this->w_chassis_in_gimbalframe[1] * cosf(gimbal_imu.roll) +
       this->w_chassis_in_gimbalframe[2] * sinf(gimbal_imu.roll))) /
       cosf(this->pitch_rel) -
     (cosf(this->roll_rel - gimbal_imu.roll) *
-     (this->w_chassis_in_gimbalframe[2] * cosf(gimbal_imu.roll) -
-      vyaw_set_in_world * cosf(gimbal_imu.pitch) +
+     (this->w_chassis_in_gimbalframe[2] * cosf(gimbal_imu.roll) - 0.0f * cosf(gimbal_imu.pitch) +
       this->w_chassis_in_gimbalframe[1] * sinf(gimbal_imu.roll))) /
       cosf(this->pitch_rel);
   yaw_target_relative_speed_filter.update(yaw_target_relative_speed);
   yaw_target_relative_speed = yaw_target_relative_speed_filter.out;
+  yaw_target_relative_speed +=
+    (sinf(this->roll_rel - gimbal_imu.roll) *
+     (vpitch_set_in_world - 0.0f * cosf(gimbal_imu.roll) + 0.0f * sinf(gimbal_imu.roll))) /
+      cosf(this->pitch_rel) -
+    (cosf(this->roll_rel - gimbal_imu.roll) *
+     (0.0f * cosf(gimbal_imu.roll) - vyaw_set_in_world * cosf(gimbal_imu.pitch) +
+      0.0f * sinf(gimbal_imu.roll))) /
+      cosf(this->pitch_rel);
+  //优先滤波再加视觉值
+  // pitch_target_relative_speed =
+  //   cosf(this->roll_rel - gimbal_imu.roll) *
+  //     (vpitch_set_in_world - this->w_chassis_in_gimbalframe[1] * cosf(gimbal_imu.roll) +
+  //      this->w_chassis_in_gimbalframe[2] * sinf(gimbal_imu.roll)) +
+  //   sinf(this->roll_rel - gimbal_imu.roll) *
+  //     (this->w_chassis_in_gimbalframe[2] * cosf(gimbal_imu.roll) -
+  //      vyaw_set_in_world * cosf(gimbal_imu.pitch) +
+  //      this->w_chassis_in_gimbalframe[1] * sinf(gimbal_imu.roll));
+  // pitch_target_relative_speed_filter.update(pitch_target_relative_speed);
+  // pitch_target_relative_speed = pitch_target_relative_speed_filter.out;
+
+  // yaw_target_relative_speed =
+  //   (sinf(this->roll_rel - gimbal_imu.roll) *
+  //    (vpitch_set_in_world - this->w_chassis_in_gimbalframe[1] * cosf(gimbal_imu.roll) +
+  //     this->w_chassis_in_gimbalframe[2] * sinf(gimbal_imu.roll))) /
+  //     cosf(this->pitch_rel) -
+  //   (cosf(this->roll_rel - gimbal_imu.roll) *
+  //    (this->w_chassis_in_gimbalframe[2] * cosf(gimbal_imu.roll) -
+  //     vyaw_set_in_world * cosf(gimbal_imu.pitch) +
+  //     this->w_chassis_in_gimbalframe[1] * sinf(gimbal_imu.roll))) /
+  //     cosf(this->pitch_rel);
+  // yaw_target_relative_speed_filter.update(yaw_target_relative_speed);
+  // yaw_target_relative_speed = yaw_target_relative_speed_filter.out;
 
   //计算A
   sp::Gimbal::Transform_matrix_rates_multipy_Euler_rates(
@@ -215,9 +256,10 @@ void Gimbal::calc_all_target(
 
   //给Final加上视觉发来的欧拉角期望加速度
   //后续只考虑后两个分量等价于乘了一个S矩阵
-  Final[1] += acc_pitch_set_in_world;
-  Final[2] += acc_yaw_set_in_world;
+  // Final[1] += acc_pitch_set_in_world;
+  // Final[2] += acc_yaw_set_in_world;
 
+  //优先滤波再加视觉值
   //千呼万唤始出来兄弟们
   //对这个Final的后两个向量求逆就可以了!!!!!!!!!!!
   pitch_target_relative_acc =
@@ -232,6 +274,17 @@ void Gimbal::calc_all_target(
     cosf(this->pitch_rel);
   yaw_motor_target_acc_filter.update(yaw_target_relative_acc);
   yaw_target_relative_acc = yaw_motor_target_acc_filter.out;
+
+  pitch_target_relative_acc +=
+    acc_pitch_set_in_world * cosf(this->roll_rel - gimbal_imu.roll) -
+    acc_yaw_set_in_world * cosf(gimbal_imu.pitch) * sinf(this->roll_rel - gimbal_imu.roll);
+  pitch_motor_target_acc_filter.update(pitch_target_relative_acc);
+  pitch_target_relative_acc = pitch_motor_target_acc_filter.out;
+
+  yaw_target_relative_acc +=
+    (acc_pitch_set_in_world * sinf(this->roll_rel - gimbal_imu.roll) +
+     acc_yaw_set_in_world * cosf(gimbal_imu.pitch) * cosf(this->roll_rel - gimbal_imu.roll)) /
+    cosf(this->pitch_rel);
 }
 
 void Gimbal::update(
