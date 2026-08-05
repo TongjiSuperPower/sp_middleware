@@ -36,10 +36,17 @@ struct __attribute__((packed)) GimbalToVision
   float supercap_voltage;
   uint8_t supercap_temperature;
   uint8_t supercap_status;
+  // only tandem use, else: set zero
+  uint16_t buffer_energy;
+  float buffercap_power_in;
+  float buffercap_power_out;
+  float buffercap_voltage;
+  uint8_t buffercap_temperature;
+  uint8_t buffercap_status;
   uint16_t crc16;
 };
 
-static_assert(sizeof(GimbalToVision) <= 64);
+static_assert(sizeof(GimbalToVision) <= 80, "GimbalToVision exceeds 80 bytes");
 
 struct __attribute__((packed)) GimbalToVisionHero
 {
@@ -57,11 +64,18 @@ struct __attribute__((packed)) GimbalToVisionHero
   float supercap_voltage;
   uint8_t supercap_temperature;
   uint8_t supercap_status;
+  // only tandem use, else: set zero
+  uint16_t buffer_energy;
+  float buffercap_power_in;
+  float buffercap_power_out;
+  float buffercap_voltage;
+  uint8_t buffercap_temperature;
+  uint8_t buffercap_status;
   uint8_t game_progress;
   uint16_t crc16;
 };
 
-static_assert(sizeof(GimbalToVisionHero) <= 64);
+static_assert(sizeof(GimbalToVisionHero) <= 80, "GimbalToVisionHero exceeds 80 bytes");
 
 struct __attribute__((packed)) VisionToHanging
 {
@@ -95,11 +109,15 @@ public:
   void send(
     uint8_t mode, float q[4], float yaw, float yaw_vel, float pitch, float pitch_vel,
     float bullet_speed, uint16_t bullet_count, float supercap_power_in, float supercap_power_out,
-    float supercap_voltage, uint8_t supercap_temperature, uint8_t supercap_status);
+    float supercap_voltage, uint8_t supercap_temperature, uint8_t supercap_status,
+    uint16_t buffer_energy, float buffercap_power_in, float buffercap_power_out,
+    float buffercap_voltage, uint8_t buffercap_temperature, uint8_t buffercap_status);
   void send(
     uint8_t mode, float q[4], float yaw, float yaw_vel, float pitch, float pitch_vel,
     float bullet_speed, uint16_t bullet_count, float supercap_power_in, float supercap_power_out,
     float supercap_voltage, uint8_t supercap_temperature, uint8_t supercap_status,
+    uint16_t buffer_energy, float buffercap_power_in, float buffercap_power_out,
+    float buffercap_voltage, uint8_t buffercap_temperature, uint8_t buffercap_status,
     uint8_t game_progress);
   VisionToHanging rx_data_hanging_;
 

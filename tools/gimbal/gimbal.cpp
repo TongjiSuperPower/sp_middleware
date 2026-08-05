@@ -12,14 +12,14 @@ Gimbal::Gimbal(
   float gimbal_roll0, const GimbalFilterConfig & fc)
 : yaw0_(yaw0),
   pitch0_(pitch0),
+  gimbal_roll0_(gimbal_roll0),
   sign_yaw_((reverse_yaw) ? -1.0f : 1.0f),
   sign_pitch_((reverse_pitch) ? -1.0f : 1.0f),
+  dt_(dt),
+  install_roll_(install_roll),
   yaw_relative_angle_filter(fc.yaw_angle),
   pitch_relative_angle_filter(fc.pitch_angle),
   roll_relative_angle_filter(fc.roll_angle),
-
-  yaw_relative_angle_filter0(1.0f),    //弃用
-  pitch_relative_angle_filter0(1.0f),  //弃用
   //电机目标速度滤波器
   pitch_target_relative_speed_filter(fc.pitch_target_speed),
   yaw_target_relative_speed_filter(fc.yaw_target_speed),
@@ -30,9 +30,9 @@ Gimbal::Gimbal(
   //电机目标加速度滤波器
   pitch_motor_target_acc_filter(fc.pitch_target_acc),
   yaw_motor_target_acc_filter(fc.yaw_target_acc),
-  dt_(dt),
-  gimbal_roll0_(gimbal_roll0),
-  install_roll_(install_roll)
+  //弃用滤波器
+  yaw_relative_angle_filter0(1.0f),
+  pitch_relative_angle_filter0(1.0f)
 {
   this->yaw_fdb_in_joint = 0.0f;
   this->pitch_fdb_in_joint = 0.0f;
