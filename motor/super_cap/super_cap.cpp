@@ -4,7 +4,7 @@ namespace sp
 {
 SuperCap::SuperCap(SuperCapMode mode, float capacitance) : mode_(mode), capacitance_(capacitance) {}
 
-bool SuperCap::is_alive(uint32_t now_ms) const { return (now_ms - last_read_ms_ < 10); }
+bool SuperCap::is_alive(uint32_t now_ms) const { return (now_ms - last_read_ms_ < 20); }
 
 void SuperCap::read(uint8_t * data, uint32_t stamp_ms)
 {
