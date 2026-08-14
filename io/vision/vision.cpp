@@ -120,9 +120,7 @@ void Vision::update(uint8_t * buf, uint32_t len)
 void Vision::send(
   uint8_t mode, float q[4], float yaw, float yaw_vel, float pitch, float pitch_vel,
   float bullet_speed, uint16_t bullet_count, float supercap_power_in, float supercap_power_out,
-  float supercap_voltage, uint8_t supercap_temperature, uint8_t supercap_status,
-  uint16_t buffer_energy, float buffercap_power_in, float buffercap_power_out,
-  float buffercap_voltage, uint8_t buffercap_temperature, uint8_t buffercap_status)
+  float supercap_voltage, uint8_t supercap_temperature, uint8_t supercap_status)
 {
   tx_data_.mode = mode;
   tx_data_.q[0] = q[0];
@@ -140,12 +138,6 @@ void Vision::send(
   tx_data_.supercap_voltage = supercap_voltage;
   tx_data_.supercap_temperature = supercap_temperature;
   tx_data_.supercap_status = supercap_status;
-  tx_data_.buffer_energy = buffer_energy;
-  tx_data_.buffercap_power_in = buffercap_power_in;
-  tx_data_.buffercap_power_out = buffercap_power_out;
-  tx_data_.buffercap_voltage = buffercap_voltage;
-  tx_data_.buffercap_temperature = buffercap_temperature;
-  tx_data_.buffercap_status = buffercap_status;
   tx_data_.crc16 =
     get_crc16(reinterpret_cast<uint8_t *>(&tx_data_), sizeof(tx_data_) - sizeof(tx_data_.crc16));
 
@@ -156,8 +148,6 @@ void Vision::send(
   uint8_t mode, float q[4], float yaw, float yaw_vel, float pitch, float pitch_vel,
   float bullet_speed, uint16_t bullet_count, float supercap_power_in, float supercap_power_out,
   float supercap_voltage, uint8_t supercap_temperature, uint8_t supercap_status,
-  uint16_t buffer_energy, float buffercap_power_in, float buffercap_power_out,
-  float buffercap_voltage, uint8_t buffercap_temperature, uint8_t buffercap_status,
   uint8_t game_progress)
 {
   tx_data_with_game_progress_.mode = mode;
@@ -176,12 +166,6 @@ void Vision::send(
   tx_data_with_game_progress_.supercap_voltage = supercap_voltage;
   tx_data_with_game_progress_.supercap_temperature = supercap_temperature;
   tx_data_with_game_progress_.supercap_status = supercap_status;
-  tx_data_with_game_progress_.buffer_energy = buffer_energy;
-  tx_data_with_game_progress_.buffercap_power_in = buffercap_power_in;
-  tx_data_with_game_progress_.buffercap_power_out = buffercap_power_out;
-  tx_data_with_game_progress_.buffercap_voltage = buffercap_voltage;
-  tx_data_with_game_progress_.buffercap_temperature = buffercap_temperature;
-  tx_data_with_game_progress_.buffercap_status = buffercap_status;
   tx_data_with_game_progress_.game_progress = game_progress;
   tx_data_with_game_progress_.crc16 = get_crc16(
     reinterpret_cast<uint8_t *>(&tx_data_with_game_progress_),
