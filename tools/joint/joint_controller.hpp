@@ -7,6 +7,9 @@
 #include "tools/low_pass_filter/low_pass_filter.hpp"
 #include "tools/pid/pid.hpp"
 
+// MotorType 需提供 public: angle, speed, torque 与 cmd(float)。
+// 固件实例化 DM_Motor / RM_Motor; HOST_SIM 实例化 sp::SimMotor。
+
 class JointControllerBase
 {
 public:
