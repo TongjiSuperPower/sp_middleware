@@ -1,5 +1,8 @@
 #include "joint_controller.hpp"
 
+#ifdef HOST_SIM
+#include "motor/sim_motor/sim_motor.hpp"
+#endif
 #include "tools/math_tools/math_tools.hpp"
 
 template <typename MotorType>
@@ -184,5 +187,9 @@ void JointMotorController<MotorType>::control()
   }
 }
 
+#ifdef HOST_SIM
+template class JointMotorController<sp::SimMotor>;
+#else
 template class JointMotorController<sp::DM_Motor>;
 template class JointMotorController<sp::RM_Motor>;
+#endif
