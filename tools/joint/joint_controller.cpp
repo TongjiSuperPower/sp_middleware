@@ -1,4 +1,5 @@
 #include "joint_controller.hpp"
+#include <cmath>
 
 #ifdef HOST_SIM
 #include "motor/sim_motor/sim_motor.hpp"
@@ -51,9 +52,25 @@ void JointMotorController<MotorType>::add(float value)
 template <typename MotorType>
 void JointMotorController<MotorType>::cmd(float value)
 {
+  if (trajectory_position_) pid_.clear(); // 模式切换后不能沿用旧模式的位置微分历史
+  trajectory_position_ = false;
   mode_ = ControlMode::POSITION;
   v_set_ = 0;
   set_ = sp::limit_min_max(value, min_, max_);
+}
+
+template <typename MotorType>
+void JointMotorController<MotorType>::cmd_trajectory(float position, float velocity)
+{
+  if (!trajectory_position_ || mode_ != ControlMode::POSITION) pid_.clear();
+  trajectory_position_ = true;
+  mode_ = ControlMode::POSITION;
+  set_ = sp::limit_min_max(position, min_, max_);
+  v_set_ = 0;
+  // 位置被限位截断时清除全部速度前馈；恰在边界时也禁止朝边界外侧的速度。
+  if (std::isfinite(velocity) && position == set_ &&
+      !((set_ >= max_ && velocity > 0) || (set_ <= min_ && velocity < 0)))
+    v_set_ = sp::limit_max(velocity, max_v_);
 }
 
 template <typename MotorType>
@@ -124,9 +141,7 @@ bool JointMotorController<MotorType>::cmd_pos_until_t(float value, float t_thres
     return true;
   }
   else {
-    mode_ = ControlMode::POSITION;
-    v_set_ = 0;
-    set_ = sp::limit_min_max(value, min_, max_);
+    cmd(value);
     return false;
   }
 }
@@ -174,8 +189,11 @@ void JointMotorController<MotorType>::control()
   }
   else {
     if (mode_ == ControlMode::POSITION) {
-      pid_.calc(set_, this->pos_filtered);
-      motor_speed_pid_.calc(pid_.out, this->vel_filtered);
+      if (trajectory_position_)
+        pid_.calc(set_, this->pos_filtered, v_set_, this->vel_filtered);
+      else
+        pid_.calc(set_, this->pos_filtered);
+      motor_speed_pid_.calc(sp::limit_max(pid_.out + v_set_, max_v_), this->vel_filtered);
     }
     else if (mode_ == ControlMode::VELOCITY) {
       motor_speed_pid_.calc(v_set_, this->vel_filtered);
