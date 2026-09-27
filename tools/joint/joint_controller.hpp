@@ -23,6 +23,9 @@ public:
   float torque_cmd = 0;
 
   virtual void cmd(float value) = 0;
+  // 轨迹位置指令（rad）与速度前馈（rad/s）。派生控制器可实现位置/速度协同跟踪；
+  // 默认实现只下发位置，兼容尚未实现速度前馈的其他关节控制器。
+  virtual void cmd_trajectory(float position, float /*velocity*/) { cmd(position); }
   virtual void disable() = 0;
   virtual void add(float value) = 0;
   virtual void init() = 0;
@@ -48,6 +51,7 @@ public:
   void init() override;
 
   void cmd(float value) override;                      // pos
+  void cmd_trajectory(float position, float velocity) override;
   void cmd_max() override;                             //pos
   void cmd_min() override;                             //pos
   void cmd_v(float value) override;                    // vel
@@ -79,6 +83,7 @@ public:
   float init_angle_ = 0.0f;
 
 private:
+  bool trajectory_position_ = false;
   const bool feedforward_;
   bool limited_;
   const float pos_filter_;
