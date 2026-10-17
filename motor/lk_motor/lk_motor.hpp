@@ -97,8 +97,13 @@ public:
   const uint16_t tx_id;  // 电机控制帧ID = LK_TX_ID_BASE + motor_id
 
   // ---------------------------- 只读状态 ----------------------------
-  uint8_t motor_state = 0x10;    // 电机状态, 来自0x9A反馈(0x00开启/0x10关闭)
-  uint8_t error_state = 0x00;    // 错误标志, 来自0x9A反馈
+  // 以下来自 0x9A(读取状态1) 的回复
+  uint8_t motor_state = 0x10;  // 电机状态(0x00 开启 / 0x10 关闭)
+  uint8_t error_state = 0x00;  // 错误标志, 各位含义见 read_state1() 里的注释
+  float bus_voltage = 0;       // 母线电压, 单位: V (0.01V/LSB)
+  float bus_current = 0;       // 母线电流, 单位: A (0.01A/LSB)
+
+  // 以下来自 0x9C(读取状态2) 的回复, 也是所有控制命令(0xA1~0xA8)回复的内容
   uint16_t encoder_raw = 0;      // 单圈编码器原始值, 用来实测该型号的编码器位宽
   uint16_t encoder_raw_max = 0;  // 上电以来编码器原始值最大值(转一整圈应扫到 满量程-1)
   int8_t temp = 0;               // 摄氏度

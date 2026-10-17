@@ -116,7 +116,20 @@ void LK_Motor::read_state1(const uint8_t * data)
 {
   if (data[0] != LK_CMD_STATE1 && data[0] != LK_CMD_CLEAR_ERROR) return;
 
+  // 0x9A 回复的数据域(手册 P5):
+  //   data[1]    电机温度, int8, 1℃/LSB
+  //   data[2..3] 母线电压, int16, 0.01V/LSB
+  //   data[4..5] 母线电流, int16, 0.01A/LSB
+  //   data[6]    电机状态: 0x00 开启 / 0x10 关闭
+  //   data[7]    错误标志(每位 0 正常 / 1 报错):
+  //              bit0 低压  bit1 高压  bit2 驱动过温  bit3 电机过温
+  //              bit4 过流  bit5 短路  bit6 堵转     bit7 输入信号丢失超时
+  const int16_t voltage_raw = static_cast<int16_t>((data[3] << 8) | data[2]);
+  const int16_t current_raw = static_cast<int16_t>((data[5] << 8) | data[4]);
+
   this->temp = static_cast<int8_t>(data[1]);
+  this->bus_voltage = voltage_raw * 0.01f;
+  this->bus_current = current_raw * 0.01f;
   this->motor_state = data[6];
   this->error_state = data[7];
 }
