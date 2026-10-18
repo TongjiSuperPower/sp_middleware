@@ -26,6 +26,10 @@ SuperPlotter::SuperPlotter(UART_HandleTypeDef * huart, bool use_dma)
 {
   table_.set_lock(&plot_lock, &plot_unlock);
   g_instance = this;
+  // Cycle counter used to time a transmit. Only diagnostics: it separates a
+  // slow UART from a starved task when the frame rate is wrong.
+  CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
+  DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
 }
 
 void SuperPlotter::record_runtime(const char * name, float value)
@@ -52,12 +56,20 @@ void SuperPlotter::flush()
   poll();
   if (huart_ == nullptr || huart_->gState != HAL_UART_STATE_READY) return;
 
-  const size_t announced = table_.pop_announce(tx_, sizeof tx_);
+  // Names are sent one per flush. A single ~180-byte name dump was truncated
+  // on this link; one name is at most 19 bytes.
+  constexpr size_t kAnnounceBurst = 3 + 15 + 1;
+  // 8 values is 44 bytes. At a 1 ms period that is 44 kB/s on a 92 kB/s link,
+  // so there is room for the adapter between frames. 16 values would use 91%
+  // of the wire and overrun it.
+  constexpr size_t kSampleBurst = 3 + 5 * 8 + 1;
+
+  const size_t announced = table_.pop_announce(tx_, kAnnounceBurst);
   if (announced > 0) {
-    send_bytes(tx_, static_cast<uint16_t>(announced));
-    if (use_dma_ || huart_->gState != HAL_UART_STATE_READY) return;
+    if (send_bytes(tx_, static_cast<uint16_t>(announced))) table_.commit_announce(announced);
+    return;
   }
-  const size_t sampled = table_.pop_sample(tx_, sizeof tx_);
+  const size_t sampled = table_.pop_sample(tx_, kSampleBurst);
   if (sampled > 0) send_bytes(tx_, static_cast<uint16_t>(sampled));
 }
 
@@ -82,15 +94,27 @@ void SuperPlotter::on_rx(uint16_t size)
   }
 }
 
-void SuperPlotter::send_bytes(const uint8_t * data, uint16_t size)
+// Blocking write. The timeout is generous on purpose: a higher-priority task
+// can preempt this one mid-frame, and HAL_UART_Transmit() counts its timeout
+// from the start of the call. 100 ms means a preemption delays the frame
+// instead of tearing it. The old Plotter used 255 ms for the same reason and
+// ran at 1 kHz without dropping frames.
+bool SuperPlotter::send_bytes(const uint8_t * data, uint16_t size)
 {
-  if (huart_ == nullptr || huart_->gState != HAL_UART_STATE_READY) return;
+  if (huart_ == nullptr || data == nullptr || size == 0) return false;
   if (use_dma_) {
-    HAL_UART_Transmit_DMA(huart_, const_cast<uint8_t *>(data), size);
+    return HAL_UART_Transmit_DMA(huart_, const_cast<uint8_t *>(data), size) == HAL_OK;
   }
-  else {
-    HAL_UART_Transmit(huart_, const_cast<uint8_t *>(data), size, 5);
+  const uint32_t t0 = DWT->CYCCNT;
+  const HAL_StatusTypeDef status = HAL_UART_Transmit(huart_, const_cast<uint8_t *>(data), size, 100);
+  const uint32_t cycles = DWT->CYCCNT - t0;
+  last_tx_us_ = cycles / (SystemCoreClock / 1000000u);
+  if (last_tx_us_ > max_tx_us_) max_tx_us_ = last_tx_us_;
+  if (status != HAL_OK) {
+    ++tx_fail_;
+    return false;
   }
+  return true;
 }
 
 }  // namespace sp

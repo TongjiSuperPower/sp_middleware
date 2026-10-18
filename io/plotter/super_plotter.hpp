@@ -72,6 +72,16 @@ public:
   void request();
   void on_rx(uint16_t size);
 
+  // Frames the UART refused to take. Non-zero means the link, not the host
+  // parser, is losing data.
+  uint32_t tx_fail() const { return tx_fail_; }
+
+  // Time the last blocking transmit occupied the CPU, in microseconds. Split
+  // from the frame period this separates "the wire is slow" from "the task is
+  // not being scheduled".
+  uint32_t last_tx_us() const { return last_tx_us_; }
+  uint32_t max_tx_us() const { return max_tx_us_; }
+
 private:
   UART_HandleTypeDef * huart_;
   bool use_dma_;
@@ -81,9 +91,12 @@ private:
   volatile uint16_t ring_w_ = 0;
   volatile uint16_t ring_r_ = 0;
   uint8_t tx_[PLOT_TX_SIZE]{};
+  volatile uint32_t tx_fail_ = 0;
+  uint32_t last_tx_us_ = 0;
+  uint32_t max_tx_us_ = 0;
 
   void write(const char * name, float value);
-  void send_bytes(const uint8_t * data, uint16_t size);
+  bool send_bytes(const uint8_t * data, uint16_t size);
 };
 
 // Shorthand for SuperPlotter::record(). Same literal-only rule: a path that

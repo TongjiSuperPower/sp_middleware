@@ -9,7 +9,8 @@
 //
 // Board -> host  AA BC | id u8 | name, NUL          once per topic, when first flushed
 // Host  -> board AA BD | op u8 | name, NUL          1 sub, 2 unsub, 3 all, 4 clear
-// Board -> host  AA BB | count u8 | (id u8, f32le)* subscribed values, every flush
+// Board -> host  AA BB | count u8 | (id u8, f32le)* | xor u8
+//                xor covers every preceding byte. A frame that fails it is dropped.
 //
 // Registered topics and transmitted values are separate limits. A topic costs
 // RAM only until the host subscribes to it; the frame is built from the
@@ -139,9 +140,9 @@ public:
     }
   }
 
-  // Packs as many pending announcements as fit in dst. Announcements are only
-  // sent for topics the host has never seen, so this drains once and then
-  // returns 0 until a topic is added (or the host clears its list).
+  // Packs as many pending announcements as fit in dst. Does not mark them
+  // sent: commit_announce() does that after the bytes have actually gone out,
+  // so a transmit that is cut short is retried instead of forgotten.
   size_t pop_announce(uint8_t * dst, size_t cap)
   {
     if (dst == nullptr) return 0;
@@ -156,17 +157,32 @@ public:
       dst[total + 1] = 0xBC;
       dst[total + 2] = static_cast<uint8_t>(i);
       std::memcpy(dst + total + 3, topics_[i].name, name_n + 1);
-      topics_[i].announced = 1;
       total += need;
     }
     return total;
+  }
+
+  // Marks the announcements packed by the last pop_announce() of `n` bytes.
+  // `n` must be a prefix of what pop_announce() just wrote.
+  void commit_announce(size_t n)
+  {
+    size_t total = 0;
+    const int count = count_;
+    for (int i = 0; i < count && total < n; ++i) {
+      if (topics_[i].name[0] == '\0' || topics_[i].announced) continue;
+      const size_t name_n = std::strlen(topics_[i].name);
+      const size_t need = 3 + name_n + 1;
+      if (total + need > n || i > PLOT_MAX_ID) break;
+      topics_[i].announced = 1;
+      total += need;
+    }
   }
 
   // Packs subscribed topics into one frame, resuming at the cursor so a set
   // larger than one frame is sent over consecutive calls instead of dropped.
   size_t pop_sample(uint8_t * dst, size_t cap)
   {
-    if (dst == nullptr || cap < 3) return 0;
+    if (dst == nullptr || cap < 9) return 0;
     const int n = count_;
     if (n == 0) return 0;
 
@@ -176,7 +192,7 @@ public:
     if (i >= n) i = 0;
     for (int scanned = 0; scanned < n; ++scanned) {
       if (topics_[i].subscribed) {
-        if (total + 5 > cap) break;
+        if (total + 5 + 1 > cap) break;
         dst[total++] = static_cast<uint8_t>(i);
         uint32_t bits = 0;
         std::memcpy(&bits, &topics_[i].value, sizeof bits);
@@ -193,6 +209,9 @@ public:
     dst[0] = 0xAA;
     dst[1] = 0xBB;
     dst[2] = static_cast<uint8_t>(packed);
+    uint8_t sum = 0;
+    for (size_t k = 0; k < total; ++k) sum ^= dst[k];
+    dst[total++] = sum;
     return total;
   }
 
