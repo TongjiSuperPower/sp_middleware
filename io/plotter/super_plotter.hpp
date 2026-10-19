@@ -30,6 +30,11 @@ static_assert(PLOT_MAX_TOPICS <= PLOT_MAX_ID, "topic id is one byte on the wire"
 // Registering is cheap (one slot of RAM), so paths can be left in the code
 // permanently; only ticked topics occupy the serial link. See publish() for an
 // O(1) handle when the same topic is written in a loop.
+//
+// Transmit is interrupt driven: flush() hands at most one frame to the UART
+// and returns in microseconds, so calling it at 1 kHz does not cost the wire
+// time of the frame. A frame that is still in flight makes the next flush skip
+// its slot; tx_ is only refilled once the completion interrupt retires it.
 class SuperPlotter
 {
 public:
@@ -72,13 +77,19 @@ public:
   void request();
   void on_rx(uint16_t size);
 
-  // Frames the UART refused to take. Non-zero means the link, not the host
-  // parser, is losing data.
+  // Called from HAL_UART_TxCpltCallback() once a frame has left the wire.
+  // Marks the announcements in that frame as sent and retires the buffer.
+  void on_tx_complete();
+
+  // Frames the UART refused to take, or that were dropped because their
+  // completion never arrived. Non-zero means the link, not the host parser,
+  // is losing data.
   uint32_t tx_fail() const { return tx_fail_; }
 
-  // Time the last blocking transmit occupied the CPU, in microseconds. Split
-  // from the frame period this separates "the wire is slow" from "the task is
-  // not being scheduled".
+  // Time the last frame spent on the wire, in microseconds. The CPU is free
+  // during it, so this is bytes * 10 bits / baud rate, not the cost of
+  // plotting; compare it with the frame period to see how much of the link is
+  // in use.
   uint32_t last_tx_us() const { return last_tx_us_; }
   uint32_t max_tx_us() const { return max_tx_us_; }
 
@@ -91,9 +102,16 @@ private:
   volatile uint16_t ring_w_ = 0;
   volatile uint16_t ring_r_ = 0;
   uint8_t tx_[PLOT_TX_SIZE]{};
+  // One frame is in flight at a time: tx_ is handed to the UART and must not
+  // be written again until the completion interrupt retires it.
+  volatile bool tx_busy_ = false;
+  // Announcement bytes in the frame that is in flight. Marked sent from
+  // on_tx_complete(), so a frame that never made it out is retried.
+  volatile size_t tx_announce_ = 0;
+  uint32_t tx_start_cycles_ = 0;
   volatile uint32_t tx_fail_ = 0;
-  uint32_t last_tx_us_ = 0;
-  uint32_t max_tx_us_ = 0;
+  volatile uint32_t last_tx_us_ = 0;
+  volatile uint32_t max_tx_us_ = 0;
 
   void write(const char * name, float value);
   bool send_bytes(const uint8_t * data, uint16_t size);
