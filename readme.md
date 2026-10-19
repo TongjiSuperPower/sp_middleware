@@ -42,6 +42,7 @@ j0.set(arm_j0.pos);                                    // 之后是一次 float 
 | 路径形式 | 字面量 | 运行期 `const char *` 不接受，长度必须编译期已知 |
 | 注册上限 | 128 个 | 每槽 24 字节，共约 3 KB；可用 `-DSP_PLOT_MAX_TOPICS=<n>` 改 |
 | 单帧载荷 | 192 字节 | 订阅数超过 37 个时分多帧连续发出，不丢数据 |
+| 单位 | `sp::PlotUnit` 枚举 | 1 字节，只作标签，不做换算 |
 
 注册和发送是两个独立的量：注册只占 RAM，**只有上位机勾选的路径才会被发送**。
 所以路径可以放心留在代码里，串口带宽只取决于勾了多少条。
@@ -49,10 +50,18 @@ j0.set(arm_j0.pos);                                    // 之后是一次 float 
 ### 协议
 
 ```
-板 -> 上位机  AA BC | id u8 | name, NUL          首次 flush 时为每个主题发一次
-上位机 -> 板  AA BD | op u8 | name, NUL          1 订阅 2 取消 3 全订阅 4 清空
-板 -> 上位机  AA BB | count u8 | (id u8, f32le)* 每次 flush 发订阅值
+板 -> 上位机  AA BC | id u8 | name, NUL | unit u8   首次 flush 时为每个主题发一次
+上位机 -> 板  AA BD | op u8 | name, NUL           1 订阅 2 取消 3 全订阅 4 清空
+板 -> 上位机  AA BB | count u8 | (id u8, f32le)*  每次 flush 发订阅值
 ```
+
+`unit` 是 `sp::PlotUnit` 的 id（0 = 无单位），一个字节，随名字一起只发一次。
+它只是给上位机坐标轴用的标签，**数值始终按记录时的单位原样发送**，不做换算。
+枚举放在 `plot_link.hpp`，id 是协议的一部分：新增只能往后加，不能改号。
+
+只列了 SuperScope 能真正换算的单位。力矩（N·m）、质量（kg）、功率（W）这类
+它没有对应单位组的量，请用 `PlotUnit::None`——挂一个上位机解析不了的标签，
+比没有标签更容易让人误以为轴已经处理好了。
 
 ### 接入
 
@@ -63,6 +72,7 @@ extern "C" void plot_task()
 {
   plotter.initialize(scope_rows());         // 启动接收 + 注册轮询表（表可省略）
   plotter.loop([] {                         // 1 kHz：采样轮询表 → record → flush
+    sp::SuperPlotter::record("chassis/vx", chassis.vx, sp::PlotUnit::MeterPerSecond);
     sp::SuperPlotter::record("chassis/power", power_meter.power);
   });
 }

@@ -34,15 +34,21 @@ SuperPlotter::SuperPlotter(UART_HandleTypeDef * huart, bool use_dma)
   DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
 }
 
-void SuperPlotter::record_runtime(const char * name, float value)
+void SuperPlotter::record_runtime(const char * name, float value, PlotUnit unit)
 {
   if (g_instance == nullptr) return;
-  g_instance->write(name, value);
+  g_instance->write(name, value, unit);
 }
 
-void SuperPlotter::write(const char * name, float value) { table_.record(name, value); }
+void SuperPlotter::write(const char * name, float value, PlotUnit unit)
+{
+  table_.record(name, value, unit);
+}
 
-PlotPublisher SuperPlotter::publish_runtime(const char * topic) { return table_.publish(topic); }
+PlotPublisher SuperPlotter::publish_runtime(const char * topic, PlotUnit unit)
+{
+  return table_.publish(topic, unit);
+}
 
 void SuperPlotter::poll()
 {
@@ -84,8 +90,8 @@ void SuperPlotter::flush()
   if (huart_->gState != HAL_UART_STATE_READY) return;
 
   // Names are sent one per flush. A single ~180-byte name dump was truncated
-  // on this link; one name is at most 19 bytes.
-  constexpr size_t kAnnounceBurst = 3 + 15 + 1;
+  // on this link; one name is at most 19 bytes, plus its unit byte.
+  constexpr size_t kAnnounceBurst = 3 + 15 + 1 + 1;
   // 8 values is 44 bytes, 0.48 ms on the wire, so at a 1 ms period the link
   // is half used and there is room for the adapter between frames. 16 values
   // would use 91% of the wire and overrun it.

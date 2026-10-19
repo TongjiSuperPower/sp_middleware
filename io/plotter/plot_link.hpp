@@ -7,10 +7,14 @@
 
 // Wire format for sp::SuperPlotter: named topics, subscription only. Not NetworkTables.
 //
-// Board -> host  AA BC | id u8 | name, NUL          once per topic, when first flushed
+// Board -> host  AA BC | id u8 | name, NUL | unit u8   once per topic, when first flushed
 // Host  -> board AA BD | op u8 | name, NUL          1 sub, 2 unsub, 3 all, 4 clear
 // Board -> host  AA BB | count u8 | (id u8, f32le)* | xor u8
 //                xor covers every preceding byte. A frame that fails it is dropped.
+//
+// The unit is one byte from PlotUnit, sent right after the name: a label for
+// the host's axis, not a conversion. The value is always transmitted in the
+// unit it was recorded in. Adding it costs one byte per topic, once.
 //
 // Registered topics and transmitted values are separate limits. A topic costs
 // RAM only until the host subscribes to it; the frame is built from the
@@ -45,6 +49,65 @@ constexpr int PLOT_MAX_TOPICS = SP_PLOT_MAX_TOPICS;
 constexpr int PLOT_MAX_NAME = 16;  // 15 characters plus the NUL
 constexpr int PLOT_MAX_ID = 255;
 
+// Unit label carried by an announcement. One byte on the wire and one byte in
+// the slot, so a topic still costs 24 bytes. The ids are part of the protocol:
+// the host keeps the same table, so never renumber an existing entry -- add new
+// ones at the end.
+//
+// Only units the dashboard can actually convert are listed. A quantity with no
+// group there (torque in N*m, mass in kg, power in W ...) should be recorded
+// with PlotUnit::None: a label the host cannot resolve is worse than no label,
+// because it looks like the axis was handled.
+//
+// None means "unknown or dimensionless"; the host shows the field without a
+// unit instead of guessing one from the path.
+enum class PlotUnit : uint8_t
+{
+  None = 0,
+
+  // length
+  Meter = 1,
+  Millimeter = 2,
+  Centimeter = 3,
+  Inch = 4,
+  Foot = 5,
+
+  // angle
+  Radian = 6,
+  Degree = 7,
+  Revolution = 8,
+
+  // time
+  Second = 9,
+  Millisecond = 10,
+  Microsecond = 11,
+  Minute = 12,
+
+  // linear
+  MeterPerSecond = 13,
+  MeterPerSecondSquared = 14,
+
+  // angular
+  RadianPerSecond = 15,
+  DegreePerSecond = 16,
+  RadianPerSecondSquared = 17,
+
+  // electrical
+  Ampere = 18,
+  Volt = 19,
+  Joule = 20,
+
+  // thermal
+  Celsius = 21,
+  Kelvin = 22,
+
+  // misc
+  Hertz = 23,
+  RevolutionPerMinute = 24,
+};
+
+constexpr int PLOT_UNIT_COUNT = 25;
+
 // True when a literal path fits in PlotSlot::name (N includes the NUL).
 // Paths shorter than 15 characters bind to the const char (&)[N] overloads of
 // SuperPlotter::record() / publish(), which static_assert this. Runtime names
@@ -61,9 +124,17 @@ struct PlotSlot
   char name[PLOT_MAX_NAME];
   float value;
   uint16_t hash;
-  uint8_t subscribed;
-  uint8_t announced;
+  PlotUnit unit;
+  // Bit 0 subscribed, bit 1 announced. Packed so the whole slot stays 24 bytes:
+  // 16 + 4 + 2 + 1 + 1.
+  uint8_t flags;
 };
+
+// The unit byte must not cost RAM: keep it in the same 24-byte slot as before.
+static_assert(sizeof(PlotSlot) == 24, "PlotSlot grew; check the field packing");
+
+constexpr uint8_t PLOT_SLOT_SUBSCRIBED = 1u << 0;
+constexpr uint8_t PLOT_SLOT_ANNOUNCED = 1u << 1;
 
 class PlotPublisher
 {
@@ -88,6 +159,7 @@ struct PolledRow
 {
   const char * name;
   float (*read)();
+  PlotUnit unit;
   PlotPublisher pub;
 };
 
@@ -108,7 +180,7 @@ public:
     unlock_ = unlock;
   }
 
-  PlotPublisher publish(const char * name)
+  PlotPublisher publish(const char * name, PlotUnit unit = PlotUnit::None)
   {
     PlotPublisher out;
     if (name == nullptr || name[0] == '\0') return out;
@@ -117,7 +189,7 @@ public:
     if (slot == nullptr) {
       const uint32_t state = lock();
       slot = lookup(name, hash);
-      if (slot == nullptr) slot = insert(name, hash);
+      if (slot == nullptr) slot = insert(name, hash, unit);
       unlock(state);
     }
     out.slot_ = slot;
@@ -127,7 +199,10 @@ public:
   // Writes one value, registering the topic the first time the name is seen.
   // Safe to call from any task: the cold path is serialized, the hot path is
   // a hash compare plus a single float store.
-  void record(const char * name, float value)
+  //
+  // The unit only matters on the registering call; a later call with a
+  // different unit is ignored, so one topic never changes its label mid-run.
+  void record(const char * name, float value, PlotUnit unit = PlotUnit::None)
   {
     if (name == nullptr || name[0] == '\0') return;
     const uint16_t hash = name_hash(name);
@@ -138,7 +213,7 @@ public:
     }
     const uint32_t state = lock();
     slot = lookup(name, hash);
-    if (slot == nullptr) slot = insert(name, hash);
+    if (slot == nullptr) slot = insert(name, hash, unit);
     if (slot != nullptr) slot->value = value;
     unlock(state);
   }
@@ -160,14 +235,15 @@ public:
     size_t total = 0;
     const int n = count_;
     for (int i = 0; i < n; ++i) {
-      if (topics_[i].name[0] == '\0' || topics_[i].announced) continue;
+      if (topics_[i].name[0] == '\0' || (topics_[i].flags & PLOT_SLOT_ANNOUNCED)) continue;
       const size_t name_n = std::strlen(topics_[i].name);
-      const size_t need = 3 + name_n + 1;
+      const size_t need = announce_size(topics_[i]);
       if (total + need > cap || i > PLOT_MAX_ID) break;
       dst[total + 0] = 0xAA;
       dst[total + 1] = 0xBC;
       dst[total + 2] = static_cast<uint8_t>(i);
       std::memcpy(dst + total + 3, topics_[i].name, name_n + 1);
+      dst[total + 3 + name_n + 1] = static_cast<uint8_t>(topics_[i].unit);
       total += need;
     }
     return total;
@@ -180,11 +256,10 @@ public:
     size_t total = 0;
     const int count = count_;
     for (int i = 0; i < count && total < n; ++i) {
-      if (topics_[i].name[0] == '\0' || topics_[i].announced) continue;
-      const size_t name_n = std::strlen(topics_[i].name);
-      const size_t need = 3 + name_n + 1;
+      if (topics_[i].name[0] == '\0' || (topics_[i].flags & PLOT_SLOT_ANNOUNCED)) continue;
+      const size_t need = announce_size(topics_[i]);
       if (total + need > n || i > PLOT_MAX_ID) break;
-      topics_[i].announced = 1;
+      topics_[i].flags |= PLOT_SLOT_ANNOUNCED;
       total += need;
     }
   }
@@ -202,7 +277,7 @@ public:
     int i = sample_cursor_;
     if (i >= n) i = 0;
     for (int scanned = 0; scanned < n; ++scanned) {
-      if (topics_[i].subscribed) {
+      if (topics_[i].flags & PLOT_SLOT_SUBSCRIBED) {
         if (total + 5 + 1 > cap) break;
         dst[total++] = static_cast<uint8_t>(i);
         uint32_t bits = 0;
@@ -232,7 +307,7 @@ public:
     int c = 0;
     const int n = count_;
     for (int i = 0; i < n; ++i) {
-      if (topics_[i].subscribed) ++c;
+      if (topics_[i].flags & PLOT_SLOT_SUBSCRIBED) ++c;
     }
     return c;
   }
@@ -276,7 +351,7 @@ private:
   // through count_, so a reader either misses the topic or sees it complete.
   // A name that does not fit is rejected rather than truncated: truncation
   // could merge two distinct paths into one field.
-  PlotSlot * insert(const char * name, uint16_t hash)
+  PlotSlot * insert(const char * name, uint16_t hash, PlotUnit unit)
   {
     if (name == nullptr || name[0] == '\0' || count_ >= kMaxTopics) return nullptr;
     const size_t len = std::strlen(name);
@@ -285,9 +360,16 @@ private:
     std::memset(&slot, 0, sizeof slot);
     std::memcpy(slot.name, name, len + 1);
     slot.hash = hash;
+    slot.unit = unit;
     SP_PLOT_BARRIER();
     count_ = count_ + 1;
     return &slot;
+  }
+
+  // 3 header bytes, the name with its NUL, and the unit byte.
+  static size_t announce_size(const PlotSlot & slot)
+  {
+    return 3 + std::strlen(slot.name) + 1 + 1;
   }
 
   int find(const char * name) const
@@ -302,18 +384,18 @@ private:
   void apply(uint8_t op, const char * name)
   {
     if (op == PLOT_OP_ALL || op == PLOT_OP_CLEAR) {
-      const uint8_t on = op == PLOT_OP_ALL ? 1 : 0;
+      const uint8_t on = op == PLOT_OP_ALL ? PLOT_SLOT_SUBSCRIBED : 0;
       for (int i = 0; i < count_; ++i) {
-        topics_[i].subscribed = on;
-        topics_[i].announced = 0;
+        // Force a re-announce so a host that just connected learns the units too.
+        topics_[i].flags = on;
       }
       sample_cursor_ = 0;
       return;
     }
     const int id = find(name);
     if (id < 0) return;
-    if (op == PLOT_OP_SUB) topics_[id].subscribed = 1;
-    else if (op == PLOT_OP_UNSUB) topics_[id].subscribed = 0;
+    if (op == PLOT_OP_SUB) topics_[id].flags |= PLOT_SLOT_SUBSCRIBED;
+    else if (op == PLOT_OP_UNSUB) topics_[id].flags &= static_cast<uint8_t>(~PLOT_SLOT_SUBSCRIBED);
   }
 
   void pump()

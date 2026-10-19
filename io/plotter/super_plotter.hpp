@@ -29,7 +29,10 @@ constexpr uint32_t PLOT_PERIOD_MS = 1;
 // The usual way to publish is the static record(), which can be called from
 // any task at any time -- the topic is registered on the first call:
 //
-//   sp::SuperPlotter::record("arm/j0/pos", arm_j0.pos);
+//   sp::SuperPlotter::record("arm/j0/pos", arm_j0.pos, sp::PlotUnit::Radian);
+//
+// The unit is only a label for the host's axis; it is not converted, and it is
+// fixed by the first call that registers the topic.
 //
 // Registering is cheap (one slot of RAM), so paths can be left in the code
 // permanently; only ticked topics occupy the serial link. See publish() for an
@@ -58,7 +61,9 @@ public:
   //
   // Paths must be literals so the length is known at compile time; a path that
   // does not fit in PLOT_MAX_NAME is a compile error rather than being
-  // truncated into a different field.
+  // truncated into a different field. The optional unit is a label for the
+  // host's axis (PlotUnit::Millimeter, PlotUnit::RadianPerSecond, ...), not a
+  // conversion: the value is sent exactly as recorded.
   template <size_t N, typename T>
   static std::enable_if_t<std::is_arithmetic<T>::value, void> record(const char (&name)[N], T value)
   {
@@ -66,10 +71,18 @@ public:
     record_runtime(name, static_cast<float>(value));
   }
 
+  template <size_t N, typename T>
+  static std::enable_if_t<std::is_arithmetic<T>::value, void> record(
+    const char (&name)[N], T value, PlotUnit unit)
+  {
+    static_assert(N <= PLOT_MAX_NAME, "SuperPlotter path is longer than PLOT_MAX_NAME");
+    record_runtime(name, static_cast<float>(value), unit);
+  }
+
   // Internal entry point used by tables that already checked their literals
   // (see scope_path()). There is no compile-time length check here, but
   // insert() rejects a name that does not fit, so it still never truncates.
-  static void record_runtime(const char * name, float value);
+  static void record_runtime(const char * name, float value, PlotUnit unit = PlotUnit::None);
 
   // Handle form: registers once, then set() is a single float store.
   template <size_t N>
@@ -79,8 +92,15 @@ public:
     return publish_runtime(name);
   }
 
+  template <size_t N>
+  PlotPublisher publish(const char (&name)[N], PlotUnit unit)
+  {
+    static_assert(N <= PLOT_MAX_NAME, "SuperPlotter path is longer than PLOT_MAX_NAME");
+    return publish_runtime(name, unit);
+  }
+
   // Internal counterpart of publish(), same rules as record_runtime().
-  PlotPublisher publish_runtime(const char * topic);
+  PlotPublisher publish_runtime(const char * topic, PlotUnit unit = PlotUnit::None);
 
   // Starts reception on the UART. Call once from the plot task, before loop().
   void initialize();
@@ -100,13 +120,14 @@ public:
   }
 
   // Per-tick user code. A captureless lambda converts, so the record() lines
-  // can stay in the task next to the values they describe.
+  // can stay in the task next to the values they describe. Optional: a task
+  // that only samples the polled table just calls loop().
   using TickFn = void (*)();
 
   // Runs forever on a PLOT_PERIOD_MS grid: samples the polled table, calls
   // record_hook, then hands at most one frame to the UART. Never returns; a
   // task that only plots is just initialize() + loop().
-  void loop(TickFn record_hook);
+  void loop(TickFn record_hook = nullptr);
 
   void poll();
   void flush();
@@ -152,7 +173,7 @@ private:
   volatile uint32_t last_tx_us_ = 0;
   volatile uint32_t max_tx_us_ = 0;
 
-  void write(const char * name, float value);
+  void write(const char * name, float value, PlotUnit unit);
   bool send_bytes(const uint8_t * data, uint16_t size);
 };
 
