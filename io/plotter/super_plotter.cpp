@@ -1,5 +1,7 @@
 #include "super_plotter.hpp"
 
+#include "cmsis_os.h"
+
 namespace sp
 {
 namespace
@@ -99,6 +101,33 @@ void SuperPlotter::flush()
   }
   const size_t sampled = table_.pop_sample(tx_, kSampleBurst);
   if (sampled > 0) send_bytes(tx_, static_cast<uint16_t>(sampled));
+}
+
+void SuperPlotter::initialize() { request(); }
+
+void SuperPlotter::loop(TickFn record_hook)
+{
+  // Fixed grid, so a hook that occasionally takes longer does not push the
+  // sample rate around; the next tick is scheduled from wake, not from now.
+  uint32_t wake = osKernelSysTick();
+  uint32_t iterations = 0;
+
+  for (;;) {
+    ++iterations;
+    for (int i = 0; i < row_count_; ++i) rows_[i].pub.set(rows_[i].read());
+
+    // Plotter self-diagnostics: together they say whether a missing curve is
+    // the link losing frames (tx_fail), the wire being saturated (tx_us vs
+    // PLOT_PERIOD_MS) or the loop itself falling behind (loop).
+    record_runtime("pl/tx_fail", static_cast<float>(tx_fail_));
+    record_runtime("pl/tx_us", static_cast<float>(last_tx_us_));
+    record_runtime("pl/tx_max", static_cast<float>(max_tx_us_));
+    record_runtime("pl/loop", static_cast<float>(iterations & 0xFFFFFFu));
+
+    if (record_hook != nullptr) record_hook();
+    flush();
+    osDelayUntil(&wake, PLOT_PERIOD_MS);
+  }
 }
 
 void SuperPlotter::request()

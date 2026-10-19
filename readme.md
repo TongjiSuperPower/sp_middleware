@@ -61,14 +61,15 @@ sp::SuperPlotter plotter(&huart7, false);   // 在 plot_task 里创建，注册�
 
 extern "C" void plot_task()
 {
-  plotter.request();                        // 启动接收
-  while (true) {
+  plotter.initialize(scope_rows());         // 启动接收 + 注册轮询表（表可省略）
+  plotter.loop([] {                         // 1 kHz：采样轮询表 → record → flush
     sp::SuperPlotter::record("chassis/power", power_meter.power);
-    plotter.flush();                        // 一帧，没订阅就什么都不发
-    osDelay(20);
-  }
+  });
 }
 ```
+
+`initialize()` 只做初始化，`loop()` 不会返回。想自己控制节奏就照旧手写循环调
+`flush()`：`record()` 是静态的，在哪个任务里调都可以。
 
 UART 中断里调用 `on_rx()` 交出收到的字节即可。主机侧工具见 SuperScope 仓库。
 

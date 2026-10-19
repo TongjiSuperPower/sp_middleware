@@ -80,6 +80,17 @@ private:
   PlotSlot * slot_ = nullptr;
 };
 
+// One row of a table polled on a fixed cadence: a path, the value it should
+// read, and the publisher handle that was registered for it. Kept here rather
+// than in super_plotter.hpp so the host-side bridge can share the table type
+// without pulling in the HAL.
+struct PolledRow
+{
+  const char * name;
+  float (*read)();
+  PlotPublisher pub;
+};
+
 class TopicTable
 {
 public:

@@ -15,6 +15,10 @@ constexpr int PLOT_TX_SIZE = 192;
 static_assert(PLOT_TX_SIZE >= 3 + 5 * 4, "tx_ must carry at least four values");
 static_assert(PLOT_MAX_TOPICS <= PLOT_MAX_ID, "topic id is one byte on the wire");
 
+// Sampling period of loop(), in milliseconds. Transmit is interrupt driven, so
+// this is the sample grid rather than the time a frame spends on the wire.
+constexpr uint32_t PLOT_PERIOD_MS = 1;
+
 // Named-topic plotter with host-controlled subscriptions.
 //
 // Unlike Plotter (fixed AA BB | size | float[18] frames, no names), the host
@@ -35,6 +39,12 @@ static_assert(PLOT_MAX_TOPICS <= PLOT_MAX_ID, "topic id is one byte on the wire"
 // and returns in microseconds, so calling it at 1 kHz does not cost the wire
 // time of the frame. A frame that is still in flight makes the next flush skip
 // its slot; tx_ is only refilled once the completion interrupt retires it.
+//
+// A task that only plots is written as two calls, with the record() lines in
+// the loop hook:
+//
+//   super_plotter.initialize(scope_rows());
+//   super_plotter.loop([]{ sp::SuperPlotter::record("arm/j0/pos", arm_j0.pos); });
 class SuperPlotter
 {
 public:
@@ -72,6 +82,32 @@ public:
   // Internal counterpart of publish(), same rules as record_runtime().
   PlotPublisher publish_runtime(const char * topic);
 
+  // Starts reception on the UART. Call once from the plot task, before loop().
+  void initialize();
+
+  // Same, and also registers every row of a polled table: the table is
+  // sampled on each tick from then on. N comes from the array itself, so the
+  // caller never passes a count.
+  //
+  //   super_plotter.initialize(scope_rows());
+  template <size_t N>
+  void initialize(PolledRow (&rows)[N])
+  {
+    initialize();
+    for (size_t i = 0; i < N; ++i) rows[i].pub = publish_runtime(rows[i].name);
+    rows_ = rows;
+    row_count_ = static_cast<int>(N);
+  }
+
+  // Per-tick user code. A captureless lambda converts, so the record() lines
+  // can stay in the task next to the values they describe.
+  using TickFn = void (*)();
+
+  // Runs forever on a PLOT_PERIOD_MS grid: samples the polled table, calls
+  // record_hook, then hands at most one frame to the UART. Never returns; a
+  // task that only plots is just initialize() + loop().
+  void loop(TickFn record_hook);
+
   void poll();
   void flush();
   void request();
@@ -97,6 +133,9 @@ private:
   UART_HandleTypeDef * huart_;
   bool use_dma_;
   TopicTable table_;
+  // Polled table handed to initialize(), sampled by loop().
+  PolledRow * rows_ = nullptr;
+  int row_count_ = 0;
   uint8_t rx_buff_[128]{};
   uint8_t ring_[256]{};
   volatile uint16_t ring_w_ = 0;
