@@ -114,7 +114,7 @@ public:
   void initialize(PolledRow (&rows)[N])
   {
     initialize();
-    for (size_t i = 0; i < N; ++i) rows[i].pub = publish_runtime(rows[i].name);
+    for (size_t i = 0; i < N; ++i) rows[i].pub = publish_runtime(rows[i].name, rows[i].unit);
     rows_ = rows;
     row_count_ = static_cast<int>(N);
   }
