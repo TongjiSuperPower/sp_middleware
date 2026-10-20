@@ -19,6 +19,12 @@ static_assert(PLOT_MAX_TOPICS <= PLOT_MAX_ID, "topic id is one byte on the wire"
 // this is the sample grid rather than the time a frame spends on the wire.
 constexpr uint32_t PLOT_PERIOD_MS = 1;
 
+// Matrices are much heavier than scalars (a 3x1 costs 5 bytes as scalars, 19
+// bytes as one matrix frame, and a 4x4 costs 71), so they are sent on a slower
+// grid. 10 ms keeps a couple of small matrices well inside a 921600 baud link
+// while still looking continuous on the dashboard.
+constexpr uint32_t PLOT_MATRIX_PERIOD_MS = 10;
+
 // Named-topic plotter with host-controlled subscriptions.
 //
 // Unlike Plotter (fixed AA BB | size | float[18] frames, no names), the host
@@ -102,6 +108,37 @@ public:
   // Internal counterpart of publish(), same rules as record_runtime().
   PlotPublisher publish_runtime(const char * topic, PlotUnit unit = PlotUnit::None);
 
+  // Matrix form: `values` holds rows * cols floats in row-major order and is
+  // copied into the slot, so a temporary buffer is fine. The dimensions are
+  // fixed by the first call that registers the name; a later call with
+  // different dimensions is ignored rather than reinterpreting the field.
+  //
+  // Use a real matrix type (sp::Matrixf) for 3D vectors, points, or a small
+  // transform. Bigger payloads should be split into several fields.
+  template <size_t N>
+  static void record_matrix(
+    const char (&name)[N], uint8_t rows, uint8_t cols, const float * values,
+    PlotUnit unit = PlotUnit::None)
+  {
+    static_assert(N <= PLOT_MAX_NAME, "SuperPlotter path is longer than PLOT_MAX_NAME");
+    record_matrix_runtime(name, rows, cols, values, unit);
+  }
+
+  static void record_matrix_runtime(
+    const char * name, uint8_t rows, uint8_t cols, const float * values,
+    PlotUnit unit = PlotUnit::None);
+
+  template <size_t N>
+  MatrixPublisher publish_matrix(
+    const char (&name)[N], uint8_t rows, uint8_t cols, PlotUnit unit = PlotUnit::None)
+  {
+    static_assert(N <= PLOT_MAX_NAME, "SuperPlotter path is longer than PLOT_MAX_NAME");
+    return publish_matrix_runtime(name, rows, cols, unit);
+  }
+
+  MatrixPublisher publish_matrix_runtime(
+    const char * topic, uint8_t rows, uint8_t cols, PlotUnit unit = PlotUnit::None);
+
   // Starts reception on the UART. Call once from the plot task, before loop().
   void initialize();
 
@@ -117,6 +154,20 @@ public:
     for (size_t i = 0; i < N; ++i) rows[i].pub = publish_runtime(rows[i].name, rows[i].unit);
     rows_ = rows;
     row_count_ = static_cast<int>(N);
+  }
+
+  // Same for matrices. Call after initialize(); the table is sampled every
+  // PLOT_MATRIX_PERIOD_MS from loop().
+  //
+  //   super_plotter.initialize_matrices(matrix_rows());
+  template <size_t N>
+  void initialize_matrices(PolledMatrix (&matrices)[N])
+  {
+    for (size_t i = 0; i < N; ++i) {
+      matrices[i].pub = publish_matrix_runtime(matrices[i].name, matrices[i].rows, matrices[i].cols, matrices[i].unit);
+    }
+    matrices_ = matrices;
+    matrix_row_count_ = static_cast<int>(N);
   }
 
   // Per-tick user code. A captureless lambda converts, so the record() lines
@@ -157,6 +208,9 @@ private:
   // Polled table handed to initialize(), sampled by loop().
   PolledRow * rows_ = nullptr;
   int row_count_ = 0;
+  PolledMatrix * matrices_ = nullptr;
+  int matrix_row_count_ = 0;
+  uint32_t last_matrix_ms_ = 0;
   uint8_t rx_buff_[128]{};
   uint8_t ring_[256]{};
   volatile uint16_t ring_w_ = 0;

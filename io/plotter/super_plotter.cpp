@@ -40,6 +40,13 @@ void SuperPlotter::record_runtime(const char * name, float value, PlotUnit unit)
   g_instance->write(name, value, unit);
 }
 
+void SuperPlotter::record_matrix_runtime(
+  const char * name, uint8_t rows, uint8_t cols, const float * values, PlotUnit unit)
+{
+  if (g_instance == nullptr) return;
+  g_instance->table_.record_matrix(name, rows, cols, values, unit);
+}
+
 void SuperPlotter::write(const char * name, float value, PlotUnit unit)
 {
   table_.record(name, value, unit);
@@ -48,6 +55,12 @@ void SuperPlotter::write(const char * name, float value, PlotUnit unit)
 PlotPublisher SuperPlotter::publish_runtime(const char * topic, PlotUnit unit)
 {
   return table_.publish(topic, unit);
+}
+
+MatrixPublisher SuperPlotter::publish_matrix_runtime(
+  const char * topic, uint8_t rows, uint8_t cols, PlotUnit unit)
+{
+  return table_.publish_matrix(topic, rows, cols, unit);
 }
 
 void SuperPlotter::poll()
@@ -90,8 +103,9 @@ void SuperPlotter::flush()
   if (huart_->gState != HAL_UART_STATE_READY) return;
 
   // Names are sent one per flush. A single ~180-byte name dump was truncated
-  // on this link; one name is at most 19 bytes, plus its unit byte.
-  constexpr size_t kAnnounceBurst = 3 + 15 + 1 + 1;
+  // on this link; one name is at most 22 bytes (a 15 character matrix path plus
+  // rows, cols and the unit).
+  constexpr size_t kAnnounceBurst = 24;
   // 8 values is 44 bytes, 0.48 ms on the wire, so at a 1 ms period the link
   // is half used and there is room for the adapter between frames. 16 values
   // would use 91% of the wire and overrun it.
@@ -105,6 +119,20 @@ void SuperPlotter::flush()
     if (!send_bytes(tx_, static_cast<uint16_t>(announced))) tx_announce_ = 0;
     return;
   }
+
+  // Matrices go out on their own, slower grid. If one is due, it takes this
+  // flush's frame and the scalars wait one tick; a matrix frame is much larger
+  // than a scalar frame, so mixing the two would need a bigger tx buffer.
+  const uint32_t now = osKernelSysTick();
+  if (now - last_matrix_ms_ >= PLOT_MATRIX_PERIOD_MS) {
+    const size_t packed = table_.pop_matrix_sample(tx_, PLOT_TX_SIZE);
+    if (packed > 0) {
+      last_matrix_ms_ = now;
+      send_bytes(tx_, static_cast<uint16_t>(packed));
+      return;
+    }
+  }
+
   const size_t sampled = table_.pop_sample(tx_, kSampleBurst);
   if (sampled > 0) send_bytes(tx_, static_cast<uint16_t>(sampled));
 }
@@ -121,6 +149,17 @@ void SuperPlotter::loop(TickFn record_hook)
   for (;;) {
     ++iterations;
     for (int i = 0; i < row_count_; ++i) rows_[i].pub.set(rows_[i].read());
+
+    // Matrices are sampled every tick like scalars; flush() decides how often
+    // they go on the wire. The buffer is per loop so a fill() that fails to
+    // write every cell cannot leak out of the frame that is due.
+    if (matrix_row_count_ > 0) {
+      float cells[PLOT_MATRIX_MAX_CELLS];
+      for (int i = 0; i < matrix_row_count_; ++i) {
+        matrices_[i].fill(cells);
+        matrices_[i].pub.set(cells);
+      }
+    }
 
     // Plotter self-diagnostics: together they say whether a missing curve is
     // the link losing frames (tx_fail), the wire being saturated (tx_us vs
