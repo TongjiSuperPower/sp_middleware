@@ -7,6 +7,9 @@
 #include "tools/low_pass_filter/low_pass_filter.hpp"
 #include "tools/pid/pid.hpp"
 
+// MotorType 需提供 public: angle, speed, torque 与 cmd(float)。
+// 固件实例化 DM_Motor / RM_Motor; HOST_SIM 实例化 sp::SimMotor。
+
 class JointControllerBase
 {
 public:
@@ -20,9 +23,14 @@ public:
   float torque_cmd = 0;
 
   virtual void cmd(float value) = 0;
+  // 轨迹位置指令（rad）与速度前馈（rad/s）。派生控制器可实现位置/速度协同跟踪；
+  // 默认实现只下发位置，兼容尚未实现速度前馈的其他关节控制器。
+  virtual void cmd_trajectory(float position, float /*velocity*/) { cmd(position); }
   virtual void disable() = 0;
   virtual void add(float value) = 0;
-  virtual void init() = 0;
+  // 设定零点: 参数是电机的直接读数 (和 joint/xx/raw 一致), 读到它时 pos == 0.
+  // 纯算术, 不读电机, 和当前姿态无关。
+  virtual void init(float zero = 0.0f) = 0;
   virtual void cmd_max() = 0;                     //pos
   virtual void cmd_min() = 0;                     //pos
   virtual void cmd_v(float value) = 0;            // vel
@@ -36,15 +44,17 @@ class JointMotorController : public JointControllerBase
 {
 public:
   JointMotorController(
-    float mid, float min, float max, float min_m, float max_m, float max_v, bool reverse,
-    MotorType & motor, sp::PID & pid, sp::PID & motor_speed_pid, bool feedforward = false,
-    bool limited = true, float pos_filter = 1.0f, float vel_filter = 1.0f);
+    float min, float max, float max_v, bool reverse, MotorType & motor, sp::PID & pid,
+    sp::PID & motor_speed_pid, bool feedforward = false, float pos_filter = 1.0f,
+    float vel_filter = 1.0f);
 
   void disable() override;
   void add(float value) override;
-  void init() override;
+  // 设定零点: 之后 pos = sign_ * (motor.angle - zero), zero 与 raw 同一坐标。
+  void init(float zero = 0.0f) override;
 
   void cmd(float value) override;                      // pos
+  void cmd_trajectory(float position, float velocity) override;
   void cmd_max() override;                             //pos
   void cmd_min() override;                             //pos
   void cmd_v(float value) override;                    // vel
@@ -55,11 +65,8 @@ public:
   void cmd_t(float value) override;                      // torque
   void control() override;
 
-  const float mid_;
   const float min_;
   const float max_;
-  const float min_m_;
-  const float max_m_;
   const float max_v_;
   const float sign_;
 
@@ -76,8 +83,8 @@ public:
   float init_angle_ = 0.0f;
 
 private:
+  bool trajectory_position_ = false;
   const bool feedforward_;
-  bool limited_;
   const float pos_filter_;
   const float vel_filter_;
   sp::LowPassFilter motor_pos_filter_{pos_filter_};

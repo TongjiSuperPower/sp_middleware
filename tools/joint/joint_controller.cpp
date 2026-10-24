@@ -1,24 +1,23 @@
 #include "joint_controller.hpp"
+#include <cmath>
 
+#ifdef HOST_SIM
+#include "motor/sim_motor/sim_motor.hpp"
+#endif
 #include "tools/math_tools/math_tools.hpp"
 
 template <typename MotorType>
 JointMotorController<MotorType>::JointMotorController(
-  float mid, float min, float max, float min_m, float max_m, float max_v, bool reverse,
-  MotorType & motor, sp::PID & pid, sp::PID & motor_speed_pid, bool feedforward, bool limited,
-  float pos_filter, float vel_filter)
-: mid_(mid),
-  min_(min),
+  float min, float max, float max_v, bool reverse, MotorType & motor, sp::PID & pid,
+  sp::PID & motor_speed_pid, bool feedforward, float pos_filter, float vel_filter)
+: min_(min),
   max_(max),
-  min_m_(min_m),
-  max_m_(max_m),
   max_v_(max_v),
   sign_(reverse ? -1.0f : 1.0f),
   motor_(motor),
   pid_(pid),
   motor_speed_pid_(motor_speed_pid),
   feedforward_(feedforward),
-  limited_(limited),
   pos_filter_(pos_filter),
   vel_filter_(vel_filter)
 {
@@ -34,9 +33,11 @@ void JointMotorController<MotorType>::disable()
 }
 
 template <typename MotorType>
-void JointMotorController<MotorType>::init()
+void JointMotorController<MotorType>::init(float zero)
 {
-  init_angle_ = motor_.angle;
+  // pos = sign_ * (motor.angle - init_angle_), zero 就是"读到这里算 0 rad"的那个读数.
+  // 纯算术: 不读 motor_, 和当前姿态无关, 上电前/没收到反馈时调用都行。
+  init_angle_ = zero;
 }
 
 template <typename MotorType>
@@ -48,9 +49,25 @@ void JointMotorController<MotorType>::add(float value)
 template <typename MotorType>
 void JointMotorController<MotorType>::cmd(float value)
 {
+  if (trajectory_position_) pid_.clear(); // 模式切换后不能沿用旧模式的位置微分历史
+  trajectory_position_ = false;
   mode_ = ControlMode::POSITION;
   v_set_ = 0;
   set_ = sp::limit_min_max(value, min_, max_);
+}
+
+template <typename MotorType>
+void JointMotorController<MotorType>::cmd_trajectory(float position, float velocity)
+{
+  if (!trajectory_position_ || mode_ != ControlMode::POSITION) pid_.clear();
+  trajectory_position_ = true;
+  mode_ = ControlMode::POSITION;
+  set_ = sp::limit_min_max(position, min_, max_);
+  v_set_ = 0;
+  // 位置被限位截断时清除全部速度前馈；恰在边界时也禁止朝边界外侧的速度。
+  if (std::isfinite(velocity) && position == set_ &&
+      !((set_ >= max_ && velocity > 0) || (set_ <= min_ && velocity < 0)))
+    v_set_ = sp::limit_max(velocity, max_v_);
 }
 
 template <typename MotorType>
@@ -121,9 +138,7 @@ bool JointMotorController<MotorType>::cmd_pos_until_t(float value, float t_thres
     return true;
   }
   else {
-    mode_ = ControlMode::POSITION;
-    v_set_ = 0;
-    set_ = sp::limit_min_max(value, min_, max_);
+    cmd(value);
     return false;
   }
 }
@@ -146,11 +161,16 @@ void JointMotorController<MotorType>::set_feedforward(float value)
 template <typename MotorType>
 void JointMotorController<MotorType>::control()
 {
-  this->pos = sign_ * motor_.angle - mid_ - init_angle_;
-  if (limited_) {
-    if (this->pos > max_m_) this->pos -= 2 * sp::SP_PI;
-    if (this->pos < min_m_) this->pos += 2 * sp::SP_PI;
-  }
+  // init_angle_ 和 raw 是同一个坐标 (电机的直接读数), 这里只是把它减掉再翻方向.
+  //
+  // 差值要折回 (-π, π]: 达妙 MIT 模式下反馈的 pos 是折到 ±PMAX 的绝对值, 零点一旦
+  // 靠近 ±PMAX (LF 的零点离 π 只有 0.12 rad), 摇臂往正向走就会过圈, 读数从 +π
+  // 跳到 -π; 上电时若已经过圈, 固件根本看不到跨越, 直接算减就整整差一圈.
+  // 摇臂行程 (-20°..100°) 远小于一圈, 折圈不会和真实姿态冲突.
+  float delta = sign_ * (motor_.angle - init_angle_);
+  while (delta > sp::SP_PI) delta -= 2.0f * sp::SP_PI;
+  while (delta <= -sp::SP_PI) delta += 2.0f * sp::SP_PI;
+  this->pos = delta;
   motor_pos_filter_.update(this->pos);
   this->pos_filtered = motor_pos_filter_.out;
   
@@ -171,8 +191,11 @@ void JointMotorController<MotorType>::control()
   }
   else {
     if (mode_ == ControlMode::POSITION) {
-      pid_.calc(set_, this->pos_filtered);
-      motor_speed_pid_.calc(pid_.out, this->vel_filtered);
+      if (trajectory_position_)
+        pid_.calc(set_, this->pos_filtered, v_set_, this->vel_filtered);
+      else
+        pid_.calc(set_, this->pos_filtered);
+      motor_speed_pid_.calc(sp::limit_max(pid_.out + v_set_, max_v_), this->vel_filtered);
     }
     else if (mode_ == ControlMode::VELOCITY) {
       motor_speed_pid_.calc(v_set_, this->vel_filtered);
@@ -184,5 +207,9 @@ void JointMotorController<MotorType>::control()
   }
 }
 
+#ifdef HOST_SIM
+template class JointMotorController<sp::SimMotor>;
+#else
 template class JointMotorController<sp::DM_Motor>;
 template class JointMotorController<sp::RM_Motor>;
+#endif
