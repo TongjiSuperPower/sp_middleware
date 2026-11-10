@@ -23,6 +23,9 @@ public:
   float torque_cmd = 0;
 
   virtual void cmd(float value) = 0;
+  // 位置指令, 并临时指定这一次走的位置环限速 (rad/s)。不传就沿用构造函数里的
+  // JOINT_MAX_V。默认实现忽略限速, 兼容尚未支持的其他关节控制器。
+  virtual void cmd(float value, float /*max_v*/) { cmd(value); }
   // 轨迹位置指令（rad）与速度前馈（rad/s）。派生控制器可实现位置/速度协同跟踪；
   // 默认实现只下发位置，兼容尚未实现速度前馈的其他关节控制器。
   virtual void cmd_trajectory(float position, float /*velocity*/) { cmd(position); }
@@ -54,6 +57,8 @@ public:
   void init(float zero = 0.0f) override;
 
   void cmd(float value) override;                      // pos
+  // 位置指令 + 这一次的位置环限速 (rad/s); 传正数才生效, <=0 沿用构造函数的值。
+  void cmd(float value, float max_v) override;
   void cmd_trajectory(float position, float velocity) override;
   void cmd_max() override;                             //pos
   void cmd_min() override;                             //pos
@@ -84,6 +89,8 @@ public:
 
 private:
   bool trajectory_position_ = false;
+  // 这一次位置指令要用的限速. <=0 表示用构造函数传入的 max_v_.
+  float cmd_max_v_ = 0.0f;
   const bool feedforward_;
   const float pos_filter_;
   const float vel_filter_;

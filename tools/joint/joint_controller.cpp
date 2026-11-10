@@ -51,9 +51,18 @@ void JointMotorController<MotorType>::cmd(float value)
 {
   if (trajectory_position_) pid_.clear(); // 模式切换后不能沿用旧模式的位置微分历史
   trajectory_position_ = false;
+  cmd_max_v_ = 0.0f;  // 不指定就沿用构造函数里的 max_v_
   mode_ = ControlMode::POSITION;
   v_set_ = 0;
   set_ = sp::limit_min_max(value, min_, max_);
+}
+
+template <typename MotorType>
+void JointMotorController<MotorType>::cmd(float value, float max_v)
+{
+  cmd(value);
+  // 只有正数才覆盖; 传 0 或负数当作"没指定".
+  if (max_v > 0.0f) cmd_max_v_ = max_v;
 }
 
 template <typename MotorType>
@@ -61,6 +70,7 @@ void JointMotorController<MotorType>::cmd_trajectory(float position, float veloc
 {
   if (!trajectory_position_ || mode_ != ControlMode::POSITION) pid_.clear();
   trajectory_position_ = true;
+  cmd_max_v_ = 0.0f;  // 轨迹模式不用临时限速, 回到构造函数里的 max_v_
   mode_ = ControlMode::POSITION;
   set_ = sp::limit_min_max(position, min_, max_);
   v_set_ = 0;
@@ -195,7 +205,9 @@ void JointMotorController<MotorType>::control()
         pid_.calc(set_, this->pos_filtered, v_set_, this->vel_filtered);
       else
         pid_.calc(set_, this->pos_filtered);
-      motor_speed_pid_.calc(sp::limit_max(pid_.out + v_set_, max_v_), this->vel_filtered);
+      // cmd(value, max_v) 指定了就用它, 否则用构造函数里的 max_v_.
+      const float speed_limit = cmd_max_v_ > 0.0f ? cmd_max_v_ : max_v_;
+      motor_speed_pid_.calc(sp::limit_max(pid_.out + v_set_, speed_limit), this->vel_filtered);
     }
     else if (mode_ == ControlMode::VELOCITY) {
       motor_speed_pid_.calc(v_set_, this->vel_filtered);
