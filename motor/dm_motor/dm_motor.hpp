@@ -5,7 +5,8 @@
 
 namespace sp
 {
-constexpr float J4310_MAX_TORQUE = 7.0f;  // N·m
+constexpr float J4310_MAX_TORQUE = 7.0f;    // N·m
+constexpr float J4340P_MAX_TORQUE = 27.0f;  // N·m
 
 class DM_Motor
 {
@@ -19,9 +20,11 @@ public:
     uint16_t can_id, uint16_t master_id, float pmax, float vmax, float tmax,
     bool multi_circle = false);
 
-  const uint16_t rx_id;      // 电机反馈帧ID
-  const uint16_t tx_id;      // 电机控制帧ID
-  const uint16_t tx_id_vel;  // 速度模式 控制帧ID (0x200 + CAN ID)
+  const uint16_t rx_id;            // 电机反馈帧ID
+  const uint16_t tx_id;            // 电机控制帧ID
+  const uint16_t tx_id_pos_vel;    // 位置速度模式 控制帧ID (0x100 + CAN ID)
+  const uint16_t tx_id_vel;        // 速度模式 控制帧ID (0x200 + CAN ID)
+  const uint16_t tx_id_force_pos;  // 力位混控模式 控制帧ID (0x300 + CAN ID)
 
   // 只读! 8: 超压, 9: 欠压, A: 过流, B: MOS过温, C: 线圈过温, D: 通讯丢失, E: 过载
   uint8_t error = 0;
@@ -49,6 +52,17 @@ public:
   // 速度模式指令缓存, 单位: rad/s
   void cmd_velocity(float velocity);
 
+  // 位置速度模式指令缓存
+  // position: 目标位置 (rad)
+  // max_velocity: 梯形加减速的匀速段速度上限 (rad/s)
+  void cmd_position_velocity(float position, float max_velocity);
+
+  // 力位混控模式指令缓存
+  // position: 目标位置 (rad)
+  // max_velocity: 速度限定值 (rad/s, 0~100)
+  // current_limit: 扭矩电流限定标幺值 (0~1)
+  void cmd_force_position(float position, float max_velocity, float current_limit);
+
   void cmd_mit(float p_des, float v_des, float kp, float kd, float t_ff);
 
   // MIT速度控制模式
@@ -59,6 +73,12 @@ public:
   // 完整的MIT模式数据打包
   void write_mit(uint8_t * data) const;
 
+  // 位置速度模式数据打包
+  void write_position_velocity(uint8_t * data) const;
+
+  // 力位混控模式数据打包
+  void write_force_position(uint8_t * data) const;
+
 private:
   const float pmax_;
   const float vmax_;
@@ -67,8 +87,10 @@ private:
   bool has_read_;
   uint32_t last_read_ms_;
 
-  float cmd_torque_;
-  float cmd_velocity_;
+  float cmd_torque_ = 0.0f;
+  float cmd_velocity_ = 0.0f;
+
+  float cmd_force_pos_current_ = 0.0f;
 
   //多圈计数
   float angle_raw_ = 0;
@@ -76,7 +98,7 @@ private:
   int32_t circle_;
   bool multi_circle_;
 
-  // 新增 MIT 模式参数缓存
+  // 位置/速度目标缓存
   float cmd_p_des_ = 0.0f;
   float cmd_v_des_ = 0.0f;
   float cmd_kp_ = 0.0f;
