@@ -10,7 +10,9 @@ DM_Motor::DM_Motor(
   uint16_t can_id, uint16_t master_id, float pmax, float vmax, float tmax, bool multi_circle)
 : rx_id(master_id),
   tx_id(can_id),
+  tx_id_pos_vel(0x100 + can_id),
   tx_id_vel(0x200 + can_id),
+  tx_id_force_pos(0x300 + can_id),
   pmax_(pmax),
   vmax_(vmax),
   tmax_(tmax),
@@ -57,11 +59,11 @@ void DM_Motor::read(uint8_t * data, uint32_t stamp_ms)
 void DM_Motor::write(uint8_t * data) const
 {
   auto torque_uint = float_to_uint(cmd_torque_, -tmax_, tmax_, 12);
-  data[3] = 0x00;              // Kp[11:8]
-  data[4] = 0x00;              // Kp[7:0]
-  data[5] = 0x00;              // Kd[11:4]
-  data[6] = torque_uint >> 8;  // Kd[3:0]
-  data[7] = torque_uint;
+
+  std::memset(data, 0, 8);
+
+  data[6] = (torque_uint >> 8) & 0x0F;
+  data[7] = torque_uint & 0xFF;
 }
 
 void DM_Motor::write_velocity(uint8_t * data) const
@@ -69,7 +71,6 @@ void DM_Motor::write_velocity(uint8_t * data) const
   // 浮点数占用 4 个字节，直接内存拷贝即可满足“低位在前”的小端要求
   std::memcpy(data, &cmd_velocity_, sizeof(float));
 
-  // 保险起见，将后4个字节清零（CAN帧通常发8字节，尽管速度模式只用前4字节）
   data[4] = 0x00;
   data[5] = 0x00;
   data[6] = 0x00;
@@ -116,6 +117,21 @@ void DM_Motor::cmd(float torque) { cmd_torque_ = limit_max(torque, tmax_); }
 
 void DM_Motor::cmd_velocity(float velocity) { cmd_velocity_ = limit_max(velocity, vmax_); }
 
+void DM_Motor::cmd_position_velocity(float position, float max_velocity)
+{
+  cmd_p_des_ = position;
+  cmd_v_des_ = max_velocity > 0.0f ? max_velocity : 0.0f;
+}
+
+void DM_Motor::cmd_force_position(float position, float max_velocity, float current_limit)
+{
+  constexpr float FORCE_POS_MAX_VELOCITY = 100.0f;
+
+  cmd_p_des_ = position;
+  cmd_v_des_ = limit_min_max(max_velocity, 0.0f, FORCE_POS_MAX_VELOCITY);
+  cmd_force_pos_current_ = limit_min_max(current_limit, 0.0f, 1.0f);
+}
+
 void DM_Motor::cmd_mit(float p_des, float v_des, float kp, float kd, float t_ff)
 {
   cmd_p_des_ = limit_max(p_des, pmax_);
@@ -150,6 +166,28 @@ void DM_Motor::write_mit(uint8_t * data) const
   data[5] = (kd_int >> 4) & 0xFF;                          // Kd[11:4]
   data[6] = ((kd_int & 0xF) << 4) | ((t_int >> 8) & 0xF);  // Kd[3:0] | t_ff[11:8]
   data[7] = t_int & 0xFF;                                  // t_ff[7:0]
+}
+
+void DM_Motor::write_position_velocity(uint8_t * data) const
+{
+  std::memcpy(data, &cmd_p_des_, sizeof(float));
+  std::memcpy(data + 4, &cmd_v_des_, sizeof(float));
+}
+
+void DM_Motor::write_force_position(uint8_t * data) const
+{
+  constexpr float VELOCITY_SCALE = 100.0f;
+  constexpr float CURRENT_SCALE = 10000.0f;
+
+  std::memcpy(data, &cmd_p_des_, sizeof(float));
+
+  const auto velocity_raw = static_cast<uint16_t>(cmd_v_des_ * VELOCITY_SCALE + 0.5f);
+  const auto current_raw = static_cast<uint16_t>(cmd_force_pos_current_ * CURRENT_SCALE + 0.5f);
+
+  data[4] = velocity_raw & 0xFF;
+  data[5] = velocity_raw >> 8;
+  data[6] = current_raw & 0xFF;
+  data[7] = current_raw >> 8;
 }
 
 }  // namespace sp
